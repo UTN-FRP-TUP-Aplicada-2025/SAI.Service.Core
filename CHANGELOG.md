@@ -9,6 +9,12 @@ y el versionado sigue [Semantic Versioning](https://semver.org/lang/es/).
 
 ### Añadido
 
+- **Fase G del SDD — 11-Examples**: dos samples documentados —`Ejemplo-01-Datos-Seed`
+  (básico: explorar el sistema con datos precargados y el adaptador de conexión simulado,
+  sin hardware) y `Ejemplo-02-Api-Ingesta` (intermedio: los cuatro caminos del contrato de
+  ingesta 201/200/409/422)— más el README con la tabla maestra. Nombrados por capacidad,
+  no por dominio. Auditoría independiente de la fase.
+
 - **Fase F del SDD — 09-Devops**: pipeline CI/CD (10 stages que ejecutan la
   Definition-of-Done de 08 como quality gates), estrategia de versionado (SemVer 2.0.0,
   Conventional Commits, MinVer, trunk-based), entornos de despliegue, guía de publicación
