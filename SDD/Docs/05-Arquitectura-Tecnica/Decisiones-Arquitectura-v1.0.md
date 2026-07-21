@@ -2,14 +2,14 @@
 
 **Proyecto:** Sai-Service-Core
 **Documento:** Decisiones-Arquitectura-v1.0.md
-**Versión:** 1.0
+**Versión:** 1.2
 **Estado:** Borrador
 **Fecha:** 2026-07-20
 **Autor:** Orquestador SDD (AG-05)
 
 ## Objetivo
 
-Índice navegable de los Architecture Decision Records (ADR) de la categoría 05 del proyecto Sai-Service-Core (`web-monolith`, caso degenerado de un único proyecto). Este documento no contiene el cuerpo de las decisiones: cada ADR vive como archivo individual e inmutable bajo `Adrs/`. Las decisiones ADR-01 a ADR-15 derivan de los pre-ADR PA-01 a PA-15 del intake §17 P.11; ADR-16 a ADR-18 cubren los ADR obligatorios de web-monolith no cubiertos por un PA (autenticación, manejo de errores de la API, motor de persistencia); ADR-19 a ADR-22 documentan las cuatro decisiones abiertas de Sprint 0 en estado Propuesto.
+Índice navegable de los Architecture Decision Records (ADR) de la categoría 05 del proyecto Sai-Service-Core (`web-monolith`, caso degenerado de un único proyecto). Este documento no contiene el cuerpo de las decisiones: cada ADR vive como archivo individual e inmutable bajo `Adrs/`. Las decisiones ADR-01 a ADR-15 derivan de los pre-ADR PA-01 a PA-15 del intake §17 P.11; ADR-16 a ADR-18 cubren los ADR obligatorios de web-monolith no cubiertos por un PA (autenticación, manejo de errores de la API, motor de persistencia); ADR-19 a ADR-22 documentan las cuatro decisiones abiertas de Sprint 0 en estado Propuesto; ADR-23 y ADR-24 (Aceptado) registran, en la Fase F, la omisión de la categoría 10-Developer-Guide dedicada y el modelo de ambientes DEV/PROD sin staging.
 
 ## Índice de ADR
 
@@ -37,6 +37,8 @@
 | [ADR-20](Adrs/ADR-20-Tls-Del-Panel-Y-La-Api-En-La-Lan-v1.0.md) | TLS del panel y de la API en la LAN | Seguridad | Propuesto | 2026-07-20 |
 | [ADR-21](Adrs/ADR-21-Contrato-Del-Endpoint-De-Rectificacion-v1.0.md) | Contrato del endpoint de rectificación del 409 | Comunicación | Propuesto | 2026-07-20 |
 | [ADR-22](Adrs/ADR-22-Contrato-Del-Adaptador-De-Conexion-v1.0.md) | Forma del contrato del adaptador de conexión | Extensibilidad | Propuesto | 2026-07-20 |
+| [ADR-23](Adrs/ADR-23-Omision-De-Developer-Guide-Dedicada-v1.0.md) | Omisión de la categoría Developer Guide dedicada | Estilo | Aceptado | 2026-07-21 |
+| [ADR-24](Adrs/ADR-24-Modelo-De-Ambientes-Dev-Prod-Sin-Staging-v1.0.md) | Modelo de ambientes DEV/PROD sin staging | Despliegue | Aceptado | 2026-07-21 |
 
 ## Trazabilidad de origen
 
@@ -64,6 +66,8 @@
 | ADR-20 | Sprint 0 (P-04) | CU-01, §17 P.5 |
 | ADR-21 | Sprint 0 (P-05) | RN-09, CU-11, CL-21 |
 | ADR-22 | Sprint 0 (P-06) | CU-05, F-24, E-07 |
+| ADR-23 | Fase F (omisión de categoría 10, gating por tipo D8 y `tiene_portal_developers`) | Master-prompt §14; 10-Rules §2.2 |
+| ADR-24 | Fase F (desviación del piso de ambientes de 09-Rules §2.2) | Intake §17 P.8; 09-Rules §2.2 |
 
 ## Notas de versionado e inmutabilidad
 
@@ -75,3 +79,5 @@
 | Versión | Fecha | Descripción |
 | --- | --- | --- |
 | 1.0 | 2026-07-20 | Índice inicial de 22 ADR (18 Aceptado, 4 Propuesto). |
+| 1.1 | 2026-07-21 | Se incorpora ADR-23 (Aceptado): omisión de la categoría 10-Developer-Guide dedicada, registrada en la Fase F. Total: 23 ADR (19 Aceptado, 4 Propuesto). |
+| 1.2 | 2026-07-21 | Se incorpora ADR-24 (Aceptado): modelo de ambientes DEV/PROD sin staging, desviación del piso de 09-Rules §2.2 registrada en la Fase F. Total: 24 ADR (20 Aceptado, 4 Propuesto). |

@@ -9,6 +9,14 @@ y el versionado sigue [Semantic Versioning](https://semver.org/lang/es/).
 
 ### Añadido
 
+- **Fase F del SDD — 09-Devops**: pipeline CI/CD (10 stages que ejecutan la
+  Definition-of-Done de 08 como quality gates), estrategia de versionado (SemVer 2.0.0,
+  Conventional Commits, MinVer, trunk-based), entornos de despliegue, guía de publicación
+  de la imagen Docker y política de supply-chain (SBOM CycloneDX, firma cosign). La
+  categoría 10-Developer-Guide se omite (proyecto de un solo desarrollador sin portal),
+  registrada en **ADR-23**; el modelo de dos ambientes DEV/PROD sin staging se registra
+  en **ADR-24**. Índice de decisiones a 24 ADR. Auditoría independiente de la fase.
+
 - **Fase E del SDD — 08-Calidad-Y-Pruebas**: estrategia de calidad (ISO 25010,
   10 quality gates), estrategia de testing (pirámide 70/25/5, cobertura por capa con
   Domain 90/85 y global 80/70), plan de pruebas por etapa, matriz de cobertura
