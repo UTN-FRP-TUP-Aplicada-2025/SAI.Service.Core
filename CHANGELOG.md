@@ -9,6 +9,16 @@ y el versionado sigue [Semantic Versioning](https://semver.org/lang/es/).
 
 ### Añadido
 
+- **Etapa 2 · Incremento A — Dominio del ciclo de vida de equipos** (BT-11, BT-12): modelo de
+  dominio framework-free en tres capas (**catálogo** `Fabricante`/`ModeloDispositivo`/`ModeloBateria`;
+  **inventario** `UnidadFisica` con `Host`/`Dispositivo`/`Bateria`, baja lógica y máquina de estados;
+  **vínculos temporales** `MontajeBateria`/`CoberturaHost`). `Vigencia` como intervalo semiabierto
+  `[desde, hasta)` (ADR-05) con no-solapamiento por clave (`Vigencias.AdmiteNuevo`) y `ResolutorTemporal`
+  que resuelve la unidad vigente en un instante (RC-07). Los invariantes **I-1, I-2, I-3, I-4** (vigencia
+  y sucesión sin hueco), **I-5, I-6** (baja lógica consultable y máquina de estados) e **I-21** (vida de
+  flotación exige temperatura de referencia) corren como pruebas (mitigación del riesgo R-10). 35 pruebas
+  de dominio nuevas (65 en total). Aún sin persistencia ni UI: llegan en incrementos posteriores.
+
 - **Etapa 1 — Persistencia y acceso**: primera etapa con lógica real sobre el andamiaje
   del Sprint 0. **Persistencia** EF Core + SQLite con migración inicial y `DbContext`
   (`IdentityDbContext`) con el interceptor append-only (ADR-04, ADR-18); la migración se
