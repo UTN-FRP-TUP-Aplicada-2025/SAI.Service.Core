@@ -17,6 +17,8 @@
 
 **Procedencia de este intake.** Todo el contenido de la Parte A y el modelo de dominio se derivan de `PROMPTs/Generar-SDD/Inputs/Planteo-Analisis-Unificado-Antecedente-SAI-Service.md` (4017 líneas, estado `draft`, 2026-07-19) del repositorio `SAI.Service.Core.Documentacion`. La Parte B y las decisiones de stack de la Parte C se derivan del tool-prompt `PROMPTs/Generar-SDD/Crear-SDD-Documento-Intake.md` y de los inputs `Topologia-Proyecto-Solucion.md` y `Entorno-Desarrollo.md`. Donde una afirmación no tiene respaldo en esas fuentes, se marca explícitamente como **[derivado]** (inferencia trazable a un dato de las fuentes) o **PENDIENTE** (sin respaldo, requiere respuesta del stakeholder). No se inventó información.
 
+**Autocontención de los datos de ejemplo.** Los ocho escenarios de instancia con su JSON completo (`E-1`…`E-8`) y las matrices de cobertura del Anexo B, que el cuerpo cita por identificador, están **transcriptos íntegramente en la Parte D (§20 y §21)** de este mismo documento. El intake no depende de ningún archivo externo para resolver esas referencias: cada `E-x` que aparece en §2, §5, §6, §7 u §8 resuelve a su subsección `§20.E-x`. La procedencia original de cada escenario (archivo y líneas de la fuente) queda declarada dentro de cada subsección.
+
 **Advertencia heredada de la fuente.** El documento antecedente se autodeclara: *"No es un diseño cerrado ni una especificación"*, *"No hay código, ni esquema SQL definitivo, ni contratos de API cerrados"*. Los flujos de usuario de §6 son **propuesta de diseño, no comportamiento verificado**. Lo que sí está verificado es el relevamiento del equipo físico (2026-07-19).
 
 ---
@@ -141,7 +143,7 @@ Roles cubiertos: administrador (US-01 a US-11) y sistema externo (US-12).
 
 ## §6 Flujos típicos
 
-Los diez flujos siguientes están descriptos en §9 de la fuente. Se transcriben los tres que la propia fuente marca como de mayor frecuencia o criticidad; los diez completos se enumeran después con su objetivo y su escenario de respaldo. **Advertencia de la fuente:** *"Los flujos son propuesta de diseño, no comportamiento verificado… Lo que no es propuesta son los datos que atraviesan cada flujo: cada uno se ancla a un escenario del Anexo A con su JSON completo."*
+Los diez flujos siguientes están descriptos en §9 de la fuente. Se transcriben los tres que la propia fuente marca como de mayor frecuencia o criticidad; los diez completos se enumeran después con su objetivo y su escenario de respaldo. **Advertencia de la fuente:** *"Los flujos son propuesta de diseño, no comportamiento verificado… Lo que no es propuesta son los datos que atraviesan cada flujo: cada uno se ancla a un escenario del Anexo A con su JSON completo."* Ese Anexo A está transcripto en la **Parte D §20**: la columna «Escenario de respaldo» de la tabla de abajo (`E-1`…`E-8`) resuelve a la subsección `§20.E-x` correspondiente.
 
 ### Flujo del 80 % del tiempo — UF-3 · Monitoreo en vivo
 
@@ -764,6 +766,1277 @@ El panel Blazor no produce sample: se demuestra ejecutando el propio servicio, q
 
 ---
 
+# Parte D — Anexos de datos
+
+Esta parte transcribe **completos** los escenarios de instancia y las matrices de cobertura que el cuerpo del intake (§2, §5, §6, §7, §8) cita por identificador (`E-1`…`E-8`). Son el juego de datos *end-to-end* del que salen los ejemplos de la maquetización (Fase B2), las *fixtures* de prueba de 08 y 11-Examples, y el modelo conceptual de 02. Antes vivían solo en el documento antecedente del repositorio `SAI.Service.Core.Documentacion`; se copian aquí para que el intake sea autocontenido y ninguna referencia quede sin resolver. Cada escenario declara su procedencia (archivo fuente + líneas) y su estado (`medido` / `derivado` / `reconstruido` / `propuesto`); un valor reconstruido para una fixture **no es una medición** y va marcado como tal en el propio JSON.
+
+## §20 Anexo A — Escenarios con ejemplos completos
+
+> **Cómo leer este anexo.** Cada escenario tiene: **contexto** (qué situación real representa),
+> **qué ejercita del modelo**, el **JSON completo**, y **qué verificar** — la traducción directa a
+> casos de prueba. Los identificadores son legibles a propósito (`ups-01`, `bat-2026-a`) para que
+> las *fixtures* de test se lean solas.
+>
+> Los ocho escenarios están encadenados: forman **una única línea de tiempo coherente**, de la
+> puesta en marcha al recambio de batería. Sirven como juego de datos de un *end-to-end* completo.
+>
+> **Sobre la veracidad de los datos.** Los valores marcados como medidos provienen del relevamiento
+> del 2026-07-19. Los marcados `reconstruido`, `_advertenciaFixture` o «ficticio» **no son
+> mediciones**: rellenan las series para que las *fixtures* sean ejecutables. La distinción es el
+> mismo principio de procedencia de §7.10 aplicado a
+> los datos de prueba.
+
+### Línea de tiempo de los escenarios
+
+```mermaid
+gantt
+    dateFormat YYYY-MM-DD
+    axisFormat %m/%y
+    section Inventario
+    bat-2024-a montada           :2024-11-20, 2026-09-05
+    bat-2026-a montada           :2026-09-05, 2027-06-30
+    ups-01 cubre i7infra         :2024-11-20, 2027-06-30
+    section Hechos
+    E2 sondeo normal             :milestone, 2026-07-19, 0d
+    E3 microcorte                :milestone, 2026-07-24, 0d
+    E4 corte prolongado          :milestone, 2026-08-11, 0d
+    E5 prueba de bateria         :milestone, 2026-09-01, 0d
+    E6 recambio de bateria       :milestone, 2026-09-05, 0d
+```
+
+---
+
+### §20.E-1 · Alta del parque: catálogo, inventario y vínculos
+
+Procedencia: `SAI.Service.Core.Documentacion/PROMPTs/Generar-SDD/Inputs/Planteo-Analisis-Unificado-Antecedente-SAI-Service.md`, líneas 2699–2914. Estado: declarado / medido — inventario y catálogo del relevamiento verificado (2026-07-19).
+
+**Contexto.** Día cero. Se da de alta el SAI existente, la batería que tiene puesta y el host que
+protege. Es la *fixture* base de la que parten los demás escenarios. Corresponde al flujo
+UF-1.
+
+**Qué ejercita.** Las tres capas y el principio P-5. Y un caso incómodo pero real: **el modelo del
+SAI no se puede leer del dispositivo**, así que entra como dato declarado por el operador — y el
+modelo tiene que decirlo.
+
+```json
+{
+  "catalogo": {
+    "fabricantes": [
+      { "id": "fab-apc",     "nombre": "APC",              "pais": "US" },
+      { "id": "fab-generico","nombre": "Sin identificar",   "nota": "El descriptor USB no expone marca del SAI" }
+    ],
+    "modelosDispositivo": [
+      {
+        "id": "mod-sai-desconocido",
+        "fabricanteId": "fab-generico",
+        "denominacion": "SAI línea interactiva 220V (modelo no identificado)",
+        "topologia": "line-interactive",
+        "potenciaVaNominal": null,
+        "dialectoProtocolo": "megatec/qx",
+        "identificacionUsb": { "vendorId": "0665", "productId": "5161", "descriptorFabricante": "INNO TECH" },
+        "procedencia": {
+          "topologia":        { "o": "medido",    "de": ["ups.type"] },
+          "potenciaVaNominal":{ "o": "imputado",  "nota": "El equipo no la expone; ups.load es % de una nominal desconocida" },
+          "denominacion":     { "o": "declarado", "por": "operador" }
+        }
+      }
+    ],
+    "modelosBateria": [
+      {
+        "id": "mod-bat-12v9ah-agm",
+        "fabricanteId": "fab-apc",
+        "denominacion": "12V 9Ah AGM VRLA",
+        "tecnologia": "AGM",
+        "tensionNominalV": 12.0,
+        "capacidadNominalAh": 9.0,
+        "capacidadC20Ah": 9.0,
+        "vidaFlotacionEsperadaAnios": {
+          "min": 3, "max": 5,
+          "temperaturaReferenciaC": 20,
+          "convencion": "Eurobat",
+          "clasificacion": "Standard Commercial",
+          "nota": "SIN la temperatura de referencia el dato es incomparable entre modelos: la misma batería se declara '3-5 años Eurobat (20 °C)' y 'hasta 5 años a 25 °C' según la convención. Ver §6.9."
+        },
+        "exponentePeukert": {
+          "porRegimen": [
+            { "ventana": "10-20h",   "k": 1.115 },
+            { "ventana": "15min-5h", "k": 1.268 },
+            { "ventana": "5min-1h",  "k": 1.383 }
+          ],
+          "nota": "k NO es constante: depende del régimen de descarga. Un SAI descarga en minutos, donde k ≈ 1.38, no el 1.15 que se cita habitualmente. Ver §6.5.",
+          "o": "derivado", "de": ["tabla de descarga del fabricante"]
+        },
+        "tablaPotenciaConstante": {
+          "referencia": "W por batería vs duración vs tensión de corte",
+          "nota": "Preferible a Peukert: es medida, es de potencia constante (que es como carga un SAI) y no necesita exponente.",
+          "disponible": false
+        },
+        "tensionFlotacionRecomendadaV": 13.6,
+        "umbralCeldaEnCortoV": 13.3,
+        "umbralCeldaAbiertaV": 14.5,
+        "procedencia": { "todos": { "o": "declarado", "por": "ficha del fabricante" } }
+      }
+    ],
+    "tiposIntervencion": [
+      { "id": "ti-recambio-bat", "nombre": "Recambio de batería",   "afecta": "Bateria",     "planificable": true },
+      { "id": "ti-reparacion",   "nombre": "Reparación de equipo",  "afecta": "Dispositivo", "planificable": false },
+      { "id": "ti-inspeccion",   "nombre": "Inspección preventiva", "afecta": "Dispositivo", "planificable": true },
+      { "id": "ti-limpieza",     "nombre": "Limpieza de bornes",    "afecta": "Dispositivo", "planificable": true },
+      { "id": "ti-reemplazo-eq", "nombre": "Reemplazo del equipo",  "afecta": "Dispositivo", "planificable": false }
+    ],
+    "proveedores": [
+      { "id": "prov-taller-electronica-sur", "razonSocial": "Taller Electrónica Sur (ficticio)",
+        "contacto": "taller@ejemplo.invalid", "especialidad": "SAI y electrónica de potencia" }
+    ]
+  },
+
+  "inventario": {
+    "hosts": [
+      { "id": "host-i7infra", "nombre": "i7infra", "estado": "EnServicio",
+        "fechaAlta": "2024-11-20", "criticidad": "alta" }
+    ],
+    "dispositivos": [
+      {
+        "id": "ups-01",
+        "modeloDispositivoId": "mod-sai-desconocido",
+        "numeroSerie": null,
+        "nota": "iSerial vacío en el descriptor USB",
+        "fechaCompra": "2024-11-15",
+        "costoAdquisicion": { "monto": 180000.00, "moneda": "ARS", "fecha": "2024-11-15",
+                              "equivalenteUsd": 178.00, "fuenteCotizacion": "BNA-divisa-venta" },
+        "estado": "EnServicio",
+        "fechaBaja": null,
+        "motivoBaja": null,
+        "conexion": { "tipo": "usb", "rutaSysfs": "/sys/bus/usb/devices/3-3", "driver": "nutdrv_qx" },
+        "parametrosDriver": {
+          "ups.delay.shutdown": { "v": 30,  "u": "s", "o": "medido", "rangoAdmitido": [12, 540] },
+          "ups.delay.start":    { "v": 180, "u": "s", "o": "medido", "rangoAdmitido": [60, 599940] },
+          "driver.flag.allow_killpower": { "v": 0, "o": "medido", "nota": "Bloqueado. Habilitarlo es el último paso del apagado." }
+        }
+      },
+      {
+        "id": "ups-02",
+        "modeloDispositivoId": "mod-sai-desconocido",
+        "numeroSerie": null,
+        "fechaCompra": "2026-02-10",
+        "costoAdquisicion": { "monto": 240000.00, "moneda": "ARS", "fecha": "2026-02-10",
+                              "equivalenteUsd": 205.00, "fuenteCotizacion": "BNA-divisa-venta" },
+        "estado": "EnStock",
+        "fechaBaja": null,
+        "motivoBaja": null,
+        "conexion": null,
+        "nota": "Unidad de repuesto, sin conectar. Existe en el modelo para que la sucesión de CoberturaHost sea representable (C-1)."
+      }
+    ],
+    "baterias": [
+      {
+        "id": "bat-2024-a",
+        "modeloBateriaId": "mod-bat-12v9ah-agm",
+        "numeroSerie": null,
+        "lote": null,
+        "fechaFabricacion": null,
+        "fechaCompra": "2024-11-15",
+        "costoAdquisicion": { "monto": 0.00, "moneda": "ARS", "fecha": "2024-11-15",
+                              "nota": "Incluida con el equipo; costo no discriminado" },
+        "estado": "EnServicio",
+        "fechaBaja": null,
+        "motivoBaja": null,
+        "edadRealDias": { "v": null, "o": "noCalculable",
+                          "motivo": "Sin fechaFabricacion. Se degrada a fechaCompra, que subestima la edad real." }
+      }
+    ]
+  },
+
+  "configuracionOperativa": {
+    "fuentesDatos": [
+      { "id": "fd-poller-local", "tipo": "PollerLocal", "identidad": "sai-service poller v1",
+        "confianzaBase": "alta", "nota": "Valores medidos por el propio servicio vía NUT." },
+      { "id": "fd-carga-manual", "tipo": "CargaManual", "identidad": "operador",
+        "confianzaBase": "media" },
+      { "id": "fd-gmao-externo", "tipo": "ApiExterna", "identidad": "GMAO Corporativo v4",
+        "confianzaBase": "media" }
+    ],
+
+    "reglasDerivacion": [
+      {
+        "id": "rd-transicion-ups-status", "version": 2, "vigenteDesde": "2026-07-19T00:00:00-03:00",
+        "resumen": "OL→OB seguido de OB→OL en menos de 60 s ⇒ Microcorte; ≥60 s ⇒ CorteSuministro",
+        "parametros": { "umbralMicrocorteSegundos": 60 },
+        "produce": ["Microcorte", "CorteSuministro", "RetornoRed"],
+        "historial": [
+          { "version": 1, "vigenteDesde": "2026-07-01T00:00:00-03:00", "vigenteHasta": "2026-07-19T00:00:00-03:00",
+            "resumen": "Umbral de microcorte en 30 s",
+            "nota": "Los eventos derivados con v1 NO son comparables con los de v2 sin normalizar. Ver I-14." }
+        ]
+      },
+      { "id": "rd-perdida-comunicacion", "version": 1, "vigenteDesde": "2026-07-19T00:00:00-03:00",
+        "resumen": "3 sondeos consecutivos sin respuesta ⇒ DesconexionUsb",
+        "parametros": { "sondeosFallidos": 3 }, "produce": ["DesconexionUsb"] },
+      { "id": "rd-tension-fuera-rango", "version": 1, "vigenteDesde": "2026-07-19T00:00:00-03:00",
+        "resumen": "input.voltage fuera de [198, 242] V sostenido 30 s ⇒ TensionFueraDeRango",
+        "parametros": { "minV": 198.0, "maxV": 242.0, "sostenidoSegundos": 30 },
+        "produce": ["TensionFueraDeRango"] }
+    ],
+
+    "politicas": [
+      {
+        "id": "pol-apagado-por-corte", "nombre": "Apagado ordenado ante corte prolongado",
+        "versiones": [
+          { "id": "vp-001", "version": 1, "vigenteDesde": "2026-07-19T00:00:00-03:00",
+            "modalidad": "SoloAlerta",
+            "parametros": { "umbralDisparoSegundos": { "v": 300, "u": "s", "o": "declarado" } },
+            "verificacionesRequeridas": [],
+            "nota": "Versión inicial. SoloAlerta no requiere verificaciones porque no actúa sobre el hardware." }
+        ]
+      }
+    ],
+
+    "usuarios": [
+      { "id": "usr-admin", "nombre": "administrador", "rol": "administrador",
+        "nota": "Administrador único. Autenticación mínima." }
+    ],
+
+    "retencion": {
+      "muestras":  { "resolucionCompleta": "P30D", "luego": "agregar a PT1H" },
+      "agregados": { "conservar": "P10Y" },
+      "eventos":   { "conservar": "indefinido" },
+      "nota": "Una muestra cada 5 s son ~6,3 millones de filas al año. Para input.voltage se conservan mínimo y máximo además del promedio: el promedio horario borra los microcortes, que son el fenómeno de interés."
+    }
+  },
+
+  "vinculos": {
+    "montajesBateria": [
+      { "id": "mnt-001", "bateriaId": "bat-2024-a", "dispositivoId": "ups-01", "posicion": 1,
+        "desde": "2024-11-20T00:00:00-03:00", "hasta": null,
+        "intervencionAperturaId": null,
+        "nota": "Montaje original de fábrica; sin intervención registrada" }
+    ],
+    "coberturasHost": [
+      { "id": "cob-001", "dispositivoId": "ups-01", "hostId": "host-i7infra",
+        "desde": "2024-11-20T00:00:00-03:00", "hasta": null }
+    ]
+  },
+
+  "verificaciones": [
+    { "id": "ver-bios-autoencendido", "supuesto": "BIOS reenciende el host tras restaurar la energía",
+      "estado": "NuncaVerificado", "metodo": "PruebaFisica | EvidenciaAcumulada",
+      "ultimaVerificacion": null, "vigenciaDias": 365, "bloquea": ["HostLuegoUpsConRetorno", "CicloForzado", "SoloHost"] },
+    { "id": "ver-shutdown-return",    "supuesto": "El firmware del SAI ejecuta shutdown.return sin quedar apagado",
+      "estado": "NuncaVerificado", "metodo": "PruebaFisica",
+      "ultimaVerificacion": null, "vigenciaDias": null, "bloquea": ["HostLuegoUpsConRetorno", "CicloForzado"] },
+    { "id": "ver-presupuesto-apagado","supuesto": "El apagado completo del host cabe en 540 s",
+      "estado": "NuncaVerificado", "metodo": "Cronometrado",
+      "ultimaVerificacion": null, "vigenciaDias": 180, "bloquea": ["HostLuegoUpsConRetorno", "CicloForzado", "SoloHost"],
+      "nota": "Vigencia corta a propósito: la carga del host cambia (3 contenedores en 2026-07-12, 8 en 2026-07-18)" },
+    { "id": "ver-flag-ob",            "supuesto": "ups.status señala OB en un corte real",
+      "estado": "NuncaVerificado", "metodo": "CorteControlado",
+      "ultimaVerificacion": null, "vigenciaDias": 365, "bloquea": ["*"] }
+  ]
+}
+```
+
+**Qué verificar.**
+
+- Un `Dispositivo` sin `numeroSerie` es válido — no puede ser `NOT NULL`.
+- `montajesBateria[0].hasta = null` significa vigente, no «desconocido».
+- Con las cuatro verificaciones en `NuncaVerificado`, **la única modalidad admisible es
+  `SoloAlerta`**. Cualquier intento de configurar otra debe rechazarse (ver E-4).
+- `potenciaVaNominal: null` con procedencia `imputado` es la representación honesta de que
+  `ups.load = 12 %` es **un porcentaje de una nominal que no conocemos**.
+- `ups-02` está `EnStock` **sin conexión y sin cobertura**. Una unidad puede existir sin estar en
+  servicio: el inventario y los vínculos son independientes.
+- `bat-2024-a.edadRealDias` es `noCalculable` por falta de `fechaFabricacion`. Dado que
+  §6.9 concluye que **la edad es el mejor
+  predictor**, esta carencia es una limitación real del caso, no un hueco del modelo — y el modelo la
+  hace visible en vez de rellenarla con la fecha de compra.
+- **`rd-transicion-ups-status` conserva su versión 1 en `historial`.** Los eventos derivados antes
+  del 2026-07-19 usaron umbral de 30 s. Una consulta de tendencia de microcortes que mezcle ambas
+  versiones sin normalizar **produce una serie corrupta**, y este campo es lo que permite detectarlo
+  (**I-14**).
+- La política arranca en `vp-001` con modalidad `SoloAlerta` y **cero verificaciones requeridas** —
+  coherente: no actuar sobre el hardware no exige probar nada.
+
+---
+
+### §20.E-2 · Sondeo normal, con procedencia por variable
+
+Procedencia: `SAI.Service.Core.Documentacion/PROMPTs/Generar-SDD/Inputs/Planteo-Analisis-Unificado-Antecedente-SAI-Service.md`, líneas 2947–3076. Estado: medido — valores reales del relevamiento (2026-07-19).
+
+**Contexto.** Régimen permanente. Una muestra cada 5 s. Estos son los **valores reales medidos** el
+2026-07-19. Corresponde al flujo UF-3.
+
+**Qué ejercita.** El núcleo de C-3: la misma muestra contiene valores **medidos**, uno **derivado por
+el driver** y dos **estimados** por él. El modelo los distingue.
+
+```json
+{
+  "sesionSondeo": {
+    "id": "ses-2026-07-19-a",
+    "dispositivoId": "ups-01",
+    "desde": "2026-07-19T00:00:00-03:00",
+    "hasta": null,
+    "driver": "nutdrv_qx",
+    "driverVersion": "2.8.1",
+    "dialecto": "megatec",
+    "intervaloSegundos": 5,
+    "fuenteDatosId": "fd-poller-local",
+    "mapaProcedencia": {
+      "input.voltage":         { "o": "medido" },
+      "output.voltage":        { "o": "medido" },
+      "output.frequency":      { "o": "medido" },
+      "battery.voltage":       { "o": "medido" },
+      "ups.load":              { "o": "medido" },
+      "ups.status":            { "o": "medido" },
+      "battery.charge":        { "o": "derivado",          "de": ["battery.voltage", "battery.voltage.high", "battery.voltage.low"] },
+      "battery.voltage.high":  { "o": "estimadoPorDriver", "nota": "guesstimation del driver, no leído del equipo" },
+      "battery.voltage.low":   { "o": "estimadoPorDriver", "nota": "ídem" }
+    }
+  },
+
+  "constantesDeSesion": {
+    "_nota": "Valores que el driver expone pero que no cambian entre muestras. Se guardan una vez por sesión, no 17.280 veces por día.",
+    "ups.type":                 { "v": "offline / line interactive", "o": "medido" },
+    "ups.firmware.aux":         { "v": "PM-T",  "o": "medido" },
+    "ups.beeper.status":        { "v": "enabled", "o": "medido" },
+    "battery.voltage.nominal":  { "v": 12.0,  "u": "V", "o": "medido" },
+    "output.voltage.nominal":   { "v": 220.0, "u": "V", "o": "medido" },
+    "output.frequency.nominal": { "v": 50.0,  "u": "Hz","o": "medido" },
+    "battery.voltage.high":     { "v": 13.00, "u": "V", "o": "estimadoPorDriver",
+                                  "advertencia": "guesstimation del driver. NO es un umbral leído del equipo." },
+    "battery.voltage.low":      { "v": 10.40, "u": "V", "o": "estimadoPorDriver",
+                                  "advertencia": "ídem" },
+    "battery.runtime":          { "v": null,  "o": "noCalculable",
+                                  "motivo": "Variable inexistente en este equipo. NO puede usarse como umbral de disparo." }
+  },
+
+  "muestras": [
+    { "id": "mue-20260719T011500", "instante": "2026-07-19T01:15:00-03:00", "calidad": "completa",
+      "valores": {
+        "ups.status":       { "v": "OL",  "o": "medido" },
+        "ups.load":         { "v": 12,    "u": "%",  "o": "medido" },
+        "input.voltage":    { "v": 232.9, "u": "V",  "o": "medido" },
+        "output.voltage":   { "v": 232.9, "u": "V",  "o": "medido" },
+        "output.frequency": { "v": 50.0,  "u": "Hz", "o": "medido" },
+        "battery.voltage":  { "v": 13.41, "u": "V",  "o": "medido" },
+        "battery.charge":   { "v": 100,   "u": "%",  "o": "derivado",
+                              "de": ["battery.voltage", "battery.voltage.high", "battery.voltage.low"],
+                              "advertencia": "Interpolación del driver sobre umbrales estimados. NO usar como umbral duro ni para tendencias de salud." }
+      },
+      "contextoHost": { "hostId": "host-i7infra", "loadAverage1m": 8.56, "contenedoresActivos": 8 } },
+
+    { "id": "mue-20260719T011505", "instante": "2026-07-19T01:15:05-03:00", "calidad": "completa",
+      "valores": {
+        "ups.status":       { "v": "OL",  "o": "medido" },
+        "ups.load":         { "v": 12,    "u": "%",  "o": "medido" },
+        "input.voltage":    { "v": 232.9, "u": "V",  "o": "medido" },
+        "output.voltage":   { "v": 232.9, "u": "V",  "o": "medido" },
+        "output.frequency": { "v": 50.0,  "u": "Hz", "o": "medido" },
+        "battery.voltage":  { "v": 13.41, "u": "V",  "o": "medido" },
+        "battery.charge":   { "v": 100,   "u": "%",  "o": "derivado",
+                              "de": ["battery.voltage", "battery.voltage.high", "battery.voltage.low"] }
+      },
+      "contextoHost": { "hostId": "host-i7infra", "loadAverage1m": 8.41, "contenedoresActivos": 8 } },
+
+    { "id": "mue-20260719T011510", "instante": "2026-07-19T01:15:10-03:00", "calidad": "parcial",
+      "valores": {
+        "ups.status":       { "v": "OL",  "o": "medido" },
+        "ups.load":         { "v": null,  "o": "noCalculable", "motivo": "sin respuesta del driver en esta variable" },
+        "input.voltage":    { "v": 231.7, "u": "V",  "o": "medido" },
+        "output.voltage":   { "v": 231.7, "u": "V",  "o": "medido" },
+        "output.frequency": { "v": 50.0,  "u": "Hz", "o": "medido" },
+        "battery.voltage":  { "v": 13.41, "u": "V",  "o": "medido" },
+        "battery.charge":   { "v": 100,   "u": "%",  "o": "derivado",
+                              "de": ["battery.voltage", "battery.voltage.high", "battery.voltage.low"] }
+      },
+      "contextoHost": { "hostId": "host-i7infra", "loadAverage1m": 8.62, "contenedoresActivos": 8 },
+      "nota": "Respuesta incompleta del driver: la muestra se conserva, marcada 'parcial'. Descartarla perdería las variables que sí llegaron." },
+
+    { "id": "mue-20260719T011515", "instante": "2026-07-19T01:15:15-03:00", "calidad": "completa",
+      "valores": {
+        "ups.status":       { "v": "OL",  "o": "medido" },
+        "ups.load":         { "v": 13,    "u": "%",  "o": "medido" },
+        "input.voltage":    { "v": 231.7, "u": "V",  "o": "medido" },
+        "output.voltage":   { "v": 231.7, "u": "V",  "o": "medido" },
+        "output.frequency": { "v": 50.0,  "u": "Hz", "o": "medido" },
+        "battery.voltage":  { "v": 13.41, "u": "V",  "o": "medido" },
+        "battery.charge":   { "v": 100,   "u": "%",  "o": "derivado",
+                              "de": ["battery.voltage", "battery.voltage.high", "battery.voltage.low"] }
+      },
+      "contextoHost": { "hostId": "host-i7infra", "loadAverage1m": 9.03, "contenedoresActivos": 8 } },
+
+    { "id": "mue-20260719T011520", "instante": "2026-07-19T01:15:20-03:00", "calidad": "completa",
+      "valores": {
+        "ups.status":       { "v": "OL",  "o": "medido" },
+        "ups.load":         { "v": 13,    "u": "%",  "o": "medido" },
+        "input.voltage":    { "v": 233.4, "u": "V",  "o": "medido" },
+        "output.voltage":   { "v": 233.4, "u": "V",  "o": "medido" },
+        "output.frequency": { "v": 50.0,  "u": "Hz", "o": "medido" },
+        "battery.voltage":  { "v": 13.41, "u": "V",  "o": "medido" },
+        "battery.charge":   { "v": 100,   "u": "%",  "o": "derivado",
+                              "de": ["battery.voltage", "battery.voltage.high", "battery.voltage.low"] }
+      },
+      "contextoHost": { "hostId": "host-i7infra", "loadAverage1m": 9.11, "contenedoresActivos": 8 } }
+  ],
+
+  "agregadoResultante": {
+    "id": "agg-20260719T01-inputvoltage",
+    "dispositivoId": "ups-01",
+    "variable": "input.voltage",
+    "ventana": "PT1H",
+    "instanteInicio": "2026-07-19T01:00:00-03:00",
+    "derivadoDe": { "desde": "2026-07-19T01:00:00-03:00", "hasta": "2026-07-19T01:59:55-03:00" },
+    "nMuestras": 718,
+    "muestrasEsperadas": 720,
+    "cobertura": 0.997,
+    "funciones": {
+      "promedio": { "v": 232.4, "u": "V", "o": "derivado", "de": ["input.voltage"] },
+      "minimo":   { "v": 229.8, "u": "V", "o": "derivado", "de": ["input.voltage"] },
+      "maximo":   { "v": 235.1, "u": "V", "o": "derivado", "de": ["input.voltage"] },
+      "p95":      { "v": 234.6, "u": "V", "o": "derivado", "de": ["input.voltage"] }
+    },
+    "advertencia": "AGREGADO, no muestra. El promedio horario NO representa microcortes: para eso está la entidad Evento."
+  }
+}
+```
+
+> **Sobre el tamaño real.** La serie de arriba son 5 muestras de las **720 por hora** que produce un
+> sondeo cada 5 s — unos 6,3 millones de filas al año. Se muestran cinco porque es lo que hace falta
+> para las pruebas: una normal, una repetida (estabilidad), una `parcial`, y dos con variación de
+> carga. El `agregadoResultante` es lo que queda de esa hora tras la retención de E-1.
+
+**Qué verificar.**
+
+- Una consulta de *«tendencia de salud de batería»* que intente usar `battery.charge` debe **fallar
+  o advertir**: su procedencia es `derivado` sobre umbrales `estimadoPorDriver`. Es el test que
+  protege contra el modo de falla de C-3.
+- **La muestra `parcial` se conserva.** Tiene `ups.load = null` pero el resto de las variables
+  llegaron: descartarla entera perdería datos buenos. Los cálculos deben tolerar nulos por variable,
+  no solo por muestra.
+- `contextoHost` no es decorativo: **O-U9** estableció que sin la carga concurrente las mediciones
+  no son comparables entre sí. Nótese que `loadAverage1m` ronda 8,5–9,1 con 8 contenedores: es la
+  carga atípica que la evidencia documentó.
+- **`battery.runtime` está presente con `noCalculable`, no ausente.** La diferencia importa: un campo
+  faltante se lee como «no lo sondeamos»; este dice «no existe en este equipo», que es lo que impide
+  usar autonomía como umbral de disparo.
+- Las constantes viven en la sesión, no en la muestra. Un test debe verificar que **no se dupliquen
+  17.280 veces por día**, y que `battery.voltage.high/low` conserven su marca de
+  `estimadoPorDriver` allí donde se guarden.
+- `cobertura: 0.997` en el agregado: faltan 2 de 720 muestras. Ese número debe viajar con el
+  agregado siempre (**I-20**).
+
+---
+
+### §20.E-3 · Microcorte: evento derivado, sin acción
+
+Procedencia: `SAI.Service.Core.Documentacion/PROMPTs/Generar-SDD/Inputs/Planteo-Analisis-Unificado-Antecedente-SAI-Service.md`, líneas 3113–3186. Estado: medido — muestras y evento del relevamiento.
+
+**Contexto.** Un parpadeo de red de 3 segundos. El SAI conmuta a batería y vuelve. No hay que apagar
+nada, pero **hay que registrarlo**: la acumulación de microcortes es lo que caracteriza la calidad
+del suministro, uno de los objetivos del servicio.
+
+**Qué ejercita.** C-6: el evento se **deriva** de muestras, con la regla y su versión.
+
+```json
+{
+  "muestrasDeEntrada": {
+    "_nota": "Las muestras crudas de las que la regla deriva el evento. El sondeo es cada 5 s.",
+    "serie": [
+      { "id": "mue-20260724T183005", "instante": "2026-07-24T18:30:05-03:00", "calidad": "completa",
+        "valores": { "ups.status": { "v": "OL", "o": "medido" },
+                     "input.voltage":   { "v": 231.4, "u": "V", "o": "medido" },
+                     "output.voltage":  { "v": 231.4, "u": "V", "o": "medido" },
+                     "battery.voltage": { "v": 13.41, "u": "V", "o": "medido" },
+                     "ups.load":        { "v": 14, "u": "%", "o": "medido" } } },
+
+      { "id": "mue-20260724T183010", "instante": "2026-07-24T18:30:10-03:00", "calidad": "completa",
+        "valores": { "ups.status": { "v": "OL", "o": "medido" },
+                     "input.voltage":   { "v": 231.4, "u": "V", "o": "medido" },
+                     "output.voltage":  { "v": 231.4, "u": "V", "o": "medido" },
+                     "battery.voltage": { "v": 13.41, "u": "V", "o": "medido" },
+                     "ups.load":        { "v": 14, "u": "%", "o": "medido" } },
+        "rol": "última muestra en OL antes de la transición" },
+
+      { "id": "mue-20260724T183015", "instante": "2026-07-24T18:30:15-03:00", "calidad": "completa",
+        "valores": { "ups.status": { "v": "OB", "o": "medido" },
+                     "input.voltage":   { "v": 0.0,   "u": "V", "o": "medido" },
+                     "output.voltage":  { "v": 228.9, "u": "V", "o": "medido" },
+                     "battery.voltage": { "v": 12.88, "u": "V", "o": "medido" },
+                     "ups.load":        { "v": 14, "u": "%", "o": "medido" } },
+        "rol": "PRIMERA y ÚNICA muestra que atrapó el corte" },
+
+      { "id": "mue-20260724T183020", "instante": "2026-07-24T18:30:20-03:00", "calidad": "completa",
+        "valores": { "ups.status": { "v": "OL", "o": "medido" },
+                     "input.voltage":   { "v": 230.8, "u": "V", "o": "medido" },
+                     "output.voltage":  { "v": 230.8, "u": "V", "o": "medido" },
+                     "battery.voltage": { "v": 13.02, "u": "V", "o": "medido" },
+                     "ups.load":        { "v": 14, "u": "%", "o": "medido" } },
+        "rol": "retorno; la batería aún recuperando hacia flotación" },
+
+      { "id": "mue-20260724T183045", "instante": "2026-07-24T18:30:45-03:00", "calidad": "completa",
+        "valores": { "ups.status": { "v": "OL", "o": "medido" },
+                     "input.voltage":   { "v": 231.1, "u": "V", "o": "medido" },
+                     "battery.voltage": { "v": 13.38, "u": "V", "o": "medido" },
+                     "ups.load":        { "v": 14, "u": "%", "o": "medido" } },
+        "rol": "flotación restablecida ~30 s después" }
+    ]
+  },
+
+  "evento": {
+    "id": "evt-20260724T183012",
+    "tipo": "Microcorte",
+    "dispositivoId": "ups-01",
+    "instante": "2026-07-24T18:30:12-03:00",
+    "instanteFin": "2026-07-24T18:30:17-03:00",
+    "duracionSegundos": 5,
+    "incertidumbreDuracionSeg": 10,
+    "notaIncertidumbre": "El corte ocurrió en algún momento entre 18:30:10 (última OL) y 18:30:15 (primera OB), y volvió entre 18:30:15 y 18:30:20. Con sondeo cada 5 s la duración real está en [0, 10] s: se reporta el punto medio con su incertidumbre. Ver O-M4.",
+    "severidad": "informativa",
+    "reglaDerivacionId": "rd-transicion-ups-status",
+    "reglaVersion": 2,
+    "reglaResumen": "OL→OB seguido de OB→OL en menos de 60 s ⇒ Microcorte; ≥60 s ⇒ CorteSuministro",
+    "muestrasEvidencia": ["mue-20260724T183010", "mue-20260724T183015", "mue-20260724T183020"],
+    "valoresClave": {
+      "input.voltage.previo":   { "v": 231.4, "u": "V", "o": "medido" },
+      "input.voltage.durante":  { "v": 0.0,   "u": "V", "o": "medido" },
+      "battery.voltage.minimo": { "v": 12.88, "u": "V", "o": "medido" },
+      "caidaBateriaV":          { "v": -0.53, "u": "V", "o": "derivado",
+                                  "de": ["battery.voltage"],
+                                  "advertencia": "NO comparable con la línea base de PruebaBateria: descarga no controlada, duración desconocida. No entra en la tendencia de salud." },
+      "segundosHastaFlotacion": { "v": 30, "u": "s", "o": "derivado", "incertidumbre": "±5 s" },
+      "ups.load":               { "v": 14,    "u": "%", "o": "medido" }
+    },
+    "accionesDesencadenadas": [],
+    "motivoSinAccion": "Duración (5 s) muy por debajo del umbralDisparoSegundos de la política vigente (300 s)."
+  }
+}
+```
+
+**Qué verificar.**
+
+- **La regla versionada es el punto.** Los eventos viejos conservan `reglaVersion: 1` (umbral de
+  30 s, ver `historial` en E-1) y una consulta de tendencia puede excluirlos o normalizarlos. Sin
+  ese campo, la serie histórica queda silenciosamente corrupta.
+- **Una sola muestra atrapó el corte.** Es el caso realista, no el excepcional: con sondeo cada 5 s
+  un microcorte deja una o ninguna muestra en `OB`. Una regla que exija dos muestras consecutivas
+  **no detectaría nada**.
+- **`duracionSegundos: 5` viene con `incertidumbreDuracionSeg: 10`**, y la nota explica por qué: el
+  valor real está en [0, 10] s. Un informe que sume duraciones de microcortes sin propagar esa
+  incertidumbre produce un total con error del 100 % (**O-M4**).
+- **`caidaBateriaV` existe pero está excluida de la tendencia de salud**, y lo dice en su propia
+  advertencia. Es la distinción de
+  §6.7: solo se comparan descargas controladas
+  a carga igualada. Una descarga de un corte real no lo es.
+- `accionesDesencadenadas: []` con `motivoSinAccion` explícito: no todo evento produce acción, y el
+  motivo debe quedar registrado para que un operador no se pregunte después por qué no pasó nada.
+
+---
+
+### §20.E-4 · Corte prolongado: la política dispara y el sistema se niega
+
+Procedencia: `SAI.Service.Core.Documentacion/PROMPTs/Generar-SDD/Inputs/Planteo-Analisis-Unificado-Antecedente-SAI-Service.md`, líneas 3216–3323. Estado: mixto — transición y evento medidos; valores intermedios de `battery.voltage` reconstruidos para la fixture (ver `_advertenciaFixture`).
+
+**Contexto.** Corte real de 6 minutos. La política está configurada con umbral de 5. **Pero los
+supuestos de §4.8 no están
+verificados.** Es el escenario más importante del documento.
+
+**Qué ejercita.** La regla de bloqueo y el valor `BloqueadaPorVerificacion`.
+
+```json
+{
+  "muestrasDeEntrada": {
+    "_nota": "Serie abreviada del corte. Sondeo cada 5 s ⇒ ~74 muestras en los 370 s; se listan los puntos de inflexión y el descenso de battery.voltage bajo descarga sostenida.",
+    "serie": [
+      { "instante": "2026-08-11T04:14:55-03:00", "ups.status": "OL", "input.voltage": 229.6, "battery.voltage": 13.41, "ups.load": 11, "calidad": "completa" },
+      { "instante": "2026-08-11T04:15:00-03:00", "ups.status": "OB", "input.voltage": 0.0,   "battery.voltage": 12.91, "ups.load": 11, "calidad": "completa", "rol": "transición OL→OB" },
+      { "instante": "2026-08-11T04:15:30-03:00", "ups.status": "OB", "input.voltage": 0.0,   "battery.voltage": 12.84, "ups.load": 11, "calidad": "completa" },
+      { "instante": "2026-08-11T04:16:00-03:00", "ups.status": "OB", "input.voltage": 0.0,   "battery.voltage": 12.79, "ups.load": 11, "calidad": "completa" },
+      { "instante": "2026-08-11T04:17:00-03:00", "ups.status": "OB", "input.voltage": 0.0,   "battery.voltage": 12.71, "ups.load": 11, "calidad": "completa" },
+      { "instante": "2026-08-11T04:18:00-03:00", "ups.status": "OB", "input.voltage": 0.0,   "battery.voltage": 12.64, "ups.load": 11, "calidad": "completa" },
+      { "instante": "2026-08-11T04:19:00-03:00", "ups.status": "OB", "input.voltage": 0.0,   "battery.voltage": 12.58, "ups.load": 11, "calidad": "completa" },
+      { "instante": "2026-08-11T04:20:00-03:00", "ups.status": "OB", "input.voltage": 0.0,   "battery.voltage": 12.52, "ups.load": 11, "calidad": "completa", "rol": "instante de decisión: 300 s sostenidos en OB" },
+      { "instante": "2026-08-11T04:21:00-03:00", "ups.status": "OB", "input.voltage": 0.0,   "battery.voltage": 12.46, "ups.load": 11, "calidad": "completa" },
+      { "instante": "2026-08-11T04:21:10-03:00", "ups.status": "OL", "input.voltage": 227.3, "battery.voltage": 12.49, "ups.load": 11, "calidad": "completa", "rol": "retorno de red" },
+      { "instante": "2026-08-11T04:35:00-03:00", "ups.status": "OL", "input.voltage": 230.1, "battery.voltage": 13.29, "ups.load": 12, "calidad": "completa", "rol": "recarga en curso" },
+      { "instante": "2026-08-11T06:00:00-03:00", "ups.status": "OL", "input.voltage": 231.8, "battery.voltage": 13.41, "ups.load": 12, "calidad": "completa", "rol": "flotación restablecida" }
+    ],
+    "_advertenciaFixture": "Los valores intermedios de battery.voltage son RECONSTRUIDOS para la fixture: representan un descenso plausible bajo descarga sostenida, no una medición. Solo los de E-5 y las líneas base provienen de mediciones reales documentadas.",
+    "observacionUtil": "El descenso de 12,91 → 12,46 V en 370 s a carga 11 % es, en principio, la señal de capacidad más valiosa que produce el sistema (§6.9, punto 3). Requiere carga comparable para servir; queda registrado para eso."
+  },
+
+  "evento": {
+    "id": "evt-20260811T041500",
+    "tipo": "CorteSuministro",
+    "dispositivoId": "ups-01",
+    "instante": "2026-08-11T04:15:00-03:00",
+    "instanteFin": "2026-08-11T04:21:10-03:00",
+    "duracionSegundos": 370,
+    "incertidumbreDuracionSeg": 10,
+    "severidad": "critica",
+    "reglaDerivacionId": "rd-transicion-ups-status",
+    "reglaVersion": 2,
+    "muestrasEvidencia": ["mue-20260811T041455", "mue-20260811T041500", "mue-20260811T042000", "mue-20260811T042110"],
+    "valoresClave": {
+      "battery.voltage.inicial": { "v": 12.91, "u": "V", "o": "medido" },
+      "battery.voltage.minimo":  { "v": 12.46, "u": "V", "o": "medido" },
+      "caidaTotalV":             { "v": -0.45, "u": "V", "o": "derivado", "de": ["battery.voltage"] },
+      "cargaMedia":              { "v": 11,    "u": "%", "o": "medido" },
+      "segundosHastaFlotacion":  { "v": 4730,  "u": "s", "o": "derivado",
+                                   "nota": "~79 min de recarga tras 6 min de descarga. Relación relevante: dos cortes seguidos NO encuentran la batería llena." }
+    },
+    "accionesDesencadenadas": ["acc-20260811T042000"]
+  },
+
+  "versionPolitica": {
+    "id": "vp-003",
+    "politicaId": "pol-apagado-por-corte",
+    "version": 3,
+    "vigenteDesde": "2026-08-01T00:00:00-03:00",
+    "modalidad": "HostLuegoUpsConRetorno",
+    "parametros": {
+      "umbralDisparoSegundos":    { "v": 300, "u": "s", "o": "declarado" },
+      "tiempoReservadoApagadoSeg":{ "v": 240, "u": "s", "o": "declarado",
+                                    "restriccion": "≤ 540 — techo duro de ups.delay.shutdown (§4.3)" },
+      "cancelableAlVolverLaRed":  { "v": true,  "o": "declarado" },
+      "retardoReencendidoSeg":    { "v": 180, "u": "s", "o": "medido", "de": ["ups.delay.start"] }
+    }
+  },
+
+  "accion": {
+    "id": "acc-20260811T042000",
+    "eventoId": "evt-20260811T041500",
+    "versionPoliticaId": "vp-003",
+    "instanteDecision": "2026-08-11T04:20:00-03:00",
+    "modalidadSolicitada": "HostLuegoUpsConRetorno",
+    "modalidadEfectiva": "SoloAlerta",
+    "resultado": "BloqueadaPorVerificacion",
+    "verificacionesRequeridas": [
+      { "id": "ver-bios-autoencendido", "estado": "NuncaVerificado", "cumple": false },
+      { "id": "ver-shutdown-return",    "estado": "NuncaVerificado", "cumple": false },
+      { "id": "ver-presupuesto-apagado","estado": "NuncaVerificado", "cumple": false },
+      { "id": "ver-flag-ob",            "estado": "Verificado", "cumple": true,
+        "ultimaVerificacion": "2026-08-11T04:15:00-03:00",
+        "nota": "Verificado por este mismo evento: el equipo sí señaló OB en un corte real" }
+    ],
+    "motivoBloqueo": "3 de 4 supuestos sin verificar. Apagar el host sin ver-bios-autoencendido arriesga dejarlo apagado indefinidamente.",
+    "notificaciones": [
+      { "canal": "log", "instante": "2026-08-11T04:20:00-03:00", "entregado": true, "intentos": 1 },
+      { "canal": "correo", "destino": "operador@ejemplo.invalid", "entregado": false, "intentos": 3,
+        "historialIntentos": [
+          { "instante": "2026-08-11T04:20:01-03:00", "error": "connect: network is unreachable" },
+          { "instante": "2026-08-11T04:20:31-03:00", "error": "connect: network is unreachable" },
+          { "instante": "2026-08-11T04:21:31-03:00", "error": "connect: network is unreachable" }
+        ],
+        "diagnostico": "Sin conectividad: el router también está sin energía. ESPERABLE en un corte de red — un diseño que dependa solo del correo no alerta nunca cuando importa." },
+      { "canal": "webhook-local", "destino": "http://192.168.1.110:9000/alertas", "entregado": false, "intentos": 1,
+        "historialIntentos": [ { "instante": "2026-08-11T04:20:02-03:00", "error": "connect: no route to host" } ],
+        "diagnostico": "Mismo problema: el destino está detrás del mismo corte." }
+    ],
+    "notaCanales": "Ningún canal remoto funcionó. El único registro que sobrevivió al corte es el log local, que es justamente el que se lee después. Es un argumento a favor de que el histórico local sea la fuente primaria y las notificaciones un extra."
+  },
+
+  "verificacionActualizada": {
+    "id": "ver-flag-ob",
+    "supuesto": "ups.status señala OB en un corte real",
+    "estado": "Verificado",
+    "metodo": "EvidenciaAcumulada",
+    "ultimaVerificacion": "2026-08-11T04:15:00-03:00",
+    "vigenciaDias": 365,
+    "venceEl": "2027-08-11",
+    "evidencia": [
+      { "tipo": "evento", "ref": "evt-20260811T041500",
+        "detalle": "Transición OL→OB observada en muestra mue-20260811T041500 durante corte real de 370 s" }
+    ]
+  }
+}
+```
+
+**Qué verificar.**
+
+- **`modalidadSolicitada` ≠ `modalidadEfectiva`.** El sistema degradó a `SoloAlerta` por sí mismo.
+  Este es el test de seguridad central: *con supuestos sin verificar, el servicio nunca apaga el
+  host*.
+- **Un corte real verifica un supuesto gratis.** `ver-flag-ob` pasó a `Verificado` por evidencia, sin
+  prueba destructiva. Es el mecanismo de
+  §4.7 funcionando.
+- **La notificación por correo falló** — y es lo esperable: en un corte de energía la red también
+  cae. Un diseño que dependa solo del correo no alerta nunca cuando importa. El modelo registra el
+  fallo en lugar de asumir la entrega.
+- La restricción `≤ 540` sobre `tiempoReservadoApagadoSeg` es un invariante de validación, no un
+  comentario (**I-10**).
+
+---
+
+### §20.E-5 · Prueba de batería periódica
+
+Procedencia: `SAI.Service.Core.Documentacion/PROMPTs/Generar-SDD/Inputs/Planteo-Analisis-Unificado-Antecedente-SAI-Service.md`, líneas 3350–3458. Estado: mixto — 19 muestras documentadas + 16 reconstruidas; los derivados se calculan solo con las documentadas.
+
+**Contexto.** Test trimestral programado. Los valores son los **realmente medidos** el 2026-07-19,
+incluidas **las dos muestras que se perdieron**. Corresponde al flujo
+UF-5.
+
+**Qué ejercita.** `PruebaBateria`, el muestreo denso, la resolución del montaje vigente, `calidad:
+"perdida"`, y el veredicto **calculado por el servicio** — porque el equipo no lo da (**O-U10**).
+
+```json
+{
+  "pruebaBateria": {
+    "id": "prb-20260901T010000",
+    "dispositivoId": "ups-01",
+    "montajeBateriaId": "mnt-001",
+    "bateriaIdResuelta": "bat-2024-a",
+    "instanteInicio": "2026-09-01T01:00:00-03:00",
+    "disparo": "programado",
+    "comando": "test.battery.start.quick",
+    "intervaloMuestreoSegundos": 1,
+
+    "contexto": {
+      "ups.load": { "v": 13, "u": "%", "o": "medido" },
+      "hostLoadAverage1m": 8.56,
+      "contenedoresActivos": 8,
+      "temperaturaAmbienteC": null,
+      "advertencia": "Sin sensor de temperatura. La comparabilidad entre pruebas asume ambiente similar; ver O-M5."
+    },
+
+    "leyendaMuestras": {
+      "t": "segundos relativos al inicio del test",
+      "v": "battery.voltage en V",
+      "s": "ups.status",
+      "q": "calidad: completa | parcial | perdida",
+      "src": "documentado = punto que consta en la evidencia del relevamiento · reconstruido = valor de fixture, NO medido"
+    },
+    "muestras": [
+      { "t": -5, "v": 13.41, "s": "OL", "q": "completa", "src": "documentado" },
+      { "t": -4, "v": 13.41, "s": "OL", "q": "completa", "src": "documentado" },
+      { "t": -3, "v": 13.41, "s": "OL", "q": "completa", "src": "documentado" },
+      { "t": -2, "v": 13.41, "s": "OL", "q": "completa", "src": "documentado" },
+      { "t": -1, "v": 13.41, "s": "OL", "q": "completa", "src": "documentado" },
+      { "t":  0, "v": 13.41, "s": "OL", "q": "completa", "src": "reconstruido", "nota": "envío del comando test.battery.start.quick" },
+      { "t":  1, "v": 13.41, "s": "OL", "q": "completa", "src": "reconstruido" },
+      { "t":  2, "v": 13.40, "s": "OL", "q": "completa", "src": "reconstruido" },
+      { "t":  3, "v": 13.40, "s": "OL", "q": "completa", "src": "reconstruido" },
+      { "t":  4, "v": 13.39, "s": "OL", "q": "completa", "src": "reconstruido" },
+      { "t":  5, "v": 13.38, "s": "OL", "q": "completa", "src": "reconstruido" },
+      { "t":  6, "v": 13.36, "s": "OL", "q": "completa", "src": "reconstruido" },
+      { "t":  7, "v": 13.32, "s": "OL", "q": "completa", "src": "reconstruido" },
+      { "t":  8, "v": 13.21, "s": "OL", "q": "completa", "src": "reconstruido" },
+      { "t":  9, "v": null,  "s": null, "q": "perdida",  "src": "documentado",
+        "nota": "El driver no respondió — coherente con el instante de conmutación a batería" },
+      { "t": 10, "v": null,  "s": null, "q": "perdida",  "src": "documentado" },
+      { "t": 11, "v": 12.98, "s": "OL", "q": "completa", "src": "reconstruido" },
+      { "t": 12, "v": 12.96, "s": "OL", "q": "completa", "src": "reconstruido" },
+      { "t": 13, "v": 12.95, "s": "OL", "q": "completa", "src": "reconstruido" },
+      { "t": 14, "v": 12.95, "s": "OL", "q": "completa", "src": "reconstruido" },
+      { "t": 15, "v": 12.94, "s": "OL", "q": "completa", "src": "reconstruido" },
+      { "t": 16, "v": 12.94, "s": "OL", "q": "completa", "src": "documentado", "nota": "inicio de la meseta documentada" },
+      { "t": 20, "v": 12.94, "s": "OL", "q": "completa", "src": "documentado" },
+      { "t": 25, "v": 12.94, "s": "OL", "q": "completa", "src": "documentado" },
+      { "t": 30, "v": 12.94, "s": "OL", "q": "completa", "src": "documentado" },
+      { "t": 35, "v": 12.94, "s": "OL", "q": "completa", "src": "documentado" },
+      { "t": 40, "v": 12.94, "s": "OL", "q": "completa", "src": "documentado" },
+      { "t": 45, "v": 12.94, "s": "OL", "q": "completa", "src": "documentado", "nota": "fin de la meseta documentada" },
+      { "t": 46, "v": 13.02, "s": "OL", "q": "completa", "src": "reconstruido" },
+      { "t": 47, "v": 13.09, "s": "OL", "q": "completa", "src": "reconstruido" },
+      { "t": 48, "v": 13.15, "s": "OL", "q": "completa", "src": "reconstruido" },
+      { "t": 49, "v": 13.20, "s": "OL", "q": "completa", "src": "reconstruido" },
+      { "t": 50, "v": 13.24, "s": "OL", "q": "completa", "src": "documentado", "nota": "recuperando hacia flotación" },
+      { "t": 52, "v": 13.31, "s": "OL", "q": "completa", "src": "reconstruido" },
+      { "t": 55, "v": 13.38, "s": "OL", "q": "completa", "src": "reconstruido" }
+    ],
+    "resumenSerie": {
+      "muestrasTotales": 35,
+      "muestrasCompletas": 33,
+      "muestrasPerdidas": 2,
+      "documentadas": 19,
+      "reconstruidas": 16,
+      "advertencia": "Las muestras 'reconstruido' NO son mediciones: rellenan la serie para que la fixture sea ejecutable. Los derivados de abajo se calculan SOLO con las documentadas, y por eso coinciden exactamente con la evidencia del relevamiento."
+    },
+
+    "derivados": {
+      "tensionReposoV":        { "v": 13.41, "o": "medido" },
+      "tensionMinimaV":        { "v": 12.94, "o": "medido" },
+      "caidaV":                { "v": -0.47, "o": "derivado", "de": ["tensionReposoV", "tensionMinimaV"] },
+      "caidaRelativa":         { "v": -0.035, "u": "fracción", "o": "derivado" },
+      "segundosRecuperacion":  { "v": 35, "o": "derivado", "incertidumbre": "±5 s por las muestras perdidas" },
+      "resistenciaInternaOhm": { "v": null, "o": "noCalculable",
+                                 "motivo": "Requiere la corriente de descarga. El equipo solo expone ups.load como % de una potencia nominal desconocida (E-1). Ver §6.6." }
+    },
+
+    "comparacionLineaBase": {
+      "lineaBaseId": "prb-20260719T010000",
+      "deltaCaidaV": 0.00,
+      "deltaSegundosRecuperacion": 0,
+      "deltaCargaConcurrente": 0,
+      "comparable": true,
+      "nota": "Carga concurrente equivalente (13 %), por lo que la comparación es válida."
+    },
+
+    "veredictoAutomatico": {
+      "resultado": "SinDegradacionDetectable",
+      "confianza": "baja",
+      "calculadoPor": "sai-service",
+      "motivoConfianza": "Solo 2 puntos de la serie histórica. Se necesitan ≥4 pruebas comparables para una tendencia.",
+      "advertencia": "El equipo NO reporta veredicto de test (sin TEST/RB/ups.alarm — O-U10). Este resultado lo calcula el servicio a partir de la caída de tensión, no lo dice el SAI."
+    },
+
+    "senialesDelEquipo": {
+      "ups.status.durante": "OL",
+      "flagTEST": false, "flagRB": false, "upsAlarm": null,
+      "nota": "51 muestras consecutivas sin cambio de estado. El equipo no señala el test por software."
+    }
+  }
+}
+```
+
+**Qué verificar.**
+
+- `calidad: "perdida"` con valores `null` es un estado de primera clase. Un parser que exija
+  `battery.voltage` no nulo falla contra datos reales. **Y las dos muestras perdidas caen justo en
+  el instante de conmutación**, que es el más informativo: no es mala suerte, es sistemático —
+  el equipo deja de atender consultas mientras conmuta.
+- **La distinción `documentado` / `reconstruido` de la fixture es el mismo principio de procedencia
+  aplicado a los datos de prueba.** Los derivados se calculan solo con las documentadas, y por eso
+  reproducen exactamente −0,47 V y ~35 s. Un test que use las reconstruidas para validar el cálculo
+  estaría verificando contra números inventados — que es el error que todo el documento trata de
+  evitar.
+- El muestreo es **a 1 Hz y aun así se pierden dos muestras**. Con el sondeo normal de 5 s el evento
+  entero (unos 50 s) daría ~10 muestras y la meseta sería irreconocible. La `PruebaBateria` debe
+  subir la cadencia de sondeo mientras dura, y volver a la normal después.
+- `resistenciaInternaOhm: null` con `noCalculable` y motivo: **el modelo dice explícitamente qué no
+  puede calcular**, en vez de guardar un número inventado.
+- `comparable: true` depende de `deltaCargaConcurrente`. Una prueba con carga muy distinta debe
+  marcarse `comparable: false` y **quedar excluida de la tendencia** (**I-16**).
+- `veredictoAutomatico.calculadoPor` ≠ el equipo. Este campo evita que dentro de dos años alguien
+  crea que el SAI dictaminó algo.
+
+---
+
+### §20.E-6 · Recambio de batería: intervención, baja lógica y cierre de vigencia
+
+Procedencia: `SAI.Service.Core.Documentacion/PROMPTs/Generar-SDD/Inputs/Planteo-Analisis-Unificado-Antecedente-SAI-Service.md`, líneas 3492–3616. Estado: mixto — intervención y ficha medidas; la serie de tendencia es reconstruida salvo el punto 2026-07-19 (ver `_advertenciaFixture`).
+
+**Contexto.** La batería llegó al final de su vida. El técnico la reemplaza. **Esto es lo que el
+requisito llama «baja lógica al hacer el servicio técnico de recambio».** Corresponde al flujo
+UF-6.
+
+**Qué ejercita.** C-4 y C-5 juntos: una `Intervencion` **cierra** un montaje, **abre** otro, cambia
+el estado de dos unidades y aporta el costo.
+
+```json
+{
+  "intervencion": {
+    "id": "int-20260905-001",
+    "tipoIntervencionId": "ti-recambio-bat",
+    "instante": "2026-09-05T10:30:00-03:00",
+    "dispositivoId": "ups-01",
+    "bateriasAfectadas": ["bat-2024-a", "bat-2026-a"],
+    "proveedorId": "prov-taller-electronica-sur",
+    "ejecutadaPor": "técnico externo",
+    "downtimeMinutos": 25,
+    "hostAfectado": { "hostId": "host-i7infra", "requirioApagado": false,
+                      "nota": "El host siguió alimentado por red durante el recambio" },
+    "costos": {
+      "repuestos": [
+        { "descripcion": "Batería 12V 9Ah AGM", "cantidad": 1,
+          "importe": { "monto": 52000.00, "moneda": "ARS", "fecha": "2026-09-05",
+                       "equivalenteUsd": 41.00, "fuenteCotizacion": "BNA-divisa-venta" } }
+      ],
+      "manoDeObra": { "monto": 15000.00, "moneda": "ARS", "fecha": "2026-09-05",
+                      "equivalenteUsd": 11.80, "fuenteCotizacion": "BNA-divisa-venta" },
+      "total":       { "monto": 67000.00, "moneda": "ARS", "fecha": "2026-09-05",
+                       "equivalenteUsd": 52.80, "fuenteCotizacion": "BNA-divisa-venta" }
+    },
+    "observaciones": "Batería original hinchada en un lateral. Bornes con sulfatación leve, limpiados.",
+    "hallazgos": [
+      { "codigo": "deformacion-carcasa", "severidad": "alta",
+        "detalle": "Abombamiento lateral visible. Señal típica de sobrecarga sostenida o de recombinación excesiva por temperatura (§6.9).",
+        "afecta": "bat-2024-a" },
+      { "codigo": "sulfatacion-bornes", "severidad": "baja",
+        "detalle": "Sulfatación leve en borne positivo, removida mecánicamente.", "afecta": "ups-01" }
+    ],
+    "mediciones": [
+      { "variable": "battery.voltage", "momento": "antes", "valor": { "v": 12.71, "u": "V", "o": "medido" },
+        "nota": "En flotación, POR DEBAJO del umbral de celda en corto de 13,3 V del catálogo. Coherente con el abombamiento." },
+      { "variable": "battery.voltage", "momento": "despues", "valor": { "v": 13.44, "u": "V", "o": "medido" } }
+    ],
+    "disposicionFinal": {
+      "bateriaId": "bat-2024-a", "destino": "reciclado",
+      "receptor": "prov-taller-electronica-sur",
+      "nota": "El proveedor retira la unidad agotada. Se registra para trazabilidad ambiental; no altera la baja lógica en el sistema."
+    },
+    "fuenteDatosId": "fd-carga-manual",
+    "claveIdempotencia": "recambio-ups01-20260905",
+    "tiempoValido": "2026-09-05T10:30:00-03:00",
+    "tiempoRegistrado": "2026-09-08T21:14:00-03:00",
+    "notaBitemporal": "Cargado 3 días después por el operador, con la factura en la mano. La diferencia entre ambos tiempos es normal en carga manual y hay que conservarla."
+  },
+
+  "efectos": {
+    "montajesCerrados": [
+      { "id": "mnt-001", "hasta": "2026-09-05T10:30:00-03:00", "intervencionCierreId": "int-20260905-001",
+        "duracionDiasServicio": 654 }
+    ],
+    "montajesAbiertos": [
+      { "id": "mnt-002", "bateriaId": "bat-2026-a", "dispositivoId": "ups-01", "posicion": 1,
+        "desde": "2026-09-05T10:30:00-03:00", "hasta": null,
+        "intervencionAperturaId": "int-20260905-001" }
+    ],
+    "cambiosDeEstado": [
+      { "entidad": "Bateria", "id": "bat-2024-a",
+        "de": "EnServicio", "a": "DadoDeBaja",
+        "fechaBaja": "2026-09-05T10:30:00-03:00",
+        "motivoBaja": "FinDeVidaUtil",
+        "nota": "BAJA LÓGICA — la unidad y todo su historial se conservan" },
+      { "entidad": "Bateria", "id": "bat-2026-a", "de": "EnStock", "a": "EnServicio" }
+    ]
+  },
+
+  "bateriaNueva": {
+    "id": "bat-2026-a",
+    "modeloBateriaId": "mod-bat-12v9ah-agm",
+    "numeroSerie": "AGM9-2026-8841",
+    "lote": "L2606",
+    "fechaFabricacion": "2026-06-01",
+    "fechaCompra": "2026-09-05",
+    "costoAdquisicion": { "monto": 52000.00, "moneda": "ARS", "fecha": "2026-09-05",
+                          "equivalenteUsd": 41.00, "fuenteCotizacion": "BNA-divisa-venta" },
+    "estado": "EnServicio",
+    "nota": "Fecha de fabricación 3 meses anterior a la compra: la edad real arranca en 2026-06, no en 2026-09."
+  },
+
+  "fichaVidaUtilCerrada": {
+    "bateriaId": "bat-2024-a",
+    "modeloBateriaId": "mod-bat-12v9ah-agm",
+    "enServicioDesde": "2024-11-20", "enServicioHasta": "2026-09-05",
+    "diasEnServicio": 654,
+    "aniosEnServicio": 1.79,
+    "vidaEsperadaAnios": { "min": 3, "max": 5 },
+    "cumplioExpectativa": false,
+    "desvio": "-1.21 años respecto del mínimo declarado",
+    "eventosSoportados": {
+      "microcortes": 47, "cortesProlongados": 3, "pruebasEjecutadas": 8,
+      "segundosTotalesEnBateria": 1284,
+      "descargasProfundas": 0,
+      "notaCiclado": "Cero descargas profundas en 654 días. Con 150-200 ciclos al 100 % de vida útil por ciclado (§6.9), esta batería NO se consumió por ciclado: su degradación fue calendario/temperatura."
+    },
+    "tendenciaSalud": {
+      "pruebasComparables": 6,
+      "pruebasDescartadas": 2,
+      "motivoDescarte": "carga concurrente fuera de tolerancia",
+      "serie": [
+        { "fecha": "2025-03-01", "caidaV": -0.31, "segundosRecuperacion": 22, "ups.load": 12 },
+        { "fecha": "2025-09-01", "caidaV": -0.35, "segundosRecuperacion": 25, "ups.load": 13 },
+        { "fecha": "2026-03-01", "caidaV": -0.41, "segundosRecuperacion": 29, "ups.load": 12 },
+        { "fecha": "2026-07-19", "caidaV": -0.47, "segundosRecuperacion": 35, "ups.load": 13 },
+        { "fecha": "2026-09-01", "caidaV": -0.47, "segundosRecuperacion": 35, "ups.load": 13 }
+      ],
+      "lectura": "Caída creciente y recuperación cada vez más lenta, a carga equivalente: es EXACTAMENTE la señal que §6.7 dice que se puede afirmar. Progresión de -0,31 a -0,47 V en 18 meses.",
+      "advertencia": "Sigue siendo una tendencia relativa en unidades arbitrarias. NO permite afirmar capacidad remanente, SoH en porcentaje ni autonomía. Y la serie no arranca con la batería nueva (O-M6).",
+      "_advertenciaFixture": "Los cuatro puntos anteriores al 2026-07-19 son reconstruidos para la fixture. Solo el del 2026-07-19 es una medición documentada."
+    },
+    "costoTotalPropiedad": { "monto": 67000.00, "moneda": "ARS", "fecha": "2026-09-05" },
+    "costoPorAnioDeServicio": { "monto": 37430.00, "moneda": "ARS", "fecha": "2026-09-05",
+                                "o": "derivado", "de": ["costoTotalPropiedad", "aniosEnServicio"],
+                                "nota": "67000 / 1.79" },
+    "comparablePorModelo": {
+      "modeloBateriaId": "mod-bat-12v9ah-agm",
+      "clave": "costoPorAnioDeServicio normalizado a USD",
+      "valorUsd": 29.50,
+      "nota": "Esta es la magnitud con la que se comparan marcas (flujo F-7). Normalizada a USD porque comparar ARS entre 2024 y 2026 no significa nada."
+    }
+  }
+}
+```
+
+**Qué verificar.**
+
+- **`bat-2024-a` sigue existiendo.** Estado `DadoDeBaja`, no borrada. Todas sus métricas y pruebas
+  siguen consultables. Test explícito: tras la baja, la consulta de historial de esa batería sigue
+  devolviendo sus 8 pruebas.
+- **Los intervalos encajan sin hueco ni solapamiento**: `mnt-001.hasta == mnt-002.desde` (**I-3**).
+- **`fichaVidaUtilCerrada` es el registro que habilita la comparación de marcas.** Con varias de
+  estas agrupadas por `modeloBateriaId` se responde *«¿qué marca rinde mejor por peso gastado?»*.
+- `fechaFabricacion` anterior a `fechaCompra` **no es un error de datos**: es la situación normal, y
+  la edad real de la batería debe contarse desde ahí.
+- El costo lleva moneda y fecha. Comparar 52 000 ARS de 2026 con 180 000 ARS de 2024 sin eso no
+  significa nada (**I-18**).
+
+---
+
+### §20.E-7 · Consulta inversa: «qué pasó en este período»
+
+Procedencia: `SAI.Service.Core.Documentacion/PROMPTs/Generar-SDD/Inputs/Planteo-Analisis-Unificado-Antecedente-SAI-Service.md`, líneas 3644–3697. Estado: derivado — respuesta de consulta compuesta a partir de E-1…E-6.
+
+**Contexto.** La pregunta que el requisito plantea al revés: *«saber en un período de tiempo qué
+dispositivo tuvo activo, en ese período qué servicios técnicos y de qué tipo, en ese período de vida
+dónde intervino qué UPS, qué batería, qué eventos intervinieron»*. Corresponde a los flujos
+UF-4 y
+UF-9.
+
+**Qué ejercita.** Que el modelo responda **sin consultas especiales**: todo sale de intersecar
+intervalos.
+
+```json
+{
+  "consulta": { "hostId": "host-i7infra", "desde": "2026-01-01T00:00:00-03:00", "hasta": "2026-12-31T23:59:59-03:00" },
+
+  "respuesta": {
+    "dispositivosActivos": [
+      { "dispositivoId": "ups-01", "desde": "2026-01-01T00:00:00-03:00", "hasta": "2026-12-31T23:59:59-03:00",
+        "diasCobertura": 365, "porcentajePeriodo": 100.0 }
+    ],
+    "cobertura": { "diasConProteccion": 365, "diasSinProteccion": 0, "disponibilidadRespaldo": 1.0 },
+
+    "bateriasIntervinientes": [
+      { "bateriaId": "bat-2024-a", "modeloBateriaId": "mod-bat-12v9ah-agm",
+        "desde": "2026-01-01T00:00:00-03:00", "hasta": "2026-09-05T10:30:00-03:00", "diasEnElPeriodo": 247,
+        "estadoActual": "DadoDeBaja" },
+      { "bateriaId": "bat-2026-a", "modeloBateriaId": "mod-bat-12v9ah-agm",
+        "desde": "2026-09-05T10:30:00-03:00", "hasta": "2026-12-31T23:59:59-03:00", "diasEnElPeriodo": 118,
+        "estadoActual": "EnServicio" }
+    ],
+
+    "intervenciones": [
+      { "id": "int-20260905-001", "tipo": "Recambio de batería", "instante": "2026-09-05T10:30:00-03:00",
+        "costoTotal": { "monto": 67000.00, "moneda": "ARS", "fecha": "2026-09-05" }, "downtimeMinutos": 25 }
+    ],
+    "costoMantenimientoPeriodo": {
+      "total":  { "monto": 67000.00, "moneda": "ARS" },
+      "totalUsdEquivalente": 52.80,
+      "desglosePorTipo": { "Recambio de batería": { "monto": 67000.00, "moneda": "ARS", "cantidad": 1 } }
+    },
+
+    "eventos": {
+      "resumen": { "Microcorte": 31, "CorteSuministro": 2, "DesconexionUsb": 1, "TensionFueraDeRango": 6 },
+      "masSignificativos": [
+        { "id": "evt-20260811T041500", "tipo": "CorteSuministro", "instante": "2026-08-11T04:15:00-03:00",
+          "duracionSegundos": 370, "bateriaVigente": "bat-2024-a", "accionResultado": "BloqueadaPorVerificacion" }
+      ]
+    },
+
+    "calidadSuministro": {
+      "fuente": "Agregado",
+      "advertencia": "Serie construida sobre agregados horarios: los promedios NO representan microcortes. El conteo de microcortes viene de Evento, no de esta serie.",
+      "inputVoltage": { "promedioV": 228.4, "minimoV": 0.0, "maximoV": 241.2, "p95V": 236.1,
+                        "muestrasAgregadas": 6307200, "ventana": "PT1H", "cobertura": 0.987 },
+      "horasFueraDeRango": 14.2,
+      "disponibilidadRed": 0.9994
+    },
+
+    "pruebasBateria": [
+      { "id": "prb-20260901T010000", "instante": "2026-09-01T01:00:00-03:00", "bateriaId": "bat-2024-a",
+        "caidaV": -0.47, "veredicto": "SinDegradacionDetectable", "confianza": "baja" }
+    ]
+  }
+}
+```
+
+**Qué verificar.**
+
+- Las dos baterías aparecen **con sus intervalos recortados al período consultado** (247 + 118 = 365
+  días, sin solapamiento).
+- `bat-2024-a` figura aunque esté `DadoDeBaja` — la baja lógica no la saca de los informes
+  históricos. **Este es el test que prueba que la baja es lógica y no física** (**I-5**).
+- `calidadSuministro.advertencia` es obligatoria cuando la serie viene de `Agregado`, por C-7
+  (**I-20**).
+- `cobertura: 0.987` dice que falta el 1,3 % de las ventanas. Un informe que presente el promedio
+  sin esa cifra está mintiendo por omisión.
+
+---
+
+### §20.E-8 · Ingesta desde un servicio externo
+
+Procedencia: `SAI.Service.Core.Documentacion/PROMPTs/Generar-SDD/Inputs/Planteo-Analisis-Unificado-Antecedente-SAI-Service.md`, líneas 3721–3817. Estado: propuesto — fixture de contrato de la API de ingesta (valores ficticios).
+
+**Contexto.** El requisito: *«esta información podría ser capturada por servicios externos de forma
+automatizada»*. Un sistema de gestión de mantenimiento externo empuja una intervención — y la
+reintenta porque no recibió la respuesta. Corresponde al flujo
+UF-10.
+
+**Qué ejercita.** `FuenteDatos`, `claveIdempotencia` y la degradación de confianza.
+
+```json
+{
+  "peticion": {
+    "metodo": "POST", "recurso": "/api/v1/intervenciones",
+    "cabeceras": { "X-Idempotency-Key": "gmao-ext-ot-88213", "X-Fuente-Datos": "fd-gmao-externo" },
+    "cuerpo": {
+      "tipoIntervencionId": "ti-inspeccion",
+      "instante": "2026-10-02T09:00:00-03:00",
+      "dispositivoId": "ups-01",
+      "proveedorId": "prov-taller-electronica-sur",
+      "downtimeMinutos": 0,
+      "costos": { "total": { "monto": 12000.00, "moneda": "ARS", "fecha": "2026-10-02" } },
+      "observaciones": "Inspección visual y medición de bornes. Sin anomalías."
+    }
+  },
+
+  "respuestaPrimeraVez": {
+    "http": 201,
+    "cuerpo": {
+      "id": "int-20261002-001", "creado": true,
+      "fuenteDatosId": "fd-gmao-externo",
+      "confianzaAsignada": "media",
+      "motivoConfianza": "Origen ApiExterna sin verificación cruzada. Los valores no fueron medidos por este servicio.",
+      "registradoEn": "2026-10-02T09:04:22-03:00"
+    }
+  },
+
+  "respuestaReintento": {
+    "http": 200,
+    "cuerpo": {
+      "id": "int-20261002-001", "creado": false,
+      "nota": "Clave de idempotencia ya procesada (gmao-ext-ot-88213). No se duplicó el registro.",
+      "registradoEn": "2026-10-02T09:04:22-03:00"
+    }
+  },
+
+  "casosDeError": [
+    {
+      "nombre": "Misma clave, cuerpo distinto",
+      "peticion": { "X-Idempotency-Key": "gmao-ext-ot-88213", "cambio": "costos.total.monto: 12000 → 19500" },
+      "respuesta": {
+        "http": 409,
+        "cuerpo": { "error": "conflicto_idempotencia",
+                    "detalle": "La clave gmao-ext-ot-88213 ya fue procesada con un cuerpo diferente.",
+                    "huellaOriginal": "sha256:4f2a…", "huellaRecibida": "sha256:9b71…",
+                    "accionSugerida": "Emitir una clave nueva si es una intervención distinta, o corregir por el endpoint de rectificación si el original estaba mal." }
+      },
+      "porQueImporta": "Devolver 200 acá sería peor que duplicar: el emisor creería que su corrección se aplicó."
+    },
+    {
+      "nombre": "Costos que no cuadran",
+      "peticion": { "repuestos": [ { "importe": 52000 } ], "manoDeObra": 15000, "total": 60000 },
+      "respuesta": {
+        "http": 422,
+        "cuerpo": { "error": "validacion", "campo": "costos.total",
+                    "detalle": "total (60000 ARS) ≠ Σ repuestos + manoDeObra (67000 ARS)",
+                    "invariante": "Costos.cuadra()" }
+      },
+      "porQueImporta": "Es el invariante que la ingesta externa rompe primero. Sin él, los costos agregados de E-7 quedan mal en silencio."
+    },
+    {
+      "nombre": "Dinero sin fecha ni moneda",
+      "peticion": { "costos": { "total": { "monto": 12000 } } },
+      "respuesta": {
+        "http": 422,
+        "cuerpo": { "error": "validacion", "campo": "costos.total",
+                    "detalle": "Dinero requiere 'moneda' y 'fecha'.", "invariante": "I-18" }
+      }
+    },
+    {
+      "nombre": "Referencia a una entidad dada de baja",
+      "peticion": { "dispositivoId": "ups-01", "bateriasAfectadas": ["bat-2024-a"], "instante": "2026-11-01T09:00:00-03:00" },
+      "respuesta": {
+        "http": 422,
+        "cuerpo": { "error": "coherencia_temporal",
+                    "detalle": "bat-2024-a fue dada de baja el 2026-09-05; no puede recibir una intervención fechada el 2026-11-01.",
+                    "nota": "Referenciarla para CONSULTAR su historial sí es válido (I-5). Lo inválido es una intervención posterior a su baja." }
+      },
+      "porQueImporta": "Distingue las dos lecturas de la baja lógica: la entidad sigue siendo consultable, pero no sigue siendo operable."
+    }
+  ],
+
+  "fuenteDatos": {
+    "id": "fd-gmao-externo",
+    "tipo": "ApiExterna",
+    "identidad": "GMAO Corporativo v4",
+    "confianzaBase": "media",
+    "nota": "Se distingue de fd-poller-local (confianza alta, valores medidos por el propio servicio)."
+  },
+
+  "bitemporalidad": {
+    "tiempoValido":     "2026-10-02T09:00:00-03:00",
+    "tiempoRegistrado": "2026-10-02T09:04:22-03:00",
+    "nota": "Cuando ocurrió vs. cuándo lo supimos. Si la carga llegara con semanas de atraso, la diferencia sería grande y relevante para auditar qué se sabía al decidir."
+  }
+}
+```
+
+**Qué verificar.**
+
+- **El reintento devuelve `200` con `creado: false` y el mismo `id`.** Es el test de idempotencia; sin
+  él, la captura automatizada duplica registros y arruina los costos agregados (**I-19**).
+- La confianza del dato externo es **menor** que la del *poller* local, y queda registrada.
+- `tiempoValido` ≠ `tiempoRegistrado`: los dos se guardan.
+
+---
+
+## §21 Anexo B — Cobertura, invariantes y flujos end-to-end
+
+### §21.B.1 Cobertura de campos por escenario
+
+Sirve para dos cosas: verificar que ningún campo del modelo quedó sin ejercitar, y elegir la
+*fixture* mínima para cada prueba.
+
+| Área del modelo | E-1 | E-2 | E-3 | E-4 | E-5 | E-6 | E-7 | E-8 |
+|-----------------|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| Catálogo (modelos, fabricantes) | ●  |    |    |    |    | ●  | ○  |    |
+| Inventario + estados | ●  |    |    |    |    | ●  | ○  |    |
+| Baja lógica y motivo |    |    |    |    |    | ●  | ○  |    |
+| `MontajeBateria` (apertura/cierre) | ●  |    |    |    | ○  | ●  | ○  |    |
+| `CoberturaHost` | ●  |    |    |    |    |    | ●  |    |
+| Procedencia por variable | ○  | ●  | ○  | ○  | ●  |    |    |    |
+| `SesionSondeo` |    | ●  | ○  |    |    |    |    |    |
+| Calidad de muestra (`perdida`) |    | ○  |    |    | ●  |    |    |    |
+| Evento derivado + regla versionada |    |    | ●  | ●  |    |    | ○  |    |
+| `PruebaBateria` y derivados |    |    |    |    | ●  |    | ○  |    |
+| Política versionada + `Accion` |    |    | ○  | ●  |    |    |    |    |
+| `Verificacion` y bloqueo | ●  |    |    | ●  |    |    |    |    |
+| `Intervencion` + costos |    |    |    |    |    | ●  | ●  | ●  |
+| `Dinero` (moneda + fecha) | ○  |    |    |    |    | ●  | ●  | ●  |
+| `Agregado` + advertencia |    |    |    |    |    |    | ●  |    |
+| `FuenteDatos` + idempotencia | ○  | ○  |    |    |    | ○  |    | ●  |
+| Bitemporalidad |    |    |    |    |    | ○  |    | ●  |
+
+● ejercitado a fondo · ○ presente de forma secundaria
+
+### §21.B.2 Invariantes verificables — pruebas unitarias
+
+Cada uno es una prueba que puede escribirse **antes** de la primera línea de implementación:
+
+| # | Invariante | Escenario |
+|---|------------|-----------|
+| I-1 | Para un `(dispositivoId, posicion)`, los intervalos de `MontajeBateria` **nunca se solapan** | E-1, E-6 |
+| I-2 | A lo sumo **un** montaje vigente (`hasta = null`) por `(dispositivoId, posicion)` | E-1 |
+| I-3 | Al cerrar un montaje y abrir otro en el mismo instante, **no queda hueco** | E-6 |
+| I-4 | Ídem I-1/I-2 para `CoberturaHost` por `hostId` | E-1, E-7 |
+| I-5 | Una entidad `DadoDeBaja` **sigue siendo consultable**; ninguna consulta histórica la excluye | E-6, E-7 |
+| I-6 | Ninguna transición de estado salta pasos del diagrama de §7.8 | E-6 |
+| I-7 | Todo valor almacenado tiene `o` (origen). **Sin excepción** | E-2, E-5 |
+| I-8 | Un valor `derivado` declara `de` con al menos una variable | E-2 |
+| I-9 | Una tendencia de salud **rechaza** entradas cuya procedencia sea `derivado` o `estimadoPorDriver` | E-2 |
+| I-10 | `tiempoReservadoApagadoSeg ≤ 540` | E-4 |
+| I-11 | Si alguna verificación requerida no cumple, `modalidadEfectiva == "SoloAlerta"` y `resultado == "BloqueadaPorVerificacion"` | E-4 |
+| I-12 | Una `Verificacion` con `ultimaVerificacion + vigenciaDias < ahora` pasa a `Vencido` sola | E-4 |
+| I-13 | Toda `Accion` referencia una **versión** de política, nunca la política | E-4 |
+| I-14 | Un `Evento` referencia `reglaDerivacionId` **y** `reglaVersion` | E-3, E-4 |
+| I-15 | `PruebaBateria` resuelve y **congela** `montajeBateriaId` en el instante de la prueba | E-5 |
+| I-16 | Una prueba con `deltaCargaConcurrente` fuera de tolerancia se marca `comparable: false` y **no entra** en la tendencia | E-5 |
+| I-17 | Una muestra `perdida` tiene valores `null` y **no rompe** el cálculo de derivados | E-5 |
+| I-18 | Todo `Dinero` tiene `moneda` **y** `fecha` | E-6, E-7, E-8 |
+| I-19 | Reenviar una `claveIdempotencia` ya procesada devuelve el registro existente, **sin crear otro** | E-8 |
+| I-20 | Toda respuesta que contenga `Agregado` incluye la advertencia y la `cobertura` | E-7 |
+| I-21 | `vidaFlotacionEsperada` sin `temperaturaReferenciaC` es **inválido** | E-1 |
+
+### §21.B.3 Flujos *end-to-end*
+
+| Flujo | Recorrido | Qué prueba de verdad | Flujo de usuario |
+|-------|-----------|----------------------|------------------|
+| **F-1 · Puesta en marcha** | E-1 → E-2 | Que el sistema arranca en `SoloAlerta` **por sí solo**, sin que nadie lo configure así | UF-1 |
+| **F-2 · Corte con supuestos sin verificar** | E-1 → E-3 → E-4 | El flujo de seguridad central: **el servicio se niega a apagar el host** | UF-3 |
+| **F-3 · Corte con supuestos verificados** | E-1 + verificaciones en `Verificado` → E-4 | La variante que sí ejecuta: apagado, `shutdown.return`, reencendido, y el arranque del host cerrando el lazo de §4.7 | UF-8 |
+| **F-4 · Vida completa de una batería** | E-1 → E-5 (×N) → E-6 | Tendencia de salud, recambio, cierre de vigencia y ficha de vida útil | UF-5, UF-6 |
+| **F-5 · Informe de período** | E-1…E-6 → E-7 | Que las consultas por intervalo devuelven todo lo que estuvo activo, incluidas las bajas | UF-4, UF-9 |
+| **F-6 · Ingesta externa** | E-8 (×2, misma clave) | Idempotencia y confianza diferenciada | UF-10 |
+| **F-7 · Comparación de marcas** | Dos ciclos de F-4 con distinto `ModeloBateria` | Que la agregación por modelo produce costo por año de servicio comparable | UF-9 |
+
+> **Sobre F-3.** Es el único flujo que **no se puede probar solo con software**: depende de la
+> ventana de mantenimiento de §4.6.
+> En pruebas automatizadas se cubre con el adaptador simulado, y queda registrado que la verificación
+> real es física.
+
+---
+
 ## §19 Checklist de completitud del intake
 
 **Negocio (Parte A):**
@@ -789,6 +2062,11 @@ El panel Blazor no produce sample: se demuestra ejecutando el propio servicio, q
 **Técnica por proyecto (Parte C):**
 - [x] §17 está completo para el único proyecto de §13 (identidad + P.1 a P.12).
 - [x] P.6 declara cobertura mínima numérica (80/70 global, 90/85 en `Domain`); P.7 adopta SemVer 2.0.0 y Conventional Commits sin excepciones; P.8 enumera 10 quality gates bloqueantes; P.9 declara plataformas y versiones mínimas con cláusula de no-soporte; P.10 expresa NFR con métricas numéricas.
+
+**Anexos de datos (Parte D):**
+- [x] Los ocho escenarios citados en el cuerpo (`E-1`…`E-8`) tienen su JSON completo en §20, y ninguno queda huérfano; el Anexo B (cobertura, invariantes, flujos) está en §21.
+- [x] Ningún dato del intake se respalda únicamente en una referencia a un archivo externo: los escenarios están transcriptos, no referenciados.
+- [x] Cada escenario de §20 declara procedencia (archivo + líneas) y estado (medido / derivado / reconstruido / propuesto).
 
 **General:**
 - [x] No hay vocabulario del dominio fuente del bootstrap ni stacks hardcodeados en el texto normativo (D7).
@@ -821,6 +2099,7 @@ El panel Blazor no produce sample: se demuestra ejecutando el propio servicio, q
 | §16 estructura | `05-Arquitectura-Tecnica/`, `10-Developer-Guide/` | Árbol de repositorio, guía de onboarding |
 | §17 P.1 a P.12 | `05`, `08`, `09`, `00` | ADRs (15 pre-ADR de P.11), estrategia de testing, pipeline, NFR, compatibilidad de plataformas |
 | §18 samples | `11-Examples/` | `Ejemplo-01-Ingesta-Gmao-v1.0.md` |
+| §20–§21 anexos de datos (E-1…E-8, Anexo B) | `02-Especificacion-Funcional/`, `11-Examples/`, `SDD/Maquetas/` | modelo conceptual con ejemplos, *fixtures* de prueba (invariantes I-1 a I-21), `Datos-Maqueta.js` de la Fase B2 |
 
 ---
 
@@ -829,3 +2108,4 @@ El panel Blazor no produce sample: se demuestra ejecutando el propio servicio, q
 | Versión | Fecha | Cambios | Autor |
 |---|---|---|---|
 | 1.0 | 2026-07-20 | Intake unificado inicial de la solución SAI.Service.Core, derivado de `Planteo-Analisis-Unificado-Antecedente-SAI-Service.md`, `Topologia-Proyecto-Solucion.md`, `Entorno-Desarrollo.md` y el tool-prompt `Crear-SDD-Documento-Intake.md`. | Orquestador SDD (Claude Code) |
+| 1.1 | 2026-07-20 | Se agrega la **Parte D — Anexos de datos**: los ocho escenarios `E-1`…`E-8` con su JSON completo (§20, transcriptos del Anexo A de la fuente, líneas 2653–3827) y las matrices de cobertura, invariantes y flujos *end-to-end* (§21, Anexo B). El intake pasa a ser autocontenido: las referencias a escenarios del cuerpo (§6, §7) resuelven dentro del documento y ya no dependen de un archivo externo. Alineado con `SOLUTION-INTAKE-template.md` v1.1. | Orquestador SDD (Claude Code) |
