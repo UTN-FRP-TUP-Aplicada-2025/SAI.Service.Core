@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Capa Domain (nucleo). Framework-free: sin EF Core, sin ASP.NET, sin Blazor,
+    sin NUT. Las dependencias de la solucion apuntan siempre hacia aca (ADR-15).
+    En Sprint 0 no hay entidades de negocio todavia: solo el marcador de assembly.
+  -->
+  <PropertyGroup>
+    <RootNamespace>SAI.Service.Core.Domain</RootNamespace>
+    <AssemblyName>SAI.Service.Core.Domain</AssemblyName>
+  </PropertyGroup>
+
+</Project>

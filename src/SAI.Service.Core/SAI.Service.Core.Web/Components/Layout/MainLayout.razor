@@ -1,0 +1,100 @@
+@inherits LayoutComponentBase
+@inject IOptions<SelloVersion> Sello
+
+@*
+    Shell del panel (BT-06): barra superior (identidad + acciones + sello de
+    version) y menu lateral con las superficies de trabajo. Replica el shell de
+    la maqueta aprobada (Maqueta.js: mq-topbar + mq-nav), implementado en
+    Blazor + MudBlazor. Terminologia: "equipos", "contrasena".
+*@
+
+<MudThemeProvider Theme="TemaSai.Tema" />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<MudLayout>
+    <MudAppBar Elevation="1">
+        <MudIconButton Icon="@Icons.Material.Filled.Menu"
+                       Color="Color.Inherit"
+                       Edge="Edge.Start"
+                       OnClick="AlternarMenu"
+                       aria-label="Alternar menu lateral" />
+        <MudIcon Icon="@Icons.Material.Filled.MonitorHeart" Class="mr-2" />
+        <MudText Typo="Typo.h6">Sai-Service-Core</MudText>
+
+        <MudSpacer />
+
+        <MudIcon Icon="@Icons.Material.Filled.AccountCircle" Class="mr-1" />
+        <MudText Typo="Typo.body2" Class="mr-4">administrador</MudText>
+
+        <MudButton Variant="Variant.Text"
+                   Color="Color.Inherit"
+                   StartIcon="@Icons.Material.Filled.Password"
+                   Disabled="true"
+                   Class="mr-2">
+            Cambiar Contrasena
+        </MudButton>
+        <MudButton Variant="Variant.Text"
+                   Color="Color.Inherit"
+                   StartIcon="@Icons.Material.Filled.Logout"
+                   Href="/acceso"
+                   Class="mr-4">
+            Cerrar Sesion
+        </MudButton>
+
+        <MudTooltip Text="@TextoDiagnostico">
+            <MudChip T="string" Variant="Variant.Outlined" Color="Color.Inherit" Size="Size.Small">
+                v: @Sello.Value.VersionLegible
+                @if (Sello.Value.EsPreliminar)
+                {
+                    <span class="ml-1">· preliminar</span>
+                }
+            </MudChip>
+        </MudTooltip>
+    </MudAppBar>
+
+    <MudDrawer @bind-Open="_menuAbierto" Elevation="1" ClipMode="DrawerClipMode.Always" Variant="@DrawerVariant.Responsive">
+        <MudDrawerHeader>
+            <MudText Typo="Typo.subtitle1">Modulos</MudText>
+        </MudDrawerHeader>
+        <MudNavMenu>
+            @foreach (var s in Superficies)
+            {
+                <MudNavLink Href="@s.Ruta" Match="@s.Match" Icon="@s.Icono">@s.Titulo</MudNavLink>
+            }
+        </MudNavMenu>
+    </MudDrawer>
+
+    <MudMainContent>
+        <MudContainer MaxWidth="MaxWidth.Large" Class="py-6">
+            @Body
+        </MudContainer>
+    </MudMainContent>
+</MudLayout>
+
+@code {
+    private bool _menuAbierto = true;
+
+    private void AlternarMenu() => _menuAbierto = !_menuAbierto;
+
+    private string TextoDiagnostico =>
+        $"Sai-Service-Core · v {Sello.Value.VersionLegible} · Modelo UX: {Sello.Value.ModeloUx} · Iteracion {Sello.Value.FechaIteracion}";
+
+    // Las 9 superficies de trabajo del menu lateral (las 2 de acceso quedan fuera
+    // del shell, con su propio layout). Orden e iconos segun la maqueta aprobada.
+    private sealed record ItemMenu(string Titulo, string Ruta, string Icono, NavLinkMatch Match);
+
+    private static readonly ItemMenu[] Superficies =
+    [
+        new("Panel de estado en vivo", "/", Icons.Material.Filled.MonitorHeart, NavLinkMatch.All),
+        new("Alta de equipos", "/alta-de-equipos", Icons.Material.Filled.Power, NavLinkMatch.Prefix),
+        new("Configuracion de politicas", "/configuracion-de-politicas", Icons.Material.Filled.Tune, NavLinkMatch.Prefix),
+        new("Prueba de bateria", "/prueba-de-bateria", Icons.Material.Filled.BatteryChargingFull, NavLinkMatch.Prefix),
+        new("Historicos y graficas", "/historicos-y-graficas", Icons.Material.Filled.ShowChart, NavLinkMatch.Prefix),
+        new("Panel de verificaciones", "/panel-de-verificaciones", Icons.Material.Filled.VerifiedUser, NavLinkMatch.Prefix),
+        new("Registro de intervenciones", "/registro-de-intervenciones", Icons.Material.Filled.Build, NavLinkMatch.Prefix),
+        new("Reparacion y sustitucion del SAI", "/sustitucion-del-sai", Icons.Material.Filled.SwapHoriz, NavLinkMatch.Prefix),
+        new("Informe de periodo", "/informe-de-periodo", Icons.Material.Filled.Description, NavLinkMatch.Prefix),
+    ];
+}

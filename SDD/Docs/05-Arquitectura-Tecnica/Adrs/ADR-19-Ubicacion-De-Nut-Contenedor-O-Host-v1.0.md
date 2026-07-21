@@ -3,7 +3,7 @@
 **Proyecto:** Sai-Service-Core
 **Documento:** ADR-19-Ubicacion-De-Nut-Contenedor-O-Host-v1.0.md
 **Versión:** 1.0
-**Estado:** Propuesto
+**Estado:** Superado por ADR-25
 **Fecha:** 2026-07-20
 **Autor:** Orquestador SDD (AG-05)
 **Categoría:** Despliegue
@@ -60,3 +60,4 @@ Qué falta para decidir: (a) determinar si algún otro contenedor o el propio ho
 | Versión | Fecha | Descripción |
 | --- | --- | --- |
 | 1.0 | 2026-07-20 | Versión inicial. Decisión abierta de Sprint 0 (P-03). |
+| 1.1 | 2026-07-21 | Decisión cerrada en el Sprint 0; este ADR queda superado por ADR-25. Ver ese ADR para la decisión adoptada. |

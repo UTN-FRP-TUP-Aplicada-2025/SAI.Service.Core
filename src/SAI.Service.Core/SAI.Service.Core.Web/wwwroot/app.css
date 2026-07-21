@@ -1,0 +1,53 @@
+/* Estilos propios del panel SAI.Service.Core.
+   MudBlazor aporta el grueso del estilo (tema, tipografia, grilla). Aca solo
+   van ajustes minimos del andamiaje de Sprint 0. */
+
+html, body {
+    margin: 0;
+    /* Tipografía de la maqueta (mismo stack que Estilos-Maqueta.css). */
+    font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+/* --- Barra lateral: chrome oscuro de marca con ítem activo verde (mq-nav) ---
+   El tema aporta el fondo oscuro (DrawerBackground) y el texto atenuado; el
+   estado activo y el hover de los enlaces de navegación se ajustan acá para
+   replicar la maqueta (activo = verde de marca, hover = velo blanco sutil). */
+.mud-drawer .mud-drawer-header .mud-typography {
+    color: rgba(255, 255, 255, 0.90);
+}
+.mud-drawer .mud-nav-link {
+    color: rgba(255, 255, 255, 0.72);
+    border-radius: 10px;
+    margin: 1px 8px;
+}
+.mud-drawer .mud-nav-link .mud-nav-link-icon {
+    color: rgba(255, 255, 255, 0.72);
+}
+.mud-drawer .mud-nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.06);
+    color: #FFFFFF;
+}
+.mud-drawer .mud-nav-link:hover .mud-nav-link-icon {
+    color: #FFFFFF;
+}
+.mud-drawer .mud-nav-link.active {
+    background-color: #0F6E56;
+    color: #FFFFFF;
+}
+.mud-drawer .mud-nav-link.active .mud-nav-link-icon {
+    color: #FFFFFF;
+}
+
+/* Enlace "saltar al contenido" para accesibilidad (equivalente a mq-skip). */
+.skip-link {
+    position: absolute;
+    left: -999px;
+    top: 0;
+    z-index: 2000;
+    padding: 0.5rem 1rem;
+    background: #fff;
+}
+
+.skip-link:focus {
+    left: 0;
+}

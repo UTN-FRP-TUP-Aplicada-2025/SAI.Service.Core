@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Capa Api: endpoints REST /api/v1/ y el endpoint de salud /health.
+    Depende de Application (no de Infrastructure): el host (Web) es quien
+    compone Api + Infrastructure en el arranque. Usa el framework de ASP.NET
+    Core via FrameworkReference (no es un proyecto de host, es una libreria).
+  -->
+  <PropertyGroup>
+    <RootNamespace>SAI.Service.Core.Api</RootNamespace>
+    <AssemblyName>SAI.Service.Core.Api</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SAI.Service.Core.Application\SAI.Service.Core.Application.csproj" />
+  </ItemGroup>
+
+  <!--
+    El versionado de la API es por segmento de ruta (/api/v1/), tal como fija
+    §17.P.3 ("Version en la ruta"). No se agrega libreria de versionado en
+    Sprint 0: alcanza con el grupo de ruta. Un v2 abriria /api/v2/ (ADR futuro).
+  -->
+
+</Project>

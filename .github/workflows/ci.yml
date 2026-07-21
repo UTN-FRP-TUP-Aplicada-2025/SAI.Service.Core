@@ -1,0 +1,47 @@
+name: ci
+
+# Pipeline de integracion continua — STAGES 1 a 4 de 09 (Pipeline-CI-CD).
+# Target unico: ubuntu-latest / .NET 10 / linux-amd64 (matriz de un solo eje).
+# Los stages 5 a 10 (e2e, SCA, SBOM, imagen, firma, publicacion) se agregan
+# en etapas posteriores.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    env:
+      DOTNET_NOLOGO: "true"
+      DOTNET_CLI_TELEMETRY_OPTOUT: "true"
+      DOTNET_SKIP_FIRST_TIME_EXPERIENCE: "true"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      # STAGE-01 (restore)
+      - name: Restore
+        run: dotnet restore SAI.Service.Core.sln
+
+      # STAGE-02 (lint / formato): sin diferencias de formato.
+      - name: Formato (verify-no-changes)
+        run: dotnet format SAI.Service.Core.sln --verify-no-changes --no-restore
+
+      # STAGE-01 (build): Release, cero errores y cero warnings (TreatWarningsAsErrors).
+      - name: Build (Release, cero warnings)
+        run: dotnet build SAI.Service.Core.sln --configuration Release --no-restore
+
+      # STAGE-03 + STAGE-04 (test unitario + integracion): 100% en verde.
+      - name: Test
+        run: dotnet test SAI.Service.Core.sln --configuration Release --no-build --verbosity normal

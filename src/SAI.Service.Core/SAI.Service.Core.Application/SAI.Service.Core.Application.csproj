@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Capa Application: casos de uso, puertos y contratos. Depende solo de Domain.
+    Aloja el puerto IAdaptadorConexion (implementado en Infrastructure) y el
+    marcador IPlanificador del hosted service de sondeo (ADR-15, §17.P.2).
+  -->
+  <PropertyGroup>
+    <RootNamespace>SAI.Service.Core.Application</RootNamespace>
+    <AssemblyName>SAI.Service.Core.Application</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SAI.Service.Core.Domain\SAI.Service.Core.Domain.csproj" />
+  </ItemGroup>
+
+</Project>
