@@ -1,11 +1,92 @@
 @page "/panel-de-verificaciones"
 @attribute [Authorize]
+@using SAI.Service.Core.Application.Equipos
+@using SAI.Service.Core.Domain.Verificaciones
+@using Microsoft.Extensions.DependencyInjection
+@inject IServiceScopeFactory FabricaAlcances
 
 <PageTitle>Panel de verificaciones — SAI.Service.Core</PageTitle>
 
 <h1 class="mud-typography mud-typography-h4">Panel de verificaciones</h1>
 
+@if (_verificaciones is null)
+{
+    <MudProgressLinear Indeterminate="true" Color="Color.Primary" Class="mt-4" />
+}
+else if (_verificaciones.Count == 0)
+{
+    <MudAlert Severity="Severity.Info" Variant="Variant.Filled" Class="mt-4">
+        Todavía no hay supuestos sembrados. <MudLink Href="/alta-de-equipos" Color="Color.Inherit"><b>Dá de alta un equipo</b></MudLink> para sembrarlos.
+    </MudAlert>
+}
+else
+{
+    var verificados = _verificaciones.Count(v => v.Estado == EstadoVerificacion.Verificado);
+    <MudAlert Severity="@(verificados == _verificaciones.Count ? Severity.Success : Severity.Warning)"
+              Variant="Variant.Filled" Class="mt-4 mb-4">
+        <b>@verificados de @_verificaciones.Count</b> supuestos verificados.
+        @if (verificados < _verificaciones.Count)
+        {
+            <span> El servicio permanece en solo aviso hasta verificar los cuatro.</span>
+        }
+    </MudAlert>
+
+    <MudList T="Verificacion" Class="mud-paper mud-elevation-1" Style="border-radius:10px;">
+        @foreach (var verificacion in _verificaciones.OrderBy(v => v.Supuesto))
+        {
+            <MudListItem T="Verificacion" Icon="@IconoEstado(verificacion.Estado)" IconColor="@ColorEstado(verificacion.Estado)">
+                <MudText Typo="Typo.body1">@EtiquetaSupuesto(verificacion.Supuesto)</MudText>
+                <MudText Typo="Typo.body2" Class="mud-text-secondary">@EtiquetaEstado(verificacion.Estado)</MudText>
+            </MudListItem>
+        }
+    </MudList>
+}
+
 <MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Class="mt-4">
-    Superficie placeholder de Sprint 0. El estado de los supuestos, la ventana de
-    mantenimiento y el desbloqueo del apagado se implementan en EP-06.
+    La ventana de mantenimiento que verifica los supuestos por evidencia observada y desbloquea el
+    apagado se implementa en la Etapa 4 (EP-06). Acá se muestra el estado sembrado en el alta.
 </MudAlert>
+
+@code {
+    private IReadOnlyList<Verificacion>? _verificaciones;
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var alcance = FabricaAlcances.CreateScope();
+        var servicio = alcance.ServiceProvider.GetRequiredService<ServicioAltaEquipos>();
+        _verificaciones = await servicio.ListarVerificacionesAsync(CancellationToken.None);
+    }
+
+    private static string EtiquetaSupuesto(Supuesto supuesto) => supuesto switch
+    {
+        Supuesto.PresupuestoDeApagado => "Presupuesto de apagado",
+        Supuesto.SenalEnBateria => "Señal en batería",
+        Supuesto.ReencendidoPorPlaca => "Reencendido por placa",
+        Supuesto.CorteConRetorno => "Corte con retorno",
+        _ => supuesto.ToString(),
+    };
+
+    private static string EtiquetaEstado(EstadoVerificacion estado) => estado switch
+    {
+        EstadoVerificacion.NuncaVerificado => "Nunca verificado",
+        EstadoVerificacion.Verificado => "Verificado",
+        EstadoVerificacion.Vencido => "Vencido",
+        EstadoVerificacion.Refutado => "Refutado (bloqueo permanente)",
+        _ => estado.ToString(),
+    };
+
+    private static string IconoEstado(EstadoVerificacion estado) => estado switch
+    {
+        EstadoVerificacion.Verificado => Icons.Material.Filled.CheckCircle,
+        EstadoVerificacion.Vencido => Icons.Material.Filled.Schedule,
+        EstadoVerificacion.Refutado => Icons.Material.Filled.Block,
+        _ => Icons.Material.Filled.HourglassEmpty,
+    };
+
+    private static Color ColorEstado(EstadoVerificacion estado) => estado switch
+    {
+        EstadoVerificacion.Verificado => Color.Success,
+        EstadoVerificacion.Refutado => Color.Error,
+        _ => Color.Warning,
+    };
+}
