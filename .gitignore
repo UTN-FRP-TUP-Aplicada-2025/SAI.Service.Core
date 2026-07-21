@@ -209,6 +209,12 @@ DocProject/Help/html
 # Click-Once directory
 publish/
 
+# Salida local de 'dotnet publish' para validacion manual (no se versiona)
+.publish-e1/
+
+# Volcados de núcleo (core dumps) que dejan procesos caidos en contenedores
+core.[0-9]*
+
 # Publish Web Output
 *.[Pp]ublish.xml
 *.azurePubxml

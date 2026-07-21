@@ -1,0 +1,113 @@
+@page "/acceso"
+@layout LayoutAcceso
+@attribute [AllowAnonymous]
+@attribute [ExcludeFromInteractiveRouting]
+@inject UserManager<AdministradorUser> Usuarios
+@inject SignInManager<AdministradorUser> Ingresos
+@inject NavigationManager Navegacion
+
+@*
+    US-02 — Login del administrador (SSR estático). Rechazo indiferenciado
+    (CREDENCIAL_INVALIDA): un único mensaje que no revela qué campo falló.
+    Guarda de superficie: sin administrador redirige al alta inicial; con sesión
+    activa redirige al panel.
+*@
+
+<PageTitle>Iniciar sesión — SAI.Service.Core</PageTitle>
+
+<MudPaper Elevation="2" Class="sai-acceso-tarjeta">
+    <h1 class="mud-typography mud-typography-h5 sai-acceso-titulo">Iniciar sesión</h1>
+    <p class="sai-acceso-subtitulo">Es la única cuenta del sistema.</p>
+
+    @if (_error is not null)
+    {
+        <div class="sai-banda sai-banda-error" role="alert">@_error</div>
+    }
+    else if (_aviso is not null)
+    {
+        <div class="sai-banda sai-banda-exito" role="status">@_aviso</div>
+    }
+
+    @* EditForm SSR emite el token antiforgery automaticamente; no se agrega uno
+       explicito para no duplicar el campo (rompe la validacion -> HTTP 400). *@
+    <EditForm Model="Entrada" method="post" OnValidSubmit="Ingresar" FormName="acceso">
+
+        <div class="sai-campo">
+            <label for="lg-user">Usuario</label>
+            <InputText id="lg-user" @bind-Value="Entrada.Usuario" autocomplete="username" />
+        </div>
+
+        <div class="sai-campo">
+            <label for="lg-secreto">Contraseña</label>
+            <InputText id="lg-secreto" type="password" @bind-Value="Entrada.Contrasena"
+                       autocomplete="current-password" />
+        </div>
+
+        <button type="submit" class="sai-boton-primario">Ingresar</button>
+    </EditForm>
+
+    <p class="sai-hint mt-4" style="text-align:center;">
+        sin registro · sin recordarme · sin recuperación · sin selector de cuentas
+    </p>
+</MudPaper>
+
+@code {
+    [CascadingParameter]
+    private HttpContext HttpContext { get; set; } = default!;
+
+    [SupplyParameterFromForm]
+    private ModeloAcceso Entrada { get; set; } = default!;
+
+    [SupplyParameterFromQuery(Name = "estado")]
+    private string? Estado { get; set; }
+
+    private string? _error;
+    private string? _aviso;
+
+    protected override void OnInitialized()
+    {
+        Entrada ??= new();
+
+        // Guarda de superficie contra el predicado de aprovisionamiento.
+        if (!Usuarios.Users.Any())
+        {
+            Navegacion.NavigateTo("/alta-inicial");
+            return;
+        }
+
+        // Si ya hay sesión activa, no tiene sentido el login: al panel.
+        if (HttpContext.User.Identity?.IsAuthenticated == true)
+        {
+            Navegacion.NavigateTo("/");
+            return;
+        }
+
+        _aviso = Estado switch
+        {
+            "contrasena-actualizada" => "Contraseña actualizada. La sesión anterior se cerró; ingresá con la contraseña nueva.",
+            "sesion-vencida" => "La sesión venció. Volvé a ingresar para continuar.",
+            _ => null,
+        };
+    }
+
+    private async Task Ingresar()
+    {
+        var resultado = await Ingresos.PasswordSignInAsync(
+            Entrada.Usuario, Entrada.Contrasena, isPersistent: false, lockoutOnFailure: false);
+
+        if (resultado.Succeeded)
+        {
+            Navegacion.NavigateTo("/");
+            return;
+        }
+
+        // Rechazo indiferenciado: no se dice si falló el usuario o la contraseña.
+        _error = "No pudimos iniciar sesión con esos datos. Revisá el usuario y la contraseña e intentá de nuevo.";
+    }
+
+    private sealed class ModeloAcceso
+    {
+        public string Usuario { get; set; } = "administrador";
+        public string Contrasena { get; set; } = string.Empty;
+    }
+}

@@ -20,6 +20,12 @@
   <ItemGroup>
     <!-- Libreria de componentes impuesta por el stack (§17.P.1). verificar version para .NET 10. -->
     <PackageReference Include="MudBlazor" Version="8.5.0" />
+    <!--
+      Autenticacion Bearer para la API REST /api/v1 (consumidores maquina-a-maquina,
+      p. ej. el GMAO de ingesta de CU-11). El panel Blazor sigue con cookie de Identity.
+      Doble esquema: cookie (default, panel) + JwtBearer (policy "Api").
+    -->
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.0" />
   </ItemGroup>
 
 </Project>

@@ -1,0 +1,115 @@
+@page "/alta-inicial"
+@layout LayoutAcceso
+@attribute [AllowAnonymous]
+@attribute [ExcludeFromInteractiveRouting]
+@inject UserManager<AdministradorUser> Usuarios
+@inject SignInManager<AdministradorUser> Ingresos
+@inject NavigationManager Navegacion
+
+@*
+    US-01 — Alta inicial del administrador único (SSR estático: setea la cookie de
+    sesión desde HttpContext, imposible desde un circuito interactivo).
+    Guardas de tres capas (Design-Rules-Primer-Arranque §3) contra el predicado
+    "ya existe administrador": ruteo (AllowAnonymous, resuelto por la guarda global),
+    superficie (redirige en GET si ya hay admin) y acción (revalida antes de crear).
+*@
+
+<PageTitle>Crear la cuenta de administrador — SAI.Service.Core</PageTitle>
+
+<MudPaper Elevation="2" Class="sai-acceso-tarjeta">
+    <h1 class="mud-typography mud-typography-h5 sai-acceso-titulo">Crear la cuenta de administrador</h1>
+    <p class="sai-acceso-subtitulo">Es la única cuenta del sistema.</p>
+
+    @if (_error is not null)
+    {
+        <div class="sai-banda sai-banda-error" role="alert">@_error</div>
+    }
+
+    @* EditForm SSR (method="post" + FormName) emite el token antiforgery de forma
+       automatica; no se agrega <AntiforgeryToken/> explicito para no duplicar el campo
+       (dos inputs __RequestVerificationToken rompen la validacion -> HTTP 400). *@
+    <EditForm Model="Entrada" method="post" OnValidSubmit="Crear" FormName="alta-inicial">
+
+        <div class="sai-campo">
+            <label for="ai-user">Usuario</label>
+            <InputText id="ai-user" @bind-Value="Entrada.Usuario" autocomplete="username" />
+        </div>
+
+        <div class="sai-campo">
+            <label for="ai-secreto">Contraseña</label>
+            <InputText id="ai-secreto" type="password" @bind-Value="Entrada.Contrasena"
+                       autocomplete="new-password" aria-describedby="ai-req" />
+        </div>
+        <p id="ai-req" class="sai-hint">Requisito: al menos 12 caracteres, con letras y números.</p>
+
+        <div class="sai-campo">
+            <label for="ai-conf">Repetir contraseña</label>
+            <InputText id="ai-conf" type="password" @bind-Value="Entrada.Repetir"
+                       autocomplete="new-password" />
+        </div>
+
+        <button type="submit" class="sai-boton-primario">Crear administrador</button>
+    </EditForm>
+</MudPaper>
+
+@code {
+    [CascadingParameter]
+    private HttpContext HttpContext { get; set; } = default!;
+
+    [SupplyParameterFromForm]
+    private ModeloAlta Entrada { get; set; } = default!;
+
+    private string? _error;
+
+    protected override void OnInitialized()
+    {
+        Entrada ??= new();
+
+        // Guarda de superficie: si ya existe administrador, esta pantalla deja de estar
+        // accesible; se redirige de forma neutra al acceso (ADMIN_YA_EXISTE).
+        if (HttpMethods.IsGet(HttpContext.Request.Method) && HayAdministrador())
+        {
+            Navegacion.NavigateTo("/acceso");
+        }
+    }
+
+    private async Task Crear()
+    {
+        // Guarda de acción: última barrera, no evitable. Condición de carrera esperable.
+        if (HayAdministrador())
+        {
+            Navegacion.NavigateTo("/acceso");
+            return;
+        }
+
+        if (Entrada.Contrasena != Entrada.Repetir)
+        {
+            _error = "Las contraseñas no coinciden. Volvé a escribir la confirmación para que sea igual a la contraseña.";
+            return;
+        }
+
+        var usuario = new AdministradorUser { UserName = Entrada.Usuario };
+        var resultado = await Usuarios.CreateAsync(usuario, Entrada.Contrasena);
+        if (!resultado.Succeeded)
+        {
+            // No se filtran detalles internos: mensaje único de política (US-01 CA).
+            _error = "Contraseña insuficiente. La contraseña no cumple la política: usá al menos 12 caracteres con letras y números.";
+            return;
+        }
+
+        await Usuarios.AddToRoleAsync(usuario, "administrador");
+
+        // Inicia sesión y entra al panel (US-01: crea, inicia sesión y redirige a /).
+        await Ingresos.SignInAsync(usuario, isPersistent: false);
+        Navegacion.NavigateTo("/");
+    }
+
+    private bool HayAdministrador() => Usuarios.Users.Any();
+
+    private sealed class ModeloAlta
+    {
+        public string Usuario { get; set; } = "administrador";
+        public string Contrasena { get; set; } = string.Empty;
+        public string Repetir { get; set; } = string.Empty;
+    }
+}

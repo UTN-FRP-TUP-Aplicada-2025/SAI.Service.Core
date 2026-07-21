@@ -2,14 +2,14 @@
 
 **Proyecto:** Sai-Service-Core
 **Documento:** Decisiones-Arquitectura-v1.0.md
-**Versión:** 1.3
+**Versión:** 1.5
 **Estado:** Borrador
-**Fecha:** 2026-07-20
+**Fecha:** 2026-07-21
 **Autor:** Orquestador SDD (AG-05)
 
 ## Objetivo
 
-Índice navegable de los Architecture Decision Records (ADR) de la categoría 05 del proyecto Sai-Service-Core (`web-monolith`, caso degenerado de un único proyecto). Este documento no contiene el cuerpo de las decisiones: cada ADR vive como archivo individual e inmutable bajo `Adrs/`. Las decisiones ADR-01 a ADR-15 derivan de los pre-ADR PA-01 a PA-15 del intake §17 P.11; ADR-16 a ADR-18 cubren los ADR obligatorios de web-monolith no cubiertos por un PA (autenticación, manejo de errores de la API, motor de persistencia); ADR-19 a ADR-22 documentaron las cuatro decisiones abiertas de Sprint 0 (en el Sprint 0, ADR-19/ADR-20/ADR-22 quedaron superadas por ADR-25/ADR-26/ADR-27, y solo ADR-21 sigue Propuesto, diferida a la Etapa 5); ADR-23 y ADR-24 (Aceptado) registran, en la Fase F, la omisión de la categoría 10-Developer-Guide dedicada y el modelo de ambientes DEV/PROD sin staging.
+Índice navegable de los Architecture Decision Records (ADR) de la categoría 05 del proyecto Sai-Service-Core (`web-monolith`, caso degenerado de un único proyecto). Este documento no contiene el cuerpo de las decisiones: cada ADR vive como archivo individual e inmutable bajo `Adrs/`. Las decisiones ADR-01 a ADR-15 derivan de los pre-ADR PA-01 a PA-15 del intake §17 P.11; ADR-16 a ADR-18 cubren los ADR obligatorios de web-monolith no cubiertos por un PA (autenticación, manejo de errores de la API, motor de persistencia); ADR-19 a ADR-22 documentaron las cuatro decisiones abiertas de Sprint 0 (en el Sprint 0, ADR-19/ADR-20/ADR-22 quedaron superadas por ADR-25/ADR-26/ADR-27, y solo ADR-21 sigue Propuesto, diferida a la Etapa 5); ADR-23 y ADR-24 (Aceptado) registran, en la Fase F, la omisión de la categoría 10-Developer-Guide dedicada y el modelo de ambientes DEV/PROD sin staging; ADR-25 a ADR-27 (Aceptado) cierran, en el Sprint 0, tres de las cuatro decisiones abiertas (NUT en el contenedor, TLS autofirmado en Kestrel y el contrato del puerto del adaptador); ADR-28 y ADR-29 (Aceptado) registran, en la Etapa 1, la autenticación de la API REST con Bearer JWT vía ROPC (complementaria de ADR-16) y la persistencia del keyring de DataProtection en un volumen (para que sesión y antiforgery sobrevivan a reinicios).
 
 ## Índice de ADR
 
@@ -42,6 +42,8 @@
 | [ADR-25](Adrs/ADR-25-Nut-En-El-Contenedor-v1.0.md) | NUT en el contenedor | Despliegue | Aceptado | 2026-07-21 |
 | [ADR-26](Adrs/ADR-26-Tls-Autofirmado-En-Kestrel-v1.0.md) | TLS con certificado autofirmado en Kestrel | Seguridad | Aceptado | 2026-07-21 |
 | [ADR-27](Adrs/ADR-27-Contrato-Del-Puerto-Del-Adaptador-De-Conexion-v1.0.md) | Contrato del puerto del adaptador de conexión | Extensibilidad | Aceptado | 2026-07-21 |
+| [ADR-28](Adrs/ADR-28-Autenticacion-De-La-Api-Con-Bearer-Jwt-Via-Ropc-v1.0.md) | Autenticación de la API REST con Bearer JWT vía ROPC | Seguridad | Aceptado | 2026-07-21 |
+| [ADR-29](Adrs/ADR-29-Persistencia-Del-Keyring-De-Dataprotection-v1.0.md) | Persistencia del keyring de DataProtection | Seguridad | Aceptado | 2026-07-21 |
 
 ## Trazabilidad de origen
 
@@ -74,6 +76,8 @@
 | ADR-25 | Sprint 0 — cierre de ADR-19 (P-03) | R-05, R-08, CL-28, ADR-03 |
 | ADR-26 | Sprint 0 — cierre de ADR-20 (P-04) | CU-01, §17 P.5, ADR-16 |
 | ADR-27 | Sprint 0 — cierre de ADR-22 (P-06) | ADR-02, ADR-11, RN-03 |
+| ADR-28 | Etapa 1 — autenticación de la API REST | ADR-16, ADR-20, CU-01, F-15 |
+| ADR-29 | Etapa 1 — persistencia del keyring de DataProtection | ADR-16, ADR-20, ADR-24 |
 
 ## Notas de versionado e inmutabilidad
 
@@ -88,3 +92,5 @@
 | 1.1 | 2026-07-21 | Se incorpora ADR-23 (Aceptado): omisión de la categoría 10-Developer-Guide dedicada, registrada en la Fase F. Total: 23 ADR (19 Aceptado, 4 Propuesto). |
 | 1.2 | 2026-07-21 | Se incorpora ADR-24 (Aceptado): modelo de ambientes DEV/PROD sin staging, desviación del piso de 09-Rules §2.2 registrada en la Fase F. Total: 24 ADR (20 Aceptado, 4 Propuesto). |
 | 1.3 | 2026-07-21 | Sprint 0: se cierran tres decisiones abiertas con ADR-25 (NUT en el contenedor), ADR-26 (TLS autofirmado en Kestrel) y ADR-27 (contrato del puerto del adaptador); ADR-19/20/22 pasan a Superado. Total: 27 ADR (23 Aceptado, 1 Propuesto —ADR-21—, 3 Superado). |
+| 1.4 | 2026-07-21 | Etapa 1: se incorpora ADR-28 (Aceptado): autenticación de la API REST con Bearer JWT vía ROPC (esquema dual con la cookie del panel), que complementa a ADR-16. Total: 28 ADR (24 Aceptado, 1 Propuesto —ADR-21—, 3 Superado). |
+| 1.5 | 2026-07-21 | Etapa 1: se incorpora ADR-29 (Aceptado): persistencia del keyring de DataProtection en un volumen (sesión y antiforgery sobreviven a reinicios), derivada de ADR-16/ADR-20. Total: 29 ADR (25 Aceptado, 1 Propuesto —ADR-21—, 3 Superado). |

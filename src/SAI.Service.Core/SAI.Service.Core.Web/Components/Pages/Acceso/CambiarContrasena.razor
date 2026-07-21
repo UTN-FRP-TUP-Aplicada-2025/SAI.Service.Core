@@ -1,0 +1,101 @@
+@page "/cuenta/cambiar-contrasena"
+@layout LayoutAcceso
+@attribute [Authorize]
+@attribute [ExcludeFromInteractiveRouting]
+@inject UserManager<AdministradorUser> Usuarios
+@inject SignInManager<AdministradorUser> Ingresos
+@inject NavigationManager Navegacion
+
+@*
+    US-02 — Cambio de contraseña (SSR estático, requiere sesión). Según
+    Design-Rules-Acceso-Monousuario, al cambiar la contraseña se INVALIDA la sesión en
+    curso y se lleva al usuario al shell de acceso a reingresar con la nueva
+    (banda ACC-SECRETO-ACTUALIZADO). Sobre contraseña actual incorrecta:
+    CONTRASENA_ACTUAL_INVALIDA, no se modifica nada.
+*@
+
+<PageTitle>Cambiar contraseña — SAI.Service.Core</PageTitle>
+
+<MudPaper Elevation="2" Class="sai-acceso-tarjeta">
+    <h1 class="mud-typography mud-typography-h5 sai-acceso-titulo">Cambiar contraseña</h1>
+    <p class="sai-acceso-subtitulo">Al cambiarla se cerrará la sesión y tendrás que reingresar.</p>
+
+    @if (_error is not null)
+    {
+        <div class="sai-banda sai-banda-error" role="alert">@_error</div>
+    }
+
+    @* EditForm SSR emite el token antiforgery automaticamente; no se agrega uno
+       explicito para no duplicar el campo (rompe la validacion -> HTTP 400). *@
+    <EditForm Model="Entrada" method="post" OnValidSubmit="Cambiar" FormName="cambiar-contrasena">
+
+        <div class="sai-campo">
+            <label for="cc-actual">Contraseña actual</label>
+            <InputText id="cc-actual" type="password" @bind-Value="Entrada.Actual"
+                       autocomplete="current-password" />
+        </div>
+
+        <div class="sai-campo">
+            <label for="cc-nueva">Contraseña nueva</label>
+            <InputText id="cc-nueva" type="password" @bind-Value="Entrada.Nueva"
+                       autocomplete="new-password" aria-describedby="cc-req" />
+        </div>
+        <p id="cc-req" class="sai-hint">Requisito: al menos 12 caracteres, con letras y números.</p>
+
+        <div class="sai-campo">
+            <label for="cc-conf">Repetir contraseña nueva</label>
+            <InputText id="cc-conf" type="password" @bind-Value="Entrada.Repetir"
+                       autocomplete="new-password" />
+        </div>
+
+        <button type="submit" class="sai-boton-primario">Cambiar contraseña</button>
+    </EditForm>
+</MudPaper>
+
+@code {
+    [CascadingParameter]
+    private HttpContext HttpContext { get; set; } = default!;
+
+    [SupplyParameterFromForm]
+    private ModeloCambio Entrada { get; set; } = default!;
+
+    private string? _error;
+
+    protected override void OnInitialized() => Entrada ??= new();
+
+    private async Task Cambiar()
+    {
+        if (Entrada.Nueva != Entrada.Repetir)
+        {
+            _error = "Las contraseñas no coinciden. Volvé a escribir la confirmación para que sea igual a la contraseña nueva.";
+            return;
+        }
+
+        var usuario = await Usuarios.GetUserAsync(HttpContext.User);
+        if (usuario is null)
+        {
+            Navegacion.NavigateTo("/acceso");
+            return;
+        }
+
+        var resultado = await Usuarios.ChangePasswordAsync(usuario, Entrada.Actual, Entrada.Nueva);
+        if (!resultado.Succeeded)
+        {
+            // Puede ser la contraseña actual incorrecta (CONTRASENA_ACTUAL_INVALIDA) o la
+            // nueva que no cumple la política: mensaje único sin filtrar detalles internos.
+            _error = "No pudimos cambiar la contraseña. Verificá la contraseña actual y que la nueva cumpla la política (al menos 12 caracteres con letras y números).";
+            return;
+        }
+
+        // Invalida la sesión en curso y lleva al acceso a reingresar (Acceso-Monousuario).
+        await Ingresos.SignOutAsync();
+        Navegacion.NavigateTo("/acceso?estado=contrasena-actualizada");
+    }
+
+    private sealed class ModeloCambio
+    {
+        public string Actual { get; set; } = string.Empty;
+        public string Nueva { get; set; } = string.Empty;
+        public string Repetir { get; set; } = string.Empty;
+    }
+}
