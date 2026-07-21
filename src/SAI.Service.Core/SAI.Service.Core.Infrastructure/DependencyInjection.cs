@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SAI.Service.Core.Application.Abstractions;
 using SAI.Service.Core.Infrastructure.Adaptadores;
+using SAI.Service.Core.Infrastructure.Adaptadores.Nut;
 using SAI.Service.Core.Infrastructure.Persistencia;
 
 namespace SAI.Service.Core.Infrastructure;
@@ -41,9 +42,40 @@ public static class DependencyInjection
                 .AddInterceptors(new InterceptorAppendOnly());
         });
 
-        // Etapa 1: la única implementación del puerto es la simulada (stub).
-        services.AddSingleton<IAdaptadorConexion, AdaptadorConexionSimulado>();
+        // Adaptador de conexión con el SAI (ADR-02): NUT real o simulado, según 'Sai:Adaptador'.
+        // Ambas implementaciones cubren el puerto de operación (IAdaptadorConexion, ADR-27) y el
+        // descubrimiento (IDescubridorSai, US-03); se resuelven a la MISMA instancia. Por defecto,
+        // el simulado (sin hardware); en un despliegue con SAI real se elige "Nut".
+        var usarNut = string.Equals(configuration["Sai:Adaptador"], "Nut", StringComparison.OrdinalIgnoreCase);
+        if (usarNut)
+        {
+            var opcionesNut = LeerOpcionesNut(configuration);
+            services.AddSingleton<IClienteNut>(new ClienteNut(opcionesNut));
+            services.AddSingleton<AdaptadorConexionNut>();
+            services.AddSingleton<IAdaptadorConexion>(sp => sp.GetRequiredService<AdaptadorConexionNut>());
+            services.AddSingleton<IDescubridorSai>(sp => sp.GetRequiredService<AdaptadorConexionNut>());
+        }
+        else
+        {
+            services.AddSingleton<AdaptadorConexionSimulado>();
+            services.AddSingleton<IAdaptadorConexion>(sp => sp.GetRequiredService<AdaptadorConexionSimulado>());
+            services.AddSingleton<IDescubridorSai>(sp => sp.GetRequiredService<AdaptadorConexionSimulado>());
+        }
 
         return services;
+    }
+
+    // Lee 'Sai:Nut' de forma manual (sin el binder de configuración, que Infrastructure no referencia).
+    private static OpcionesNut LeerOpcionesNut(IConfiguration configuration)
+    {
+        var seccion = configuration.GetSection(OpcionesNut.Seccion);
+        var defecto = new OpcionesNut();
+        return new OpcionesNut
+        {
+            Host = seccion["Host"] ?? defecto.Host,
+            Puerto = int.TryParse(seccion["Puerto"], out var puerto) ? puerto : defecto.Puerto,
+            Ups = seccion["Ups"] ?? defecto.Ups,
+            TimeoutSegundos = int.TryParse(seccion["TimeoutSegundos"], out var timeout) ? timeout : defecto.TimeoutSegundos,
+        };
     }
 }
