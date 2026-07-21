@@ -25,6 +25,22 @@
     <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="2.1.12" />
     <!-- Identity: la ranura de autenticacion de administrador unico (ADR-16). -->
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.0" />
+    <!--
+      Pin transitivo: la pila de Identity/DataProtection arrastra
+      System.Security.Cryptography.Xml 9.0.0, con vulnerabilidades altas conocidas
+      (GHSA-23rf-6693-g89p y otras). Se fija a 10.0.10 (parcheada, alineada a .NET 10)
+      para cumplir la politica de supply-chain de 09. Revisar al actualizar Identity.
+    -->
+    <PackageReference Include="System.Security.Cryptography.Xml" Version="10.0.10" />
+    <!--
+      Herramientas de diseno de EF Core: habilitan 'dotnet ef migrations add/database update'
+      en el contenedor (ADR-18). No forma parte del runtime (PrivateAssets=all): las migraciones
+      ya escritas se aplican al arranque con Database.Migrate() sin necesitar este paquete.
+    -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
 </Project>

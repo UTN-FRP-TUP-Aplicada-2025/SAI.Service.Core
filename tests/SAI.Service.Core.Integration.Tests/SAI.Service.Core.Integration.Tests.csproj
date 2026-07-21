@@ -14,6 +14,8 @@
     <PackageReference Include="coverlet.collector" Version="6.0.2" />
     <!-- WebApplicationFactory para pruebas de integracion (§17.P.6). -->
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.0" />
+    <!-- EF Core Sqlite para la prueba del interceptor append-only con un contexto minimo. -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.0" />
   </ItemGroup>
 
   <ItemGroup>

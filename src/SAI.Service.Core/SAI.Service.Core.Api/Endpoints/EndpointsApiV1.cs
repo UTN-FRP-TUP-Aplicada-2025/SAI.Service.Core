@@ -28,7 +28,23 @@ public static class EndpointsApiV1
             estado = "andamiaje",
             nota = "Placeholder de Sprint 0. Los recursos reales se agregan en etapas posteriores."
         }))
+        .AllowAnonymous()
         .WithName("ApiV1Raiz");
+
+        // Endpoint de demostracion protegido por Bearer (JWT). Sirve para probar el
+        // flujo maquina-a-maquina de punta a punta: sin token -> 401; con token
+        // valido (obtenido en POST /api/v1/token) -> 200. La policy "Api" la define
+        // el composition root (Web) y exige el esquema JwtBearer, no la cookie del panel.
+        v1.MapGet("/ping", (System.Security.Claims.ClaimsPrincipal usuario) => Results.Ok(new
+        {
+            api = "SAI.Service.Core",
+            version = "v1",
+            respuesta = "pong",
+            usuario = usuario.Identity?.Name,
+            utc = DateTimeOffset.UtcNow
+        }))
+        .RequireAuthorization("Api")
+        .WithName("ApiV1Ping");
 
         return app;
     }

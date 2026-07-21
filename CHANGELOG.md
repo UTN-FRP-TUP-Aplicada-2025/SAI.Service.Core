@@ -9,6 +9,32 @@ y el versionado sigue [Semantic Versioning](https://semver.org/lang/es/).
 
 ### Añadido
 
+- **Etapa 1 — Persistencia y acceso**: primera etapa con lógica real sobre el andamiaje
+  del Sprint 0. **Persistencia** EF Core + SQLite con migración inicial y `DbContext`
+  (`IdentityDbContext`) con el interceptor append-only (ADR-04, ADR-18); la migración se
+  aplica al arranque y siembra el rol único `administrador` de forma idempotente.
+  **Autenticación del administrador único** (ADR-16) con ASP.NET Core Identity: alta
+  inicial, inicio de sesión por cookie, cambio de contraseña y cierre de sesión, resueltos
+  con formularios SSR estáticos (setean la cookie desde `HttpContext`). **Guarda de primer
+  arranque en tres capas** (ruteo / superficie / acción, Design-Rules-Primer-Arranque): un
+  middleware de la capa de ruteo desvía las superficies del panel a `/alta-inicial` mientras
+  no exista ningún administrador. **API REST autenticada con Bearer JWT vía ROPC**
+  (**ADR-28**, complementa a ADR-16): `POST /api/v1/token` emite el token con las
+  credenciales del administrador y los endpoints de `/api/v1` lo exigen por la policy `Api`,
+  con esquema dual (la cookie sigue sirviendo al panel). Se aplica el **tema visual de la
+  maqueta** (paleta verde/chrome oscuro, tipografía Inter) al panel MudBlazor. **Pruebas de
+  integración** (WebApplicationFactory) del acceso y del flujo de token, con base SQLite
+  aislada por prueba. La configuración de la cadena de conexión y de la firma JWT se lee de
+  forma **diferida** (desde el `ServiceProvider` / `IOptions`), de modo que firmar y validar
+  usan siempre el mismo secreto y las pruebas quedan aisladas. El keyring de **DataProtection**
+  (que cifra la cookie de sesión y los tokens antiforgery) se **persiste en un volumen** con
+  nombre de aplicación estable (**ADR-29**), para que reiniciar o redesplegar el contenedor no
+  invalide sesiones ni rompa los formularios; y los formularios SSR emiten **un único** token
+  antiforgery (el de `EditForm`), evitando el campo duplicado que devolvía HTTP 400, y el
+  middleware antiforgery se ejecuta **después** de la autenticación para que los formularios
+  autenticados (cambio de contraseña) validen el token contra el usuario correcto. Índice de
+  decisiones → v1.5 (29 ADR).
+
 - **Sprint 0 — Arranque (primer código)**: andamiaje de la solución .NET 10 en cinco
   assemblies (Clean Architecture: `Domain`, `Application`, `Infrastructure`, `Api`, `Web`),
   con tres proyectos de prueba (xUnit + FluentAssertions), Dev Container, scripts de

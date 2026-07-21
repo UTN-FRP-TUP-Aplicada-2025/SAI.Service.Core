@@ -1,0 +1,19 @@
+@inject NavigationManager Navegacion
+@inject UserManager<AdministradorUser> Usuarios
+
+@*
+    Guarda global de ruteo del panel: cuando una superficie de trabajo ([Authorize])
+    se abre sin sesión, se redirige de forma neutra según el predicado de
+    aprovisionamiento (Design-Rules-Primer-Arranque):
+      · sin administrador creado  -> /alta-inicial
+      · con administrador y sin sesión -> /acceso
+    No expone por qué rechaza: sólo redirige.
+*@
+
+@code {
+    protected override void OnInitialized()
+    {
+        var destino = Usuarios.Users.Any() ? "/acceso" : "/alta-inicial";
+        Navegacion.NavigateTo(destino, forceLoad: true);
+    }
+}

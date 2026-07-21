@@ -1,6 +1,12 @@
 @*
-    Componente raiz del host Blazor. Contiene el documento HTML, carga los
-    estilos y scripts de MudBlazor y del framework, y renderiza <Routes/>.
+    Componente raíz del host Blazor. Contiene el documento HTML, carga los estilos y
+    scripts de MudBlazor y del framework, y renderiza <Routes/>.
+
+    Modo de render por página: las superficies de acceso (alta inicial, login, cambio
+    de contraseña) son SSR estáticas para poder setear/limpiar la cookie de sesión
+    desde HttpContext; el resto del panel es interactivo (InteractiveServer). El corte
+    lo marca [ExcludeFromInteractiveRouting] en esas páginas, detectado por
+    AcceptsInteractiveRouting().
 *@
 <!DOCTYPE html>
 <html lang="es">
@@ -11,11 +17,20 @@
     <link rel="icon" href="data:," />
     <link rel="stylesheet" href="_content/MudBlazor/MudBlazor.min.css" />
     <link rel="stylesheet" href="app.css" />
-    <HeadOutlet />
+    <HeadOutlet @rendermode="RenderModeParaPagina" />
 </head>
 <body>
-    <Routes @rendermode="InteractiveServer" />
+    <Routes @rendermode="RenderModeParaPagina" />
     <script src="_content/MudBlazor/MudBlazor.min.js"></script>
     <script src="_framework/blazor.web.js"></script>
 </body>
 </html>
+
+@code {
+    [CascadingParameter]
+    private HttpContext HttpContext { get; set; } = default!;
+
+    // Interactivo salvo en las superficies marcadas [ExcludeFromInteractiveRouting].
+    private IComponentRenderMode? RenderModeParaPagina =>
+        HttpContext.AcceptsInteractiveRouting() ? InteractiveServer : null;
+}
