@@ -25,6 +25,15 @@ public sealed class CoberturaHost : IVinculoTemporal
     /// <inheritdoc/>
     public Vigencia Vigencia { get; private set; }
 
+    // Constructor de materialización (EF Core): construye la instancia y luego asigna las
+    // propiedades por campo/setter. No introduce dependencia de framework en el dominio.
+    private CoberturaHost()
+    {
+        Codigo = null!;
+        DispositivoCodigo = null!;
+        HostCodigo = null!;
+    }
+
     /// <summary>Construye una cobertura con su vigencia.</summary>
     public CoberturaHost(
         string codigo,

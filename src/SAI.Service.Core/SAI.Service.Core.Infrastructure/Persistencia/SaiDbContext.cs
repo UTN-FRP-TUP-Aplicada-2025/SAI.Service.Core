@@ -1,6 +1,11 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using SAI.Service.Core.Domain.Catalogo;
+using SAI.Service.Core.Domain.Inventario;
+using SAI.Service.Core.Domain.Verificaciones;
+using SAI.Service.Core.Domain.Vinculos;
+using SAI.Service.Core.Infrastructure.Persistencia.Configuraciones;
 
 namespace SAI.Service.Core.Infrastructure.Persistencia;
 
@@ -20,15 +25,34 @@ namespace SAI.Service.Core.Infrastructure.Persistencia;
 public class SaiDbContext(DbContextOptions<SaiDbContext> options)
     : IdentityDbContext<AdministradorUser>(options)
 {
+    /// <summary>Catálogo: fabricantes (ADR-07).</summary>
+    public DbSet<Fabricante> Fabricantes => Set<Fabricante>();
+
+    /// <summary>Catálogo: modelos de dispositivo.</summary>
+    public DbSet<ModeloDispositivo> ModelosDispositivo => Set<ModeloDispositivo>();
+
+    /// <summary>Catálogo: modelos de batería.</summary>
+    public DbSet<ModeloBateria> ModelosBateria => Set<ModeloBateria>();
+
+    /// <summary>Inventario: unidades físicas (Host/Dispositivo/Bateria, TPH).</summary>
+    public DbSet<UnidadFisica> Unidades => Set<UnidadFisica>();
+
+    /// <summary>Vínculos temporales: montajes de batería.</summary>
+    public DbSet<MontajeBateria> Montajes => Set<MontajeBateria>();
+
+    /// <summary>Vínculos temporales: coberturas de host.</summary>
+    public DbSet<CoberturaHost> Coberturas => Set<CoberturaHost>();
+
+    /// <summary>Verificaciones de los cuatro supuestos de seguridad operativa (ADR-10).</summary>
+    public DbSet<Verificacion> Verificaciones => Set<Verificacion>();
+
     /// <inheritdoc />
     protected override void OnModelCreating(ModelBuilder builder)
     {
         // Configura el esquema estándar de Identity (AspNetUsers, AspNetRoles, etc.).
         base.OnModelCreating(builder);
 
-        // Etapa 1: sin entidades de negocio. El modelo de datos lógico (catálogo /
-        // inventario / historia append-only) y sus migraciones llegan en etapas
-        // posteriores. Los objetos de valor Valor<T>/Dinero (Domain) se mapearán
-        // entonces como owned types (Modelo-Datos-Lógico §2).
+        // Catálogo / inventario / vínculos / verificaciones del dominio de equipos (Etapa 2).
+        ModeloEquipos.Configurar(builder);
     }
 }

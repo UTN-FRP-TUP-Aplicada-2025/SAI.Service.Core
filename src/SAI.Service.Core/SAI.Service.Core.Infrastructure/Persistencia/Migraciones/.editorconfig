@@ -1,0 +1,5 @@
+# Las migraciones de EF Core son código autogenerado por 'dotnet ef migrations add'.
+# Se marcan como generadas para que los analizadores (y TreatWarningsAsErrors) no las traten
+# como código propio: no se editan a mano ni deben ajustarse a las reglas de estilo/calidad.
+[*.cs]
+generated_code = true
