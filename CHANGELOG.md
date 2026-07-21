@@ -9,6 +9,15 @@ y el versionado sigue [Semantic Versioning](https://semver.org/lang/es/).
 
 ### Añadido
 
+- **Fase E del SDD — 08-Calidad-Y-Pruebas**: estrategia de calidad (ISO 25010,
+  10 quality gates), estrategia de testing (pirámide 70/25/5, cobertura por capa con
+  Domain 90/85 y global 80/70), plan de pruebas por etapa, matriz de cobertura
+  (12 CU / 13 RN / 25 NFR / 21 invariantes ↔ tests), 40 casos de prueba referenciales,
+  criterios de validación de release, Definition-of-Done de cuatro capas, guía de testing
+  de extensibilidad del adaptador de conexión, y la `Matriz-Sensado-Deriva-v1.0.md`
+  (142 comprobaciones que contrastan lo construido contra la línea de base de la maqueta
+  de la Fase B2). Auditoría independiente de la fase.
+
 - **Fase D del SDD — 06-Backlog-Tecnico y 07-Plan-Sprint**: Product Backlog
   (7 épicas, 26 historias de usuario en archivos individuales, MoSCoW 18/6/2 con
   estimación Fibonacci), Backlog Técnico (30 tareas técnicas trazadas a ADR/componentes/
