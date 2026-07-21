@@ -2,7 +2,7 @@
 
 **Proyecto:** Sai-Service-Core
 **Documento:** RN-13-Vida-De-Flotacion-Con-Temperatura-De-Referencia-v1.0.md
-**Versión:** 1.0
+**Versión:** 1.1
 **Estado:** Borrador
 **Fecha:** 2026-07-20
 **Autor:** Orquestador SDD (AG-02)
@@ -26,7 +26,7 @@ Una vida de flotación esperada sin temperatura de referencia se rechaza en el a
 
 ## 5. CU afectados
 
-CU-02 (Alta del parque y puesta en marcha, alta del modelo de batería); se apoya en CU-08 y CU-12 para la comparación por vida útil.
+CU-02 (Alta de equipos y puesta en marcha, alta del modelo de batería); se apoya en CU-08 y CU-12 para la comparación por vida útil.
 
 ## 6. Pruebas que la verifican
 
@@ -37,3 +37,4 @@ Prueba de que un modelo de batería con vida de flotación esperada sin temperat
 | Versión | Fecha | Cambios |
 | --- | --- | --- |
 | 1.0 | 2026-07-20 | Redacción inicial derivada del invariante I-21 y de §20.E-1 |
+| 1.1 | 2026-07-20 | Retroalimentación de la Fase B2: unificación de terminología "parque" → "equipos" |

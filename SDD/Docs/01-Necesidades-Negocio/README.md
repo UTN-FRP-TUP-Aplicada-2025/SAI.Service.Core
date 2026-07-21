@@ -11,7 +11,7 @@ Son 8 NB, por lo que esta sección incluye README de acuerdo con §3.4 de las re
 | NB-01 | Apagado ordenado y reencendido automático garantizado del host | Continuidad del servicio y camino crítico irreversible | Must Have | Borrador | [NB-01](Necesidades-De-Negocio/NB-01-Apagado-Ordenado-Y-Reencendido-Garantizado-v1.0.md) |
 | NB-02 | Monitoreo en vivo del estado del SAI y alertas de conectividad | Visibilidad operativa e insumo del apagado | Must Have | Borrador | [NB-02](Necesidades-De-Negocio/NB-02-Monitoreo-En-Vivo-Y-Alertas-v1.0.md) |
 | NB-03 | Historia trazable de métricas con procedencia y corrección retroactiva | Confiabilidad de las conclusiones y auditabilidad | Must Have | Borrador | [NB-03](Necesidades-De-Negocio/NB-03-Historia-Trazable-Con-Procedencia-v1.0.md) |
-| NB-04 | Gestión del ciclo de vida del parque de dispositivos y baterías | Trazabilidad del parque y decisión de compra con datos | Must Have | Borrador | [NB-04](Necesidades-De-Negocio/NB-04-Ciclo-De-Vida-Del-Parque-v1.0.md) |
+| NB-04 | Gestión del ciclo de vida de los equipos y baterías | Trazabilidad de los equipos y decisión de compra con datos | Must Have | Borrador | [NB-04](Necesidades-De-Negocio/NB-04-Ciclo-De-Vida-De-Los-Equipos-v1.0.md) |
 | NB-05 | Seguridad operativa: arranque seguro, bloqueo por verificación y validación por efecto observado | Garantía de no apagar sin poder probar el reencendido | Must Have | Borrador | [NB-05](Necesidades-De-Negocio/NB-05-Seguridad-Operativa-Bloqueo-Por-Verificacion-v1.0.md) |
 | NB-06 | Evaluación de la salud de las baterías por tendencia, con confianza y reservas | Planificación del recambio y diferenciador de valor | Must Have | Borrador | [NB-06](Necesidades-De-Negocio/NB-06-Evaluacion-De-Salud-De-Baterias-v1.0.md) |
 | NB-07 | Configuración de políticas de apagado versionadas | Control y explicabilidad del camino crítico | Must Have | Borrador | [NB-07](Necesidades-De-Negocio/NB-07-Configuracion-De-Politicas-De-Apagado-v1.0.md) |
@@ -34,7 +34,7 @@ El grafo es acíclico y ninguna NB depende de más de 3 otras. NB-04 es la raíz
 
 ## Orden de lectura sugerido
 
-1. NB-04 — Ciclo de vida del parque (fundacional: unidades y vínculos temporales).
+1. NB-04 — Ciclo de vida de los equipos (fundacional: unidades y vínculos temporales).
 2. NB-03 — Historia trazable con procedencia (se apoya en el inventario).
 3. NB-02 — Monitoreo en vivo y alertas (persiste sobre la historia).
 4. NB-07 — Configuración de políticas de apagado (evalúa el estado en vivo).

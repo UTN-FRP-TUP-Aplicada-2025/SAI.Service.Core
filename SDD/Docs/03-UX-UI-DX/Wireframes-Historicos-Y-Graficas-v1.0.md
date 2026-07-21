@@ -2,7 +2,7 @@
 
 **Proyecto:** Sai-Service-Core
 **Documento:** Wireframes-Historicos-Y-Graficas-v1.0.md
-**Versión:** 1.0
+**Versión:** 1.1
 **Estado:** Borrador
 **Fecha:** 2026-07-20
 **Autor:** Orquestador SDD (AG-03)
@@ -91,7 +91,7 @@ El lienzo del gráfico se ajusta al ancho; los controles de período y variables
 | Acceso de operador único aplicado | sí (shell de trabajo) |
 | Identidad de versión aplicada | sí (sello heredado del shell de trabajo) |
 | Modelo UX-UI aplicado en la Fase B2 | catálogo base |
-| Validación visual de maqueta | N/A (pendiente Fase B2) |
+| Validación de maqueta | aprobada 2026-07-20, ruta SDD/Maquetas/Sai-Service-Core/ |
 | Línea de base emitida | N/A (pendiente Fase B2) |
 
 ## 9. Control de cambios
@@ -99,3 +99,4 @@ El lienzo del gráfico se ajusta al ancho; los controles de período y variables
 | Versión | Fecha | Cambios |
 | --- | --- | --- |
 | 1.0 | 2026-07-20 | Redacción inicial. Superficie Historicos-Y-Graficas: selección de período/variables/resolución, distinción explícita muestra/agregado, marcas de evento, banda de advertencia de cobertura, conteo de microcortes desde eventos. Tabla de estados (vacío/cargando/con datos muestras y agregados/error + serie con advertencia), responsive, accesibilidad AA, trazabilidad. Maqueta-aware. |
+| 1.1 | 2026-07-20 | Retroalimentación de la Fase B2 de validación de maqueta: validación de maqueta aprobada (ruta SDD/Maquetas/Sai-Service-Core/). |

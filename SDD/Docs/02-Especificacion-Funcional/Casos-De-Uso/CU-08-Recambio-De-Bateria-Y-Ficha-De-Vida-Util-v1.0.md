@@ -2,7 +2,7 @@
 
 **Proyecto:** Sai-Service-Core
 **Documento:** CU-08-Recambio-De-Bateria-Y-Ficha-De-Vida-Util-v1.0.md
-**Versión:** 1.0
+**Versión:** 1.1
 **Estado:** Borrador
 **Fecha:** 2026-07-20
 **Autor:** Orquestador SDD (AG-02)
@@ -67,7 +67,7 @@ Permitir que el administrador registre el recambio de una batería con su costo,
 
 | Dimensión | Referencia |
 | --- | --- |
-| Necesidad de negocio | NB-04 (Ciclo de vida del parque); NB-06 (ficha de vida útil e insumo de comparación) |
+| Necesidad de negocio | NB-04 (Ciclo de vida de los equipos); NB-06 (ficha de vida útil e insumo de comparación) |
 | Reglas de negocio aplicables | RN-07, RN-08, RN-12; RN-05 |
 | Historias de usuario a generar | US-08 en 06 |
 | Componentes esperados | Servicio de intervenciones con efectos, vínculos temporales, resolutor temporal, proyección de ficha (referencia tentativa a 05) |
@@ -88,3 +88,4 @@ Trivial: un único administrador registra intervenciones. La ingesta externa que
 | Versión | Fecha | Descripción |
 | --- | --- | --- |
 | 1.0 | 2026-07-20 | Redacción inicial derivada de SOLUTION-INTAKE UF-6 (§6), §20.E-6, NB-04 y NB-06 |
+| 1.1 | 2026-07-20 | Retroalimentación de la Fase B2: unificación de terminología "parque" → "equipos" |

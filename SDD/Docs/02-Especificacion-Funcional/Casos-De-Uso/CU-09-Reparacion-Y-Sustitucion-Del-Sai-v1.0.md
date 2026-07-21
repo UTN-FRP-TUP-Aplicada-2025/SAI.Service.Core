@@ -2,7 +2,7 @@
 
 **Proyecto:** Sai-Service-Core
 **Documento:** CU-09-Reparacion-Y-Sustitucion-Del-Sai-v1.0.md
-**Versión:** 1.0
+**Versión:** 1.1
 **Estado:** Borrador
 **Fecha:** 2026-07-20
 **Autor:** Orquestador SDD (AG-02)
@@ -64,7 +64,7 @@ Permitir que el administrador registre que el equipo de alimentación se fue a r
 
 | Dimensión | Referencia |
 | --- | --- |
-| Necesidad de negocio | NB-04 (Ciclo de vida del parque) |
+| Necesidad de negocio | NB-04 (Ciclo de vida de los equipos) |
 | Reglas de negocio aplicables | RN-12; RN-01 y RN-02 aplicables a la reanudación de la modalidad tras la sustitución |
 | Historias de usuario a generar | US-09 en 06 |
 | Componentes esperados | Servicio de intervenciones, vínculos temporales de cobertura, máquina de estados de la unidad física (referencia tentativa a 05) |
@@ -85,3 +85,4 @@ Trivial: un único administrador registra estas intervenciones.
 | Versión | Fecha | Descripción |
 | --- | --- | --- |
 | 1.0 | 2026-07-20 | Redacción inicial derivada de SOLUTION-INTAKE UF-7 (§6), §20.E-1 parcial y NB-04 |
+| 1.1 | 2026-07-20 | Retroalimentación de la Fase B2: unificación de terminología "parque" → "equipos" |

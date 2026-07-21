@@ -4,7 +4,7 @@
 | --- | --- |
 | Proyecto | Sai-Service-Core |
 | Documento | NB-03-Historia-Trazable-Con-Procedencia-v1.0.md |
-| Versión | 1.1 |
+| Versión | 1.2 |
 | Estado | Borrador |
 | Fecha | 2026-07-20 |
 | Autor | Orquestador SDD (AG-01) |
@@ -62,12 +62,12 @@ El administrador prepara una decisión y abre la evolución de tensión y carga 
 | NB | CU prevista | Estado |
 | --- | --- | --- |
 | NB-03 | CU-06 Históricos y gráficas de evolución del suministro | aprobada |
-| NB-03 | CU-02 Alta del parque y puesta en marcha | aprobada |
+| NB-03 | CU-02 Alta de equipos y puesta en marcha | aprobada |
 | NB-03 | CU-04 Monitoreo en vivo del estado del SAI | aprobada |
 
 ## 8. Dependencias con otras NB
 
-- Depende de NB-04 (Ciclo de vida del parque): la historia guarda equipo e instante y resuelve la batería consultando los vínculos temporales del inventario.
+- Depende de NB-04 (Ciclo de vida de los equipos): la historia guarda equipo e instante y resuelve la batería consultando los vínculos temporales del inventario.
 
 ## 9. Prioridad MoSCoW
 
@@ -79,3 +79,4 @@ Must Have. La procedencia y la historia append-only son la base de confianza de 
 | --- | --- | --- |
 | 1.0 | 2026-07-20 | Redacción inicial derivada de SOLUTION-INTAKE §1, §3, §4, §7, §8 y §11, y de Vision-Producto-v1.0.md |
 | 1.1 | 2026-07-20 | Reconciliación de trazabilidad §7 con los CU vigentes de 02 tras audit de Fase B |
+| 1.2 | 2026-07-20 | Retroalimentación de la Fase B2: unificación de terminología 'parque' → 'equipos' |

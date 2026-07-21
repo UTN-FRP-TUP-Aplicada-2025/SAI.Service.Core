@@ -2,7 +2,7 @@
 
 **Proyecto:** Sai-Service-Core
 **Documento:** Alcance-Proyecto-v1.0.md
-**Versión:** 1.0
+**Versión:** 1.1
 **Estado:** Borrador
 **Fecha:** 2026-07-20
 **Autor:** Orquestador SDD (AG-00)
@@ -15,13 +15,13 @@ Este documento fija qué construye el proyecto y qué deja explícitamente afuer
 
 ## 2. Descripción general
 
-El proyecto entrega un servicio propio que protege a un único servidor respaldado por un único SAI, y que resuelve lo que las herramientas existentes no cubren para ese equipo. El servicio hace tres cosas: (1) decide y ejecuta el apagado ordenado del servidor solo cuando puede probar que el servidor volverá a encenderse solo, y se niega a apagarlo mientras no pueda probarlo; (2) construye y conserva el histórico de salud de batería, ciclo de vida del parque y costos; y (3) ofrece un panel de administración accesible desde la red local y una interfaz de integración para que sistemas externos empujen datos de forma automatizada. El monitoreo básico y el apagado ordenado ante corte que las herramientas existentes ya resuelven no se reconstruyen: el proyecto se apoya en ellos y agrega lo que falta.
+El proyecto entrega un servicio propio que protege a un único servidor respaldado por un único SAI, y que resuelve lo que las herramientas existentes no cubren para ese equipo. El servicio hace tres cosas: (1) decide y ejecuta el apagado ordenado del servidor solo cuando puede probar que el servidor volverá a encenderse solo, y se niega a apagarlo mientras no pueda probarlo; (2) construye y conserva el histórico de salud de batería, ciclo de vida de los equipos y costos; y (3) ofrece un panel de administración accesible desde la red local y una interfaz de integración para que sistemas externos empujen datos de forma automatizada. El monitoreo básico y el apagado ordenado ante corte que las herramientas existentes ya resuelven no se reconstruyen: el proyecto se apoya en ellos y agrega lo que falta.
 
 ## 3. Objetivos del proyecto
 
 - Garantizar el reencendido del servidor tras un corte, con una regla de seguridad que impide apagarlo mientras los supuestos de los que depende no estén verificados.
 - Registrar y mantener vivo el histórico de salud de batería, con veredictos propios que declaran su confianza y sus límites.
-- Modelar el ciclo de vida completo del parque, de modo que el histórico responda qué equipo protegía al servidor en cada tramo y cuántos días quedó sin protección.
+- Modelar el ciclo de vida completo de los equipos, de modo que el histórico responda qué equipo protegía al servidor en cada tramo y cuántos días quedó sin protección.
 - Dar visibilidad remota del estado en tiempo real y de la evolución histórica desde la red local.
 - Habilitar la ingesta automatizada de intervenciones desde sistemas externos sin duplicar hechos ante reintentos.
 

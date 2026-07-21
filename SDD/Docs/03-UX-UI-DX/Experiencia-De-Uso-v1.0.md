@@ -2,13 +2,13 @@
 
 **Proyecto:** Sai-Service-Core
 **Documento:** Experiencia-De-Uso-v1.0.md
-**Versión:** 1.1
+**Versión:** 1.2
 **Estado:** Borrador
 **Fecha:** 2026-07-20
 **Autor:** Orquestador SDD (AG-03)
 **Variante:** UX/UI
 
-> Marco de experiencia del panel de control web de Sai-Service-Core: un servicio que monitorea un SAI, decide y ejecuta el apagado ordenado con reencendido garantizado, administra el ciclo de vida del parque y expone una API REST. Instancia propia, un solo administrador, acceso por LAN. Este documento es maqueta-aware: sus flujos clave son las rutas de navegación que la maqueta de la Fase B2 va a materializar, y cada superficie citada declara su nombre canónico en su wireframe.
+> Marco de experiencia del panel de control web de Sai-Service-Core: un servicio que monitorea un SAI, decide y ejecuta el apagado ordenado con reencendido garantizado, administra el ciclo de vida de los equipos y expone una API REST. Instancia propia, un solo administrador, acceso por LAN. Este documento es maqueta-aware: sus flujos clave son las rutas de navegación que la maqueta de la Fase B2 va a materializar, y cada superficie citada declara su nombre canónico en su wireframe.
 
 ---
 
@@ -21,7 +21,7 @@ Contexto físico y emocional:
 - Uso cotidiano (el 80 % del tiempo, CU-04): consulta rápida del estado en vivo desde cualquier equipo de la LAN (escritorio o portátil, navegador Chromium o Firefox). Tono tranquilo, mirada de comprobación. Duración típica: segundos a un par de minutos.
 - Uso de alta consecuencia y baja frecuencia (CU-10, ventana de mantenimiento): con presencia física junto al servidor, ejecutando una prueba destructiva que corta la energía. Tensión alta, cero tolerancia a la ambigüedad: una acción mal entendida deja un host sin respaldo apagado hasta que alguien apriete el botón.
 - Uso analítico ocasional (CU-06, CU-07, CU-12): preparando una decisión de compra o evaluando la calidad del suministro. Lectura pausada de series y veredictos, con atención a la procedencia de cada número.
-- Uso de puesta en marcha, una sola vez (CU-01 alta inicial, CU-02 alta del parque): arranque de una instancia recién desplegada que todavía no es utilizable.
+- Uso de puesta en marcha, una sola vez (CU-01 alta inicial, CU-02 alta de equipos): arranque de una instancia recién desplegada que todavía no es utilizable.
 
 Frecuencia y duración: consulta diaria breve; intervenciones de configuración e inventario esporádicas; ventana de mantenimiento una vez por período de vigencia (180 o 365 días según el supuesto). El sistema corre en el mismo host que protege y se opera desde la LAN, nunca desde internet.
 
@@ -70,13 +70,13 @@ Cada flujo es una ruta de navegación que la maqueta de la Fase B2 va a material
 
 ### 3.1 Puesta en marcha de la instancia (UF-1 / CU-01 + CU-02)
 
-Disparador: primer acceso a una instancia recién desplegada, sin administrador y sin parque.
+Disparador: primer acceso a una instancia recién desplegada, sin administrador y sin equipos.
 
 1. Resolución del destino: el guard de ruteo consulta el predicado único de aprovisionamiento (`estaAprovisionado` = existe un administrador). Como es falso, redirige a la superficie `Alta-Inicial-Administrador`.
-2. El administrador crea la única identidad del sistema (usuario y secreto) en una superficie sin chrome de navegación y sin acción de cancelar. Acto explícito, indivisible e irreversible desde la UI.
+2. El administrador crea la única identidad del sistema (usuario y contraseña) en una superficie sin chrome de navegación y sin acción de cancelar. Acto explícito, indivisible e irreversible desde la UI.
 3. `destinoAlCompletar` declarado: la superficie de acceso (`Acceso-Login`), que acusa recibo con la banda de confirmación "identidad creada".
-4. Primer ingreso. El panel de estado en vivo abre en su estado vacío-orientación: todavía no hay parque. La orientación posterior sugiere los pasos siguientes sin bloquear (dar de alta el parque, configurar la política, planificar la ventana de mantenimiento).
-5. El administrador da de alta el parque (`Alta-Del-Parque`): descubre el dispositivo USB, declara marca/modelo/potencia con procedencia `declarado`, abre los vínculos temporales y siembra las cuatro verificaciones en "nunca verificado", lo que fuerza el modo solo aviso.
+4. Primer ingreso. El panel de estado en vivo abre en su estado vacío-orientación: todavía no hay equipos. La orientación posterior sugiere los pasos siguientes sin bloquear (dar de alta los equipos, configurar la política, planificar la ventana de mantenimiento).
+5. El administrador da de alta los equipos (`Alta-De-Equipos`): descubre el dispositivo USB, declara marca/modelo/potencia con procedencia `declarado`, abre los vínculos temporales y siembra las cuatro verificaciones en "nunca verificado", lo que fuerza el modo solo aviso.
 6. Salida: el panel muestra "operativo · 0 de 4 supuestos verificados" con el banner de bloqueo y el enlace a la ventana de mantenimiento.
 
 Puntos de fricción anticipados: el operador puede esperar un asistente multipaso; se le da, en cambio, un acto único por superficie (evita ceremonias abandonables). El dispositivo se descubre sin marca ni modelo (`0665:5161 · INNO TECH · iSerial vacío`): el formulario declara antes del intento que esos campos se cargan a mano y que un serial vacío es válido.
@@ -139,9 +139,9 @@ Mapa de estados por superficie clave. El detalle por superficie vive en cada wir
 | Superficie (nombre canónico) | Vacío | Cargando | Con datos | Error | Estados propios |
 | --- | --- | --- | --- | --- | --- |
 | Alta-Inicial-Administrador | No aplica (acto único) | Resolviendo destino; enviando | Formulario listo | Requisito no cumplido; confirmación no coincidente; envío fuera de tiempo | Aprovisionado (redirige) |
-| Acceso-Login | No aplica | Enviando | Formulario listo | Credenciales rechazadas (indiferenciado); acceso restringido temporalmente; formulario vencido | Identidad recién creada; secreto actualizado; sesión expirada |
-| Panel-Estado-En-Vivo | Sin parque (orientación posterior) | Esperando primer estado en vivo | Estado en vivo con eventos | Sin conexión con el SAI (desconexión USB); circuito del panel caído | Política degradada a solo aviso; tensión fuera de rango |
-| Alta-Del-Parque | Sin dispositivos descubiertos | Descubriendo dispositivos USB; probando conexión | Candidato encontrado / inventario cargado | Prueba de conexión fallida; dato obligatorio inválido | Descubierto sin marca ni modelo |
+| Acceso-Login | No aplica | Enviando | Formulario listo | Credenciales rechazadas (indiferenciado); acceso restringido temporalmente; formulario vencido | Identidad recién creada; contraseña actualizada; sesión expirada |
+| Panel-Estado-En-Vivo | Sin equipos (orientación posterior) | Esperando primer estado en vivo | Estado en vivo con eventos | Sin conexión con el SAI (desconexión USB); circuito del panel caído | Política degradada a solo aviso; tensión fuera de rango |
+| Alta-De-Equipos | Sin dispositivos descubiertos | Descubriendo dispositivos USB; probando conexión | Candidato encontrado / inventario cargado | Prueba de conexión fallida; dato obligatorio inválido | Descubierto sin marca ni modelo |
 | Configuracion-De-Politicas | Sin política previa (usa defaults del descriptor) | Cargando descriptores | Política vigente + edición | Valor fuera de límites; propuesta rechazada por el sistema | Modo simulación; propuesta en previsualización; ranura del asistente deshabilitada |
 | Prueba-De-Bateria | Sin pruebas registradas | Prueba en curso (cadencia 1 Hz) | Veredicto emitido | Precondición no cumplida (flotación insuficiente); muestras perdidas en conmutación | Prueba no comparable |
 | Historicos-Y-Graficas | Sin datos en el período | Cargando serie | Serie de muestras / serie de agregados | Período sin cobertura suficiente | Serie agregada con advertencia de cobertura |
@@ -192,7 +192,7 @@ Taxonomía de los errores que el administrador verá, con tono y vía de recuper
 
 | Categoría | Ejemplos en este producto | Tono y mensaje | Vía de recuperación |
 | --- | --- | --- | --- |
-| Acceso rechazado | Par usuario/secreto inválido | Rechazo indiferenciado, sin decir qué parte falló ni si el usuario existe | Reintentar; el foco vuelve a la banda de resultado |
+| Acceso rechazado | Par usuario/contraseña inválido | Rechazo indiferenciado, sin decir qué parte falló ni si el usuario existe | Reintentar; el foco vuelve a la banda de resultado |
 | Acceso restringido temporalmente | Se superó el umbral de intentos | Declara la restricción y su carácter temporal, sin umbrales ni cuenta regresiva | Esperar y reintentar |
 | Sesión vencida | La sesión expiró por inactividad o tope | Retorno al shell de acceso con estado "sesión vencida", sin culpar al usuario ni fallar en una acción arbitraria | Volver a ingresar |
 | Envío fuera de tiempo (primer arranque) | El sistema se aprovisionó entre la carga y el envío | Redirección neutra a la superficie de acceso, sin exponer el motivo | Ingresar con la identidad ya creada |
@@ -215,8 +215,8 @@ Handoff humano: no hay soporte externo; el administrador es el único operador. 
 | Persona objetivo | Administrador único (00, Visión §2) |
 | CU origen | CU-01 a CU-12 (02); con foco en CU-01, CU-02, CU-03, CU-04, CU-05, CU-06, CU-07, CU-10 |
 | Reglas de negocio relevantes | RN-01, RN-02, RN-03, RN-04, RN-05, RN-06, RN-10, RN-11, RN-13 |
-| Wireframes que materializan el marco | Wireframes-Alta-Inicial-Administrador, Wireframes-Acceso-Login, Wireframes-Panel-Estado-En-Vivo, Wireframes-Alta-Del-Parque, Wireframes-Configuracion-De-Politicas, Wireframes-Prueba-De-Bateria, Wireframes-Historicos-Y-Graficas, Wireframes-Panel-De-Verificaciones |
-| US a generar en 06 | US-01 a US-11 (administrador); US de acceso (alta inicial, ingreso, cambio de secreto, cierre) a derivar de CU-01 |
+| Wireframes que materializan el marco | Wireframes-Alta-Inicial-Administrador, Wireframes-Acceso-Login, Wireframes-Panel-Estado-En-Vivo, Wireframes-Alta-De-Equipos, Wireframes-Configuracion-De-Politicas, Wireframes-Prueba-De-Bateria, Wireframes-Historicos-Y-Graficas, Wireframes-Panel-De-Verificaciones |
+| US a generar en 06 | US-01 a US-11 (administrador); US de acceso (alta inicial, ingreso, cambio de contraseña, cierre) a derivar de CU-01 |
 | Tests previstos en 08 | Snapshot de estados por superficie; test de accesibilidad AA (contraste, foco, teclado, aria-live); visualización de supuestos y banner de bloqueo; marca de derivado en carga de batería; rechazo por techo de 540 s; distinción vencido/refutado |
 | Catálogo de diseño aplicado | Design-Rules-Web-Generico-v1.0 (base) + Design-Rules-Blazor-Mudblazor-v1.0 (stack: Blazor Interactive Server + MudBlazor) |
 | Configuración dirigida por esquema aplicada (descriptores, presets, modo simulación, ranura del asistente) | sí (Design-Rules-Config-Esquema; superficie de configuración de políticas y frontera aplicación/entorno declarada en §2.3) |
@@ -224,7 +224,7 @@ Handoff humano: no hay soporte externo; el administrador es el único operador. 
 | Acceso de operador único aplicado (omisiones declaradas, shell partido, catálogo de resultados, política de sesión) | sí (Design-Rules-Acceso-Monousuario; omisiones en §2.2 y en Wireframes-Acceso-Login) |
 | Identidad de versión aplicada (contrato, ubicaciones del sello, detalle de diagnóstico) | sí (Design-Rules-Identidad-De-Version; sello en acceso y en el sistema en funcionamiento) |
 | Modelo UX-UI aplicado en la Fase B2 | catálogo base (no se eligió un modelo de Modelos-UX-UI aún) |
-| Validación visual de maqueta | N/A (pendiente Fase B2) |
+| Validación de maqueta | aprobada 2026-07-20, ruta SDD/Maquetas/Sai-Service-Core/ |
 | Línea de base emitida | N/A (pendiente Fase B2) |
 
 ---
@@ -245,3 +245,4 @@ Handoff humano: no hay soporte externo; el administrador es el único operador. 
 | --- | --- | --- |
 | 1.0 | 2026-07-20 | Redacción inicial. Marco de experiencia del panel Sai-Service-Core: audiencia y contexto, principios (heurísticas de Nielsen y leyes UX), frontera aplicación/entorno, seis flujos clave derivados de UF-1..UF-10, mapa de estados por superficie, accesibilidad WCAG 2.2 AA, i18n español único, performance percibida del estado en vivo, taxonomía de errores y recuperación, trazabilidad upstream/downstream. Aplica el catálogo de diseño base + especialización de stack y las cuatro extensiones de capacidad (config por esquema, primer arranque, acceso monousuario, identidad de versión). Maqueta-aware: los flujos son las rutas que materializará la Fase B2. |
 | 1.1 | 2026-07-20 | Corrección de conformidad D7: reemplazo de nombres de stack por vocabulario de dominio tras audit de Fase B. En §1, §2.3 y §8 se sustituyeron menciones de implementación (mecanismo de acceso al equipo, almacenamiento, contenedor, anclaje físico del dispositivo) por términos agnósticos de implementación; sin cambios de semántica. |
+| 1.2 | 2026-07-20 | Retroalimentación de la Fase B2 de validación de maqueta: unificación de 'parque' → 'equipos' y 'secreto' → 'contraseña'. |

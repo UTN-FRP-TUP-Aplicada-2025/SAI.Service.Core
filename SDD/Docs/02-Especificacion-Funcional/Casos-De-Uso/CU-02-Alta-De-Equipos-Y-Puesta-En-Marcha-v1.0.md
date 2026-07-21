@@ -1,8 +1,8 @@
-# CU-02 — Alta del parque y puesta en marcha
+# CU-02 — Alta de equipos y puesta en marcha
 
 **Proyecto:** Sai-Service-Core
-**Documento:** CU-02-Alta-Del-Parque-Y-Puesta-En-Marcha-v1.0.md
-**Versión:** 1.0
+**Documento:** CU-02-Alta-De-Equipos-Y-Puesta-En-Marcha-v1.0.md
+**Versión:** 1.1
 **Estado:** Borrador
 **Fecha:** 2026-07-20
 **Autor:** Orquestador SDD (AG-02)
@@ -22,12 +22,12 @@ Permitir que el administrador, la primera vez que abre el panel, dé de alta el 
 ## 3. Precondiciones
 
 - El administrador tiene una sesión activa (CU-01).
-- No existe todavía un dispositivo activo dado de alta, o se está incorporando uno nuevo al parque vacío.
+- No existe todavía un dispositivo activo dado de alta, o se está incorporando uno nuevo al conjunto de equipos vacío.
 - El equipo de alimentación está conectado físicamente al host.
 
 ## 4. Flujo principal
 
-1. El administrador inicia el alta del parque desde el panel.
+1. El administrador inicia el alta de equipos desde el panel.
 2. El adaptador de conexión lista los candidatos conectados con sus descriptores y devuelve el identificador del dispositivo, por ejemplo `vendorId 0665`, `productId 5161`, descriptor de fabricante `INNO TECH`, sin número de serie.
 3. El administrador declara a mano el fabricante, el modelo y la topología del equipo, que quedan con procedencia declarado; si la potencia nominal se desconoce, queda sin valor con procedencia imputado, nunca un número inventado.
 4. El administrador da de alta el catálogo necesario: fabricante, modelo de dispositivo y modelo de batería, este último con su vida de flotación esperada acompañada de la temperatura de referencia.
@@ -53,7 +53,7 @@ Permitir que el administrador, la primera vez que abre el panel, dé de alta el 
 ## 7. Postcondiciones
 
 - Éxito: existen el catálogo, el inventario y los vínculos temporales abiertos; hay una sesión de sondeo activa; las cuatro verificaciones están en estado sin verificar y la modalidad efectiva es solo aviso.
-- Fallo: si el alta no se confirma, no se crean entidades a medias; el parque queda como estaba.
+- Fallo: si el alta no se confirma, no se crean entidades a medias; los equipos quedan como estaban.
 
 ## 8. Criterios de aceptación
 
@@ -62,14 +62,14 @@ Permitir que el administrador, la primera vez que abre el panel, dé de alta el 
 | CA-01 | Un dispositivo descubierto con descriptor `0665:5161 INNO TECH` sin número de serie | El administrador confirma el alta del dispositivo sin número de serie | El sistema registra el dispositivo con número de serie vacío, sin rechazarlo por ese campo |
 | CA-02 | Un modelo de batería `12V 9Ah AGM` cuya vida de flotación se declara como 3 a 5 años sin temperatura de referencia | El administrador intenta guardar el modelo | El sistema rechaza el alta con VIDA_FLOTACION_SIN_TEMPERATURA (RN-13) |
 | CA-03 | El host `i7infra` y el dispositivo `ups-01` recién dados de alta | El administrador confirma la puesta en marcha | El sistema abre el montaje `mnt-001` y la cobertura `cob-001` con fin abierto y crea la sesión de sondeo |
-| CA-04 | El alta del parque recién completada | El sistema termina la puesta en marcha | Las cuatro verificaciones quedan en estado sin verificar y el panel muestra operativo con 0 de 4 supuestos verificados y modalidad solo aviso |
+| CA-04 | El alta de equipos recién completada | El sistema termina la puesta en marcha | Las cuatro verificaciones quedan en estado sin verificar y el panel muestra operativo con 0 de 4 supuestos verificados y modalidad solo aviso |
 | CA-05 | Una potencia nominal desconocida al declarar el modelo | El administrador continúa el alta | El sistema registra la potencia sin valor con procedencia imputado y no bloquea la puesta en marcha |
 
 ## 9. Trazabilidad
 
 | Dimensión | Referencia |
 | --- | --- |
-| Necesidad de negocio | NB-04 (Ciclo de vida del parque); toca NB-02 (sondeo), NB-03 (procedencia) y NB-05 (siembra de verificaciones) |
+| Necesidad de negocio | NB-04 (Ciclo de vida de los equipos); toca NB-02 (sondeo), NB-03 (procedencia) y NB-05 (siembra de verificaciones) |
 | Reglas de negocio aplicables | RN-01, RN-05, RN-13; RN-06 de forma indirecta |
 | Historias de usuario a generar | US-01, US-05 (base) en 06 |
 | Componentes esperados | Adaptador de conexión, gestión de catálogo, inventario y vínculos temporales, resolutor temporal (referencia tentativa a 05) |
@@ -91,3 +91,4 @@ Trivial: un único administrador ejecuta el alta. No hay concurrencia de operado
 | Versión | Fecha | Descripción |
 | --- | --- | --- |
 | 1.0 | 2026-07-20 | Redacción inicial derivada de SOLUTION-INTAKE UF-1 (§6), §20.E-1 y NB-04 |
+| 1.1 | 2026-07-20 | Retroalimentación de la Fase B2: unificación de terminología "parque" → "equipos" |

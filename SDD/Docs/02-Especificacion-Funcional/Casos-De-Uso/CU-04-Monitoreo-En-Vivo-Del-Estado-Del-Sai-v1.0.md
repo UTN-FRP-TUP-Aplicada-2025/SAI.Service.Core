@@ -2,7 +2,7 @@
 
 **Proyecto:** Sai-Service-Core
 **Documento:** CU-04-Monitoreo-En-Vivo-Del-Estado-Del-Sai-v1.0.md
-**Versión:** 1.0
+**Versión:** 1.1
 **Estado:** Borrador
 **Fecha:** 2026-07-20
 **Autor:** Orquestador SDD (AG-02)
@@ -21,7 +21,7 @@ Permitir que el administrador vea desde cualquier equipo de la LAN el estado en 
 
 ## 3. Precondiciones
 
-- El parque está dado de alta y existe una sesión de sondeo activa (CU-02).
+- Los equipos están dados de alta y existe una sesión de sondeo activa (CU-02).
 - El administrador tiene una sesión activa para ver el panel (CU-01).
 
 ## 4. Flujo principal
@@ -87,3 +87,4 @@ Trivial en cuanto a usuarios (un solo administrador). El único concurrente rele
 | Versión | Fecha | Descripción |
 | --- | --- | --- |
 | 1.0 | 2026-07-20 | Redacción inicial derivada de SOLUTION-INTAKE UF-3 (§6), §20.E-2, §20.E-3 y NB-02 |
+| 1.1 | 2026-07-20 | Retroalimentación de la Fase B2: unificación de terminología "parque" → "equipos" |

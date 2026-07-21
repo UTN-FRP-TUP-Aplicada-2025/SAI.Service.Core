@@ -1,8 +1,8 @@
-# Wireframes — Alta del parque y puesta en marcha
+# Wireframes — Alta de equipos y puesta en marcha
 
 **Proyecto:** Sai-Service-Core
-**Documento:** Wireframes-Alta-Del-Parque-v1.0.md
-**Versión:** 1.0
+**Documento:** Wireframes-Alta-De-Equipos-v1.0.md
+**Versión:** 1.1
 **Estado:** Borrador
 **Fecha:** 2026-07-20
 **Autor:** Orquestador SDD (AG-03)
@@ -12,9 +12,9 @@
 
 ## 1. Pantalla y propósito
 
-Nombre canónico de la superficie: **Alta-Del-Parque**.
+Nombre canónico de la superficie: **Alta-De-Equipos**.
 
-Superficie de catálogo e inventario para la puesta en marcha. Permite descubrir el dispositivo por su conexión física, declarar a mano marca, modelo y potencia nominal (con procedencia `declarado`), dar de alta el host y la batería, abrir los vínculos temporales de montaje y cobertura, probar la conexión y sembrar las cuatro verificaciones en "nunca verificado" (lo que fuerza el modo solo aviso). Deja el sistema listo para registrar historia. Origen: CU-02 (alta del parque y puesta en marcha), UF-1.
+Superficie de catálogo e inventario para la puesta en marcha. Permite descubrir el dispositivo por su conexión física, declarar a mano marca, modelo y potencia nominal (con procedencia `declarado`), dar de alta el host y la batería, abrir los vínculos temporales de montaje y cobertura, probar la conexión y sembrar las cuatro verificaciones en "nunca verificado" (lo que fuerza el modo solo aviso). Deja el sistema listo para registrar historia. Origen: CU-02 (alta de equipos y puesta en marcha), UF-1.
 
 ## 2. Layout
 
@@ -22,10 +22,10 @@ Shell de trabajo (barra lateral + barra superior). Área de contenido con un blo
 
 ```text
 +----------------+-----------------------------------------------------------------+
-| navegacion     |  Alta del parque                                    <sello v>   |  <h1> + sello (shell)
+| navegacion     |  Alta de equipos                                    <sello v>   |  <h1> + sello (shell)
 |  · Estado      |  +--------- Descubrimiento del dispositivo ------------------+  |
 |  · Verificac.  |  | Candidatos USB:                              [Descubrir]  |  |
-|  · Parque  <-  |  | 0665:5161 · INNO TECH · iSerial vacio   [Seleccionar]     |  |
+|  · Equipos <-  |  | 0665:5161 · INNO TECH · iSerial vacio   [Seleccionar]     |  |
 |  · ...         |  +-----------------------------------------------------------+  |
 |                |                                                                 |
 |                |  +--------- Datos declarados del SAI -----------------------+  |
@@ -97,7 +97,7 @@ La grilla de campos (`minmax`) pasa a una columna bajo ~768px; la barra lateral 
 | Dimensión | Referencia |
 | --- | --- |
 | Persona objetivo | Administrador único (00, Visión §2) |
-| CU origen | CU-02 (alta del parque y puesta en marcha); UF-1 |
+| CU origen | CU-02 (alta de equipos y puesta en marcha); UF-1 |
 | Marco de experiencia aplicado | Experiencia-De-Uso-v1.0 §3.1 (puesta en marcha) |
 | Reglas de negocio relevantes | RN-01 (arranque seguro), RN-05 (procedencia), RN-13 (vida de flotación con temperatura); RN-06 indirecta |
 | US a generar en 06 | US-01 (alta del SAI y la batería descubriendo el USB), US-05 (base: procedencia de cada valor) |
@@ -108,11 +108,12 @@ La grilla de campos (`minmax`) pasa a una columna bajo ~768px; la barra lateral 
 | Acceso de operador único aplicado | sí (shell de trabajo) |
 | Identidad de versión aplicada | sí (sello heredado del shell de trabajo) |
 | Modelo UX-UI aplicado en la Fase B2 | catálogo base |
-| Validación visual de maqueta | N/A (pendiente Fase B2) |
+| Validación de maqueta | aprobada 2026-07-20, ruta SDD/Maquetas/Sai-Service-Core/ |
 | Línea de base emitida | N/A (pendiente Fase B2) |
 
 ## 9. Control de cambios
 
 | Versión | Fecha | Cambios |
 | --- | --- | --- |
-| 1.0 | 2026-07-20 | Redacción inicial. Superficie Alta-Del-Parque: descubrimiento del dispositivo por conexión física, formularios de SAI/batería/host con procedencia declarada, requisito declarado antes del intento, prueba de conexión por efecto observado, siembra de verificaciones que fuerza solo aviso. Tabla de estados (vacío/cargando/con datos/error + descubierto sin marca), responsive, accesibilidad AA, trazabilidad. Maqueta-aware. |
+| 1.0 | 2026-07-20 | Redacción inicial. Superficie Alta-De-Equipos: descubrimiento del dispositivo por conexión física, formularios de SAI/batería/host con procedencia declarada, requisito declarado antes del intento, prueba de conexión por efecto observado, siembra de verificaciones que fuerza solo aviso. Tabla de estados (vacío/cargando/con datos/error + descubierto sin marca), responsive, accesibilidad AA, trazabilidad. Maqueta-aware. |
+| 1.1 | 2026-07-20 | Retroalimentación de la Fase B2 de validación de maqueta: unificación de 'parque' → 'equipos' y 'secreto' → 'contraseña'. |

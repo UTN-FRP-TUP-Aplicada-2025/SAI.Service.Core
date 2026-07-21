@@ -2,7 +2,7 @@
 
 **Proyecto:** Sai-Service-Core
 **Documento:** Wireframes-Panel-De-Verificaciones-v1.0.md
-**Versión:** 1.0
+**Versión:** 1.1
 **Estado:** Borrador
 **Fecha:** 2026-07-20
 **Autor:** Orquestador SDD (AG-03)
@@ -69,7 +69,7 @@ Identificadores de supuestos tomados del intake (E-4/UF-8); ilustrativos del con
 
 | Estado | Condición que lo produce | Representación esperada |
 | --- | --- | --- |
-| Vacío (cuatro nunca verificados) | Tras el alta del parque, ninguno probado | Lista con los cuatro en "nunca verificado"; banner de bloqueo; modalidad solo aviso |
+| Vacío (cuatro nunca verificados) | Tras el alta de equipos, ninguno probado | Lista con los cuatro en "nunca verificado"; banner de bloqueo; modalidad solo aviso |
 | Cargando (paso en ejecución) | Se está ejecutando o registrando un paso | Indicador de progreso del paso; el resto del stepper deshabilitado |
 | Con datos (estado de supuestos) | Hay supuestos con algún estado distinto de nunca | Lista con badges de estado y vigencias; contador "n de m" |
 | Error (paso fallido) | La acción no se validó por efecto observado | Mensaje que declara que el efecto no se observó; el paso no se da por hecho |
@@ -105,7 +105,7 @@ La lista de supuestos pasa a tarjetas apiladas. El stepper horizontal se vuelve 
 | Acceso de operador único aplicado | sí (shell de trabajo) |
 | Identidad de versión aplicada | sí (sello heredado del shell de trabajo) |
 | Modelo UX-UI aplicado en la Fase B2 | catálogo base |
-| Validación visual de maqueta | N/A (pendiente Fase B2) |
+| Validación de maqueta | aprobada 2026-07-20, ruta SDD/Maquetas/Sai-Service-Core/ |
 | Línea de base emitida | N/A (pendiente Fase B2) |
 
 ## 9. Control de cambios
@@ -113,3 +113,4 @@ La lista de supuestos pasa a tarjetas apiladas. El stepper horizontal se vuelve 
 | Versión | Fecha | Cambios |
 | --- | --- | --- |
 | 1.0 | 2026-07-20 | Redacción inicial. Superficie Panel-De-Verificaciones: estado de los cuatro supuestos con sus vigencias, banner de bloqueo, ventana de mantenimiento como stepper con confirmación por paso y validación por efecto observado, distinción vencido/refutado, renovación por evidencia. Tabla de estados (vacío/cargando/con datos/error + refutado, vencido, ventana en curso, desbloqueado), responsive, accesibilidad AA, trazabilidad. Maqueta-aware. |
+| 1.1 | 2026-07-20 | Retroalimentación de la Fase B2 de validación de maqueta: unificación de 'parque' → 'equipos' y 'secreto' → 'contraseña'. |

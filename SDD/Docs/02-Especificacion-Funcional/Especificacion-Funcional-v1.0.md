@@ -2,14 +2,14 @@
 
 **Proyecto:** Sai-Service-Core
 **Documento:** Especificacion-Funcional-v1.0.md
-**Versión:** 1.0
+**Versión:** 1.1
 **Estado:** Borrador
 **Fecha:** 2026-07-20
 **Autor:** Orquestador SDD (AG-02)
 
 ## 1. Propósito y alcance
 
-Índice maestro de la especificación funcional del proyecto Sai-Service-Core, un servicio web de tipo web-monolith que monitorea el equipo de alimentación, decide y ejecuta el apagado ordenado del host y su reencendido, administra el ciclo de vida del parque y expone un panel y una interfaz de integración, para un único administrador. Consolida los casos de uso, las reglas de negocio, el modelo conceptual y sus reglas conceptuales, y traza cada artefacto a las necesidades de negocio del catálogo 01. Define el qué del sistema, sin invadir el cómo.
+Índice maestro de la especificación funcional del proyecto Sai-Service-Core, un servicio web de tipo web-monolith que monitorea el equipo de alimentación, decide y ejecuta el apagado ordenado del host y su reencendido, administra el ciclo de vida de los equipos y expone un panel y una interfaz de integración, para un único administrador. Consolida los casos de uso, las reglas de negocio, el modelo conceptual y sus reglas conceptuales, y traza cada artefacto a las necesidades de negocio del catálogo 01. Define el qué del sistema, sin invadir el cómo.
 
 Insumos: SOLUTION-INTAKE de la solución (§1 a §12 de negocio, §17 P.4 modelo y P.10 invariantes, §20 escenarios E-1 a E-8, §21 invariantes I-1 a I-21); categoría 00-Contexto; catálogo de 8 necesidades de negocio NB-01 a NB-08 de 01-Necesidades-Negocio.
 
@@ -20,7 +20,7 @@ Insumos: SOLUTION-INTAKE de la solución (§1 a §12 de negocio, §17 P.4 modelo
 | NB-01 | Apagado ordenado y reencendido garantizado | CU-05, CU-10 | RN-01, RN-02, RN-03, RN-04, RN-11 | US-02, US-04, US-10 |
 | NB-02 | Monitoreo en vivo y alertas | CU-04 (y CU-02 en el alta) | RN-05, RN-06, RN-03 | US-02, US-04, US-05 |
 | NB-03 | Historia trazable con procedencia | CU-06 (y CU-08 en la reatribución) | RN-05, RN-10 | US-05, US-06 |
-| NB-04 | Ciclo de vida del parque | CU-02, CU-08, CU-09, CU-12 | RN-07, RN-08, RN-12, RN-13 | US-01, US-08, US-09, US-11 |
+| NB-04 | Ciclo de vida de los equipos | CU-02, CU-08, CU-09, CU-12 | RN-07, RN-08, RN-12, RN-13 | US-01, US-08, US-09, US-11 |
 | NB-05 | Seguridad operativa y bloqueo por verificación | CU-01, CU-05, CU-10 | RN-01, RN-02, RN-03 | US-02, US-10, US de autenticación |
 | NB-06 | Evaluación de salud de baterías | CU-07, CU-08, CU-12 | RN-05, RN-06, RN-07 | US-07, US-11 |
 | NB-07 | Configuración de políticas de apagado | CU-03 (y CU-05 en la ejecución) | RN-04, RN-11, RN-02 | US-03 |
@@ -33,7 +33,7 @@ Cobertura bidireccional: cada una de las 8 NB tiene al menos un CU y cada uno de
 | CU | Título | Flujo de usuario | Actor primario | NB | Estado |
 | --- | --- | --- | --- | --- | --- |
 | CU-01 | Autenticación y gestión de la sesión del administrador | Autenticación | Administrador | NB-05 | Borrador |
-| CU-02 | Alta del parque y puesta en marcha | UF-1 | Administrador | NB-04 | Borrador |
+| CU-02 | Alta de equipos y puesta en marcha | UF-1 | Administrador | NB-04 | Borrador |
 | CU-03 | Configuración de políticas de apagado versionadas | UF-2 | Administrador | NB-07 | Borrador |
 | CU-04 | Monitoreo en vivo del estado del SAI | UF-3 | Administrador | NB-02 | Borrador |
 | CU-05 | Ejecución del apagado ordenado ante corte sostenido | UF-3 / E-4 | Planificador interno | NB-01, NB-05 | Borrador |
@@ -97,3 +97,4 @@ Todos los artefactos de esta categoría están en estado Borrador, fecha 2026-07
 | Versión | Fecha | Cambios |
 | --- | --- | --- |
 | 1.0 | 2026-07-20 | Especificación funcional inicial: matriz NB-CU-RN-US, 12 CU, 13 RN, modelo conceptual y 9 RC, derivados del SOLUTION-INTAKE y del catálogo NB-01 a NB-08 |
+| 1.1 | 2026-07-20 | Retroalimentación de la Fase B2: unificación de terminología "parque" → "equipos" |

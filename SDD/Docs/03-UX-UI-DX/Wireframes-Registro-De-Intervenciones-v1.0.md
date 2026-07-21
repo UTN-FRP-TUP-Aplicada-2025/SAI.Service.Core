@@ -2,7 +2,7 @@
 
 **Proyecto:** Sai-Service-Core
 **Documento:** Wireframes-Registro-De-Intervenciones-v1.0.md
-**Versión:** 1.0
+**Versión:** 1.1
 **Estado:** Borrador
 **Fecha:** 2026-07-20
 **Autor:** Orquestador SDD (AG-03)
@@ -23,7 +23,7 @@ Shell de trabajo (barra lateral + barra superior). Área de contenido con: un fo
 ```text
 +----------------+-----------------------------------------------------------------+
 | navegacion     |  Registrar intervencion                              <sello>    |  <h1> + sello
-|  · Parque      |  Tipo [ select: recambio v ]  Instante [ fecha/hora ]           |
+|  · Equipos     |  Tipo [ select: recambio v ]  Instante [ fecha/hora ]           |
 |  · Intervenc.<-|  Dispositivo [ select ]   Bateria saliente [ select ]           |
 |                |  Bateria entrante [ select / alta en el mismo acto ]            |
 |                |  Proveedor [ select ]   Ejecutada por [ campo ]                 |
@@ -112,7 +112,7 @@ La grilla de campos pasa a una columna bajo ~768px; el bloque de costos mantiene
 | Acceso de operador único aplicado | sí (shell de trabajo) |
 | Identidad de versión aplicada | sí (sello heredado del shell de trabajo) |
 | Modelo UX-UI aplicado en la Fase B2 | catálogo base |
-| Validación visual de maqueta | N/A (pendiente Fase B2) |
+| Validación de maqueta | aprobada 2026-07-20, ruta SDD/Maquetas/Sai-Service-Core/ |
 | Línea de base emitida | N/A (pendiente Fase B2) |
 
 ## 9. Control de cambios
@@ -120,3 +120,4 @@ La grilla de campos pasa a una columna bajo ~768px; el bloque de costos mantiene
 | Versión | Fecha | Cambios |
 | --- | --- | --- |
 | 1.0 | 2026-07-20 | Redacción inicial. Superficie Registro-De-Intervenciones: formulario de intervención con carga diferida, bloque de costos con cuadre, disposición final, previsualización de efectos, ficha de vida útil proyectada y distinción de fuente local vs externa. Tabla de estados (vacío/cargando/con datos/error de cuadre, de importe y de coherencia temporal + efecto aplicado, fuente externa), responsive, accesibilidad AA, trazabilidad. Maqueta-aware. |
+| 1.1 | 2026-07-20 | Retroalimentación de la Fase B2 de validación de maqueta: unificación de 'parque' → 'equipos' y 'secreto' → 'contraseña'. |

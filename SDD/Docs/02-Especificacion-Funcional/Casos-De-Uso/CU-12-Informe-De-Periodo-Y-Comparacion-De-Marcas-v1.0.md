@@ -2,7 +2,7 @@
 
 **Proyecto:** Sai-Service-Core
 **Documento:** CU-12-Informe-De-Periodo-Y-Comparacion-De-Marcas-v1.0.md
-**Versión:** 1.0
+**Versión:** 1.1
 **Estado:** Borrador
 **Fecha:** 2026-07-20
 **Autor:** Orquestador SDD (AG-02)
@@ -62,7 +62,7 @@ Permitir que el administrador obtenga un informe de un período y una comparaci�
 
 | Dimensión | Referencia |
 | --- | --- |
-| Necesidad de negocio | NB-04 (Ciclo de vida del parque); NB-06 (comparación de marcas por desempeño) |
+| Necesidad de negocio | NB-04 (Ciclo de vida de los equipos); NB-06 (comparación de marcas por desempeño) |
 | Reglas de negocio aplicables | RN-05, RN-07, RN-10, RN-12 |
 | Historias de usuario a generar | US-11 en 06 |
 | Componentes esperados | Servicio de informes, resolutor temporal, agregación, proyección de fichas (referencia tentativa a 05) |
@@ -84,3 +84,4 @@ Trivial: un único administrador consulta informes.
 | Versión | Fecha | Descripción |
 | --- | --- | --- |
 | 1.0 | 2026-07-20 | Redacción inicial derivada de SOLUTION-INTAKE UF-9 (§6), §20.E-6, §20.E-7, NB-04 y NB-06 |
+| 1.1 | 2026-07-20 | Retroalimentación de la Fase B2: unificación de terminología "parque" → "equipos" |

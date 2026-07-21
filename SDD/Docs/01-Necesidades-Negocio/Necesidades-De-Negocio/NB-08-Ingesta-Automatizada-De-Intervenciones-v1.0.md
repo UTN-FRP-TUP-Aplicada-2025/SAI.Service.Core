@@ -4,7 +4,7 @@
 | --- | --- |
 | Proyecto | Sai-Service-Core |
 | Documento | NB-08-Ingesta-Automatizada-De-Intervenciones-v1.0.md |
-| Versión | 1.2 |
+| Versión | 1.3 |
 | Estado | Borrador |
 | Fecha | 2026-07-20 |
 | Autor | Orquestador SDD (AG-01) |
@@ -67,7 +67,7 @@ El sistema de gestión de mantenimiento de un tercero registra un recambio de ba
 ## 8. Dependencias con otras NB
 
 - Depende de NB-03 (Historia trazable con procedencia): las intervenciones ingeridas se registran como hechos append-only con su origen y confianza.
-- Depende de NB-04 (Ciclo de vida del parque): una intervención se aplica sobre unidades del inventario y sus vínculos temporales, cerrando y abriendo vigencias.
+- Depende de NB-04 (Ciclo de vida de los equipos): una intervención se aplica sobre unidades del inventario y sus vínculos temporales, cerrando y abriendo vigencias.
 
 ## 9. Prioridad MoSCoW
 
@@ -80,3 +80,4 @@ Must Have. El SOLUTION-INTAKE §4 marca F-20 (API REST de ingesta idempotente) c
 | 1.0 | 2026-07-20 | Redacción inicial derivada de SOLUTION-INTAKE §1, §4, §7 y §11, y de Vision-Producto-v1.0.md |
 | 1.1 | 2026-07-20 | Corrección de prioridad MoSCoW a Must Have por alineación con SOLUTION-INTAKE §4 tras audit de Fase A |
 | 1.2 | 2026-07-20 | Reconciliación de trazabilidad §7 con los CU vigentes de 02 tras audit de Fase B |
+| 1.3 | 2026-07-20 | Retroalimentación de la Fase B2: unificación de terminología 'parque' → 'equipos' |

@@ -102,7 +102,7 @@ Verificaciones automáticas ejecutadas: barrido de rangos de emoji (solo `→` U
 | NB-01 | Apagado ordenado y reencendido garantizado | CU-05, CU-10 | Cubierta |
 | NB-02 | Monitoreo en vivo y alertas | CU-04, CU-02, CU-06 | Cubierta |
 | NB-03 | Historia trazable con procedencia | CU-06, CU-02, CU-04 | Cubierta |
-| NB-04 | Ciclo de vida del parque | CU-02, CU-08, CU-09, CU-12 | Cubierta |
+| NB-04 | Ciclo de vida de los equipos | CU-02, CU-08, CU-09, CU-12 | Cubierta |
 | NB-05 | Seguridad operativa y bloqueo por verificación | CU-01, CU-05, CU-10, CU-04 | Cubierta |
 | NB-06 | Evaluación de salud de baterías | CU-07, CU-08, CU-12 | Cubierta |
 | NB-07 | Configuración de políticas de apagado | CU-03, CU-05 | Cubierta |
@@ -132,7 +132,7 @@ F-15 "Autenticación mínima de administrador único" es Must Have (intake §4) 
 | --- | --- | --- |
 | Acceso-Login | CU-01 | Sí |
 | Alta-Inicial-Administrador | CU-01 | Sí |
-| Alta-Del-Parque | CU-02 | Sí |
+| Alta-De-Equipos | CU-02 | Sí |
 | Configuracion-De-Politicas | CU-03 | Sí |
 | Panel-Estado-En-Vivo | CU-04, CU-05 | Sí |
 | Panel-De-Verificaciones | CU-05, CU-10 | Sí |

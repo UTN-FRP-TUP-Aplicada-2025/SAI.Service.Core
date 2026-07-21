@@ -2,7 +2,7 @@
 
 **Proyecto:** Sai-Service-Core
 **Documento:** Vision-Producto-v1.0.md
-**Versión:** 1.0
+**Versión:** 1.1
 **Estado:** Borrador
 **Fecha:** 2026-07-20
 **Autor:** Orquestador SDD (AG-00)
@@ -14,7 +14,7 @@
 Un servidor doméstico y de laboratorio, de criticidad alta y sin copias de respaldo, está respaldado por un equipo de alimentación ininterrumpida (SAI). El monitoreo básico y el apagado ordenado ante un corte ya están resueltos por herramientas existentes y verificadas: eso no se reconstruye. El dolor está en cuatro carencias que ninguna herramienta —libre ni comercial— cubre para este equipo:
 
 - No hay histórico de salud de la batería. El equipo relevado no expone ningún indicador de salud y su autoprueba no emite veredicto: la bandera de «reemplazar batería» en la que se apoya el monitoreo convencional nunca se enciende en este equipo, así que un monitoreo estándar no alerta jamás. La salud solo puede obtenerse midiendo la caída de tensión durante la autoprueba y guardando la serie en el tiempo.
-- No hay modelo de ciclo de vida del parque. Altas, recambios de batería, reparaciones, sustitución del SAI y la asociación de cada medición al período de la batería que estaba montada no tienen dónde registrarse; el registro actual es texto plano.
+- No hay modelo de ciclo de vida de los equipos. Altas, recambios de batería, reparaciones, sustitución del SAI y la asociación de cada medición al período de la batería que estaba montada no tienen dónde registrarse; el registro actual es texto plano.
 - No hay verificación viva de los supuestos. Que el servidor vuelva a encenderse solo tras un corte es un supuesto que puede volverse falso en silencio (por ejemplo, por agotamiento de la pila de la placa o un cambio de ajuste no documentado). Nada lo vigila.
 - No hay panel remoto ni interfaz de administración: solo variables crudas expuestas por la herramienta existente. La alternativa del fabricante fue descartada por una vulnerabilidad de ejecución remota sin parche.
 
@@ -30,7 +30,7 @@ Este es un proyecto interno y autopromovido: los tres roles de propietario, impl
 
 | Rol | Nombre o cargo | Categoría | Nivel de involucramiento | Responsabilidad principal |
 |---|---|---|---|---|
-| Administrador único | Administrador del servidor (proyecto interno) | Propietario, Implementador y Beneficiario (una sola persona) | Total, permanente | Aprueba el alcance, da de alta el parque, configura políticas, monitorea, consulta históricos, dispara pruebas, carga intervenciones, ejecuta la ventana de mantenimiento con presencia física y emite informes |
+| Administrador único | Administrador del servidor (proyecto interno) | Propietario, Implementador y Beneficiario (una sola persona) | Total, permanente | Aprueba el alcance, da de alta los equipos, configura políticas, monitorea, consulta históricos, dispara pruebas, carga intervenciones, ejecuta la ventana de mantenimiento con presencia física y emite informes |
 | Servidor protegido | Host de criticidad alta, sin respaldo | Beneficiario (sistema) | Objeto de la protección | Es lo que se protege: el apagado ordenado y el reencendido automático operan sobre él |
 | Proveedor / técnico externo | Servicio técnico de batería y reparación | Beneficiario indirecto / ejecutor | Puntual, por intervención | Ejecuta recambios, reparaciones e inspecciones; recibe las baterías retiradas y consta para trazabilidad ambiental |
 | Sistema externo de gestión de mantenimiento | Plataforma de gestión de mantenimiento de terceros | Integrador / consumidor | Ocasional, automatizado | Empuja intervenciones sin intervención humana, con confianza declarada menor que la del dato medido localmente |
@@ -51,7 +51,7 @@ Diferenciadores, en orden de defendibilidad:
 
 ## 4. Visión a 3 años
 
-En tres años, el servicio es la fuente única de verdad sobre la energía del servidor: decide y ejecuta el apagado ordenado solo cuando puede probar que el servidor volverá a encenderse, y mantiene esa garantía viva sin repetir pruebas destructivas. Acumula varios años de histórico de salud de batería con tendencia legible y confianza creciente, y una biblioteca de fichas de vida útil cerradas que permite decidir cada compra de batería con datos de desempeño y costo real, y no por precio de lista. El parque queda modelado por completo —altas, recambios, reparaciones, sustituciones y cobertura temporal—, de modo que el histórico responde en cualquier momento qué equipo protegía al servidor en cada tramo y cuántos días quedó sin protección. La solución permanece deliberadamente acotada a un único servidor, un único SAI activo y un único administrador; el crecimiento previsto es en profundidad de histórico y confianza de veredictos, no en cantidad de equipos ni de usuarios.
+En tres años, el servicio es la fuente única de verdad sobre la energía del servidor: decide y ejecuta el apagado ordenado solo cuando puede probar que el servidor volverá a encenderse, y mantiene esa garantía viva sin repetir pruebas destructivas. Acumula varios años de histórico de salud de batería con tendencia legible y confianza creciente, y una biblioteca de fichas de vida útil cerradas que permite decidir cada compra de batería con datos de desempeño y costo real, y no por precio de lista. El conjunto de equipos queda modelado por completo —altas, recambios, reparaciones, sustituciones y cobertura temporal—, de modo que el histórico responde en cualquier momento qué equipo protegía al servidor en cada tramo y cuántos días quedó sin protección. La solución permanece deliberadamente acotada a un único servidor, un único SAI activo y un único administrador; el crecimiento previsto es en profundidad de histórico y confianza de veredictos, no en cantidad de equipos ni de usuarios.
 
 ## 5. Objetivos SMART
 

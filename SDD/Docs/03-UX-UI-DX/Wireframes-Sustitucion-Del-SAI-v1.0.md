@@ -2,7 +2,7 @@
 
 **Proyecto:** Sai-Service-Core
 **Documento:** Wireframes-Sustitucion-Del-SAI-v1.0.md
-**Versión:** 1.0
+**Versión:** 1.1
 **Estado:** Borrador
 **Fecha:** 2026-07-20
 **Autor:** Orquestador SDD (AG-03)
@@ -23,7 +23,7 @@ Shell de trabajo. Área de contenido con: una línea de cobertura vigente arriba
 ```text
 +----------------+-----------------------------------------------------------------+
 | navegacion     |  Reparacion y sustitucion del SAI                    <sello>    |  <h1> + sello
-|  · Parque      |  Cobertura vigente: [ ups-01 protege i7infra ]  [badge Activa]  |  estado de cobertura
+|  · Equipos     |  Cobertura vigente: [ ups-01 protege i7infra ]  [badge Activa]  |  estado de cobertura
 |  · Sustituc. <-|                                                                 |
 |                |  +--------- Intervencion sobre el equipo -----------------+     |
 |                |  | Accion ( Reparacion )( Sustitucion )   Instante [ f/h ] |     |
@@ -108,7 +108,7 @@ La línea de cobertura vigente se mantiene por encima del pliegue. El formulario
 | Acceso de operador único aplicado | sí (shell de trabajo) |
 | Identidad de versión aplicada | sí (sello heredado del shell de trabajo) |
 | Modelo UX-UI aplicado en la Fase B2 | catálogo base |
-| Validación visual de maqueta | N/A (pendiente Fase B2) |
+| Validación de maqueta | aprobada 2026-07-20, ruta SDD/Maquetas/Sai-Service-Core/ |
 | Línea de base emitida | N/A (pendiente Fase B2) |
 
 ## 9. Control de cambios
@@ -116,3 +116,4 @@ La línea de cobertura vigente se mantiene por encima del pliegue. El formulario
 | Versión | Fecha | Cambios |
 | --- | --- | --- |
 | 1.0 | 2026-07-20 | Redacción inicial. Superficie Sustitucion-Del-SAI: línea de cobertura vigente, formulario de reparación/sustitución, cobertura suplente, sucesión de coberturas con días sin protección y aviso de caracterización al sustituir por otro modelo. Tabla de estados (vacío/cargando/con datos/error de solapamiento y de coherencia temporal + host sin cobertura, suplente activa, SAI en reparación), responsive, accesibilidad AA, pendiente R-11 referido, trazabilidad. Maqueta-aware. |
+| 1.1 | 2026-07-20 | Retroalimentación de la Fase B2 de validación de maqueta: unificación de 'parque' → 'equipos' y 'secreto' → 'contraseña'. |

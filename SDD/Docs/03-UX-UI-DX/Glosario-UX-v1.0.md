@@ -2,7 +2,7 @@
 
 **Proyecto:** Sai-Service-Core
 **Documento:** Glosario-UX-v1.0.md
-**Versión:** 1.0
+**Versión:** 1.1
 **Estado:** Borrador
 **Fecha:** 2026-07-20
 **Autor:** Orquestador SDD (AG-03)
@@ -23,7 +23,7 @@
 | Shell partido | Diseño de dos shells separados por la sesión: el shell de acceso (sin sesión, sin navegación) y el shell de trabajo (con sesión, con navegación). La transición entre ellos es una navegación completa. |
 | Shell de acceso | Shell sin sesión: lienzo vacío con una tarjeta centrada, sin navegación. Lo usan Acceso-Login y Alta-Inicial-Administrador. |
 | Shell de trabajo | Shell con sesión: navegación de módulos, barra superior con la identidad y las acciones de identidad, y área de contenido. |
-| Barra de identidad | Zona de la barra superior del shell de trabajo con la identidad activa y las acciones de cambio de secreto y cierre de sesión. |
+| Barra de identidad | Zona de la barra superior del shell de trabajo con la identidad activa y las acciones de cambio de contraseña y cierre de sesión. |
 | Área de contenido | Región donde vive el contenido de cada superficie, dentro del shell de trabajo. |
 
 ## 2. Términos de estado y feedback
@@ -43,7 +43,7 @@
 | Alerta de conectividad | Señal en el panel cuando el sistema pierde comunicación con el SAI (3 sondeos consecutivos sin respuesta). |
 | Región activa (`aria-live`) | Zona cuyo cambio se anuncia a tecnologías asistivas sin que el usuario la busque; usada para el estado en vivo y las alertas. |
 | Catálogo de códigos de resultado | Fuente única de los textos de resultado de acceso e identidad; cada código tiene un texto único, no repetido por superficie. |
-| Rechazo indiferenciado | Mensaje de credenciales inválidas que no distingue "usuario inexistente" de "secreto incorrecto", para no confirmar la existencia de la identidad. |
+| Rechazo indiferenciado | Mensaje de credenciales inválidas que no distingue "usuario inexistente" de "contraseña incorrecta", para no confirmar la existencia de la identidad. |
 
 ## 3. Términos de configuración dirigida por esquema
 
@@ -95,3 +95,4 @@
 | Versión | Fecha | Cambios |
 | --- | --- | --- |
 | 1.0 | 2026-07-20 | Redacción inicial. Vocabulario de superficie/navegación, estado/feedback, configuración por esquema, primer arranque e identidad de versión. Referencia al glosario del dominio de 02 sin duplicarlo. |
+| 1.1 | 2026-07-20 | Retroalimentación de la Fase B2 de validación de maqueta: unificación de 'parque' → 'equipos' y 'secreto' → 'contraseña'. |

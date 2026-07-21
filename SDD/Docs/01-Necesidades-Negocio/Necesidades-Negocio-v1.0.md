@@ -4,12 +4,12 @@
 | --- | --- |
 | Proyecto | Sai-Service-Core |
 | Documento | Necesidades-Negocio-v1.0.md |
-| Versión | 1.0 |
+| Versión | 1.1 |
 | Estado | Borrador |
 | Fecha | 2026-07-20 |
 | Autor | Orquestador SDD (AG-01) |
 | Cantidad de NB | 8 |
-| Versión del catálogo de NB | 1.2 |
+| Versión del catálogo de NB | 1.3 |
 | Trazabilidad upstream | SOLUTION-INTAKE §1, §3, §4, §8, §10, §11; Vision-Producto-v1.0.md; Alcance-Proyecto-v1.0.md |
 | Trazabilidad downstream | 02-Especificacion-Funcional (CU previstas); 06-Backlog-Tecnico, 07-Plan-Sprint (priorización MoSCoW); 08-Calidad-Y-Pruebas (criterios de éxito) |
 
@@ -17,7 +17,7 @@
 
 Este índice maestro consolida las necesidades de negocio (NB) del proyecto Sai-Service-Core, derivadas de los dolores reales relevados en el SOLUTION-INTAKE y del marco previo de la categoría 00. Cada NB articula un problema concreto del negocio, para quién, con qué métrica de éxito y con qué prioridad relativa. Las NB no descienden a flujos funcionales (categoría 02) ni a decisiones técnicas (categoría 05).
 
-El proyecto es una solución de un único proyecto (caso degenerado, layout aplanado), de tipo web-monolith: un servicio web que monitorea el equipo de alimentación, decide y ejecuta el apagado ordenado del servidor y su reencendido, administra el ciclo de vida del parque y expone un panel y una interfaz de integración. Un único administrador concentra los roles de propietario, implementador y beneficiario.
+El proyecto es una solución de un único proyecto (caso degenerado, layout aplanado), de tipo web-monolith: un servicio web que monitorea el equipo de alimentación, decide y ejecuta el apagado ordenado del servidor y su reencendido, administra el ciclo de vida de los equipos y expone un panel y una interfaz de integración. Un único administrador concentra los roles de propietario, implementador y beneficiario.
 
 ## 2. Tabla resumen de NB
 
@@ -26,7 +26,7 @@ El proyecto es una solución de un único proyecto (caso degenerado, layout apla
 | NB-01 | Apagado ordenado y reencendido automático garantizado del host | Continuidad del servicio y camino crítico irreversible | Must Have | CU-05, CU-10 | Borrador | [NB-01](Necesidades-De-Negocio/NB-01-Apagado-Ordenado-Y-Reencendido-Garantizado-v1.0.md) |
 | NB-02 | Monitoreo en vivo del estado del SAI y alertas de conectividad | Visibilidad operativa e insumo del apagado | Must Have | CU-04, CU-02, CU-06 | Borrador | [NB-02](Necesidades-De-Negocio/NB-02-Monitoreo-En-Vivo-Y-Alertas-v1.0.md) |
 | NB-03 | Historia trazable de métricas con procedencia y corrección retroactiva | Confiabilidad de las conclusiones y auditabilidad | Must Have | CU-06, CU-02, CU-04 | Borrador | [NB-03](Necesidades-De-Negocio/NB-03-Historia-Trazable-Con-Procedencia-v1.0.md) |
-| NB-04 | Gestión del ciclo de vida del parque de dispositivos y baterías | Trazabilidad del parque y decisión de compra con datos | Must Have | CU-02, CU-08, CU-09, CU-12 | Borrador | [NB-04](Necesidades-De-Negocio/NB-04-Ciclo-De-Vida-Del-Parque-v1.0.md) |
+| NB-04 | Gestión del ciclo de vida de los equipos y baterías | Trazabilidad de los equipos y decisión de compra con datos | Must Have | CU-02, CU-08, CU-09, CU-12 | Borrador | [NB-04](Necesidades-De-Negocio/NB-04-Ciclo-De-Vida-De-Los-Equipos-v1.0.md) |
 | NB-05 | Seguridad operativa: arranque seguro, bloqueo por verificación y validación por efecto observado | Garantía de no apagar sin poder probar el reencendido | Must Have | CU-01, CU-05, CU-10, CU-04 | Borrador | [NB-05](Necesidades-De-Negocio/NB-05-Seguridad-Operativa-Bloqueo-Por-Verificacion-v1.0.md) |
 | NB-06 | Evaluación de la salud de las baterías por tendencia, con confianza y reservas | Planificación del recambio y diferenciador de valor | Must Have | CU-07, CU-08, CU-12 | Borrador | [NB-06](Necesidades-De-Negocio/NB-06-Evaluacion-De-Salud-De-Baterias-v1.0.md) |
 | NB-07 | Configuración de políticas de apagado versionadas | Control y explicabilidad del camino crítico | Must Have | CU-03, CU-05 | Borrador | [NB-07](Necesidades-De-Negocio/NB-07-Configuracion-De-Politicas-De-Apagado-v1.0.md) |
@@ -82,7 +82,7 @@ Los 12 CU vigentes en 02-Especificacion-Funcional, alineados uno a uno con los f
 | CU | Título vigente en 02 | NB que la cubre |
 | --- | --- | --- |
 | CU-01 | Autenticación y gestión de la sesión del administrador | NB-05 |
-| CU-02 | Alta del parque y puesta en marcha | NB-02, NB-03, NB-04 |
+| CU-02 | Alta de equipos y puesta en marcha | NB-02, NB-03, NB-04 |
 | CU-03 | Configuración de políticas de apagado versionadas | NB-07 |
 | CU-04 | Monitoreo en vivo del estado del SAI | NB-02, NB-03, NB-05 |
 | CU-05 | Ejecución del apagado ordenado ante corte sostenido | NB-01, NB-05, NB-07 |
@@ -101,3 +101,4 @@ Los 12 CU vigentes en 02-Especificacion-Funcional, alineados uno a uno con los f
 | 1.0 | 2026-07-20 | Índice maestro inicial con 8 NB derivadas del SOLUTION-INTAKE y de la categoría 00 |
 | 1.1 | 2026-07-20 | Corrección de prioridad MoSCoW de NB-06 y NB-08 a Must Have por alineación con SOLUTION-INTAKE §4 (F-16, F-17, F-20) tras audit de Fase A; catálogo de NB a 1.1 |
 | 1.2 | 2026-07-20 | Reconciliación de trazabilidad con los 12 CU vigentes de 02 tras audit de Fase B: tabla resumen §2, matriz §4 y catálogo §5 reapuntados a los CU reales (estado aprobada); nota de autenticación (F-15, CU-01) agregada en §2; catálogo de NB a 1.2 |
+| 1.3 | 2026-07-20 | Retroalimentación de la Fase B2: unificación de terminología 'parque' → 'equipos'; renombrado de NB-04 a «Ciclo de vida de los equipos» y de CU-02 a «Alta de equipos y puesta en marcha» en las referencias; catálogo de NB a 1.3 |
