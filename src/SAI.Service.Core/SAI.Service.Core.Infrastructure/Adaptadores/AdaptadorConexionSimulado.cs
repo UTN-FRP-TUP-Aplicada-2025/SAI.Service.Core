@@ -11,9 +11,25 @@ namespace SAI.Service.Core.Infrastructure.Adaptadores;
 /// fisica, ADR-01/ADR-03/ADR-19) llega en etapas posteriores.
 /// </para>
 /// </summary>
-public sealed class AdaptadorConexionSimulado : IAdaptadorConexion
+public sealed class AdaptadorConexionSimulado : IAdaptadorConexion, IDescubridorSai
 {
     private static DateTimeOffset Ahora => DateTimeOffset.UtcNow;
+
+    /// <inheritdoc />
+    public Task<IReadOnlyList<DispositivoDescubierto>> DescubrirAsync(CancellationToken ct)
+    {
+        IReadOnlyList<DispositivoDescubierto> candidatos =
+        [
+            new DispositivoDescubierto(
+                NombreNut: "sai",
+                Descriptor: "0000:0000 · SAI simulado (sin hardware) · serie: vacío",
+                VendorId: "0000",
+                ProductId: "0000",
+                Driver: "simulado",
+                NumeroSerie: null),
+        ];
+        return Task.FromResult(candidatos);
+    }
 
     /// <inheritdoc />
     public Task<EstadoSai> LeerEstadoAsync(CancellationToken ct) =>

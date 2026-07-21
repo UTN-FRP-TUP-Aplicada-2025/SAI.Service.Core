@@ -9,6 +9,20 @@ y el versionado sigue [Semantic Versioning](https://semver.org/lang/es/).
 
 ### Añadido
 
+- **Etapa 2 · Incremento B — Adaptador de conexión NUT real + descubrimiento** (BT-15, US-03):
+  `AdaptadorConexionNut` que habla con el SAI a través de **NUT** (Network UPS Tools) por su
+  protocolo de red, sin traductor de dialecto propio (ADR-01). Cliente NUT mínimo (`ClienteNut`
+  sobre `IClienteNut`, con parseo puro `ProtocoloNut`), **descubrimiento** de dispositivos
+  (`IDescubridorSai`: `LIST UPS` + descriptores `vendor:product · marca · serie`, US-03) y **prueba
+  de conexión por efecto observado** (lee `ups.status` real, mide latencia; una excepción de
+  transporte se traduce a "no alcanzable", ADR-11). Mapeo NUT→`EstadoSai`: `input.voltage`/
+  `output.voltage`/`ups.load` como **medidos**, `battery.charge` como **estimado por el driver**
+  (nunca medido, RN-05). El adaptador se elige por configuración (`Sai:Adaptador` = `Simulado` por
+  defecto o `Nut`). El apagado y el test de batería por NUT quedan diferidos a la Etapa 4 (escritura
+  con credenciales). El anclaje USB por ruta física (BT-13) es configuración de despliegue
+  (udev + `--device`, ADR-03/ADR-25), no código. Pruebas: parser puro + adaptador con cliente falso
+  (16 nuevas) y 3 pruebas **en vivo** opcionales (validadas contra el SAI real por NUT).
+
 - **Etapa 2 · Incremento A — Dominio del ciclo de vida de equipos** (BT-11, BT-12): modelo de
   dominio framework-free en tres capas (**catálogo** `Fabricante`/`ModeloDispositivo`/`ModeloBateria`;
   **inventario** `UnidadFisica` con `Host`/`Dispositivo`/`Bateria`, baja lógica y máquina de estados;
