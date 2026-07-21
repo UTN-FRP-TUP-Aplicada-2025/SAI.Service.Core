@@ -2,7 +2,7 @@
 
 **Proyecto:** Sai-Service-Core
 **Documento:** Wireframes-Acceso-Login-v1.0.md
-**Versión:** 1.0
+**Versión:** 1.1
 **Estado:** Borrador
 **Fecha:** 2026-07-20
 **Autor:** Orquestador SDD (AG-03)
@@ -14,7 +14,7 @@
 
 Nombre canónico de la superficie: **Acceso-Login**.
 
-Superficie de acceso del perfil de operador único. Con el sistema ya aprovisionado y sin sesión activa, el administrador ingresa con su usuario y su secreto para alcanzar el panel de trabajo. Es también el destino al completar el primer arranque y el destino al que devuelve una sesión vencida. Lleva el sello de identidad de versión (ubicación obligatoria de acceso). Origen: CU-01 (ingreso, cierre de sesión).
+Superficie de acceso del perfil de operador único. Con el sistema ya aprovisionado y sin sesión activa, el administrador ingresa con su usuario y su contraseña para alcanzar el panel de trabajo. Es también el destino al completar el primer arranque y el destino al que devuelve una sesión vencida. Lleva el sello de identidad de versión (ubicación obligatoria de acceso). Origen: CU-01 (ingreso, cierre de sesión).
 
 ## 2. Layout
 
@@ -30,8 +30,8 @@ Shell de acceso: lienzo vacío, sin navegación, con una tarjeta de acceso ancla
 |                 |  [ banda de error      role=alert  ]  |  condicional     |
 |                 |  Usuario                              |  label           |
 |                 |  [ campo identificador             ]  |                  |
-|                 |  Secreto                              |  label           |
-|                 |  [ campo secreto                   ]  |                  |
+|                 |  Contraseña                           |  label           |
+|                 |  [ campo contraseña                ]  |                  |
 |                 |  [========== Ingresar ============]   |  ancho completo  |
 |                 |             <sello de version>        |  al pie, sutil   |
 |                 +---------------------------------------+                  |
@@ -47,17 +47,17 @@ Shell de acceso: lienzo vacío, sin navegación, con una tarjeta de acceso ancla
 | Subtítulo de alcance | Explicar la ausencia de opciones multiusuario | "Es la única cuenta del sistema" | Estático |
 | Banda de resultado por código | Acusar rechazo, restricción, confirmación entrante o sesión vencida | Texto único resuelto desde el catálogo de códigos | Error `role="alert"`, confirmación `role="status"`; nunca el código crudo |
 | Campo identificador | Capturar el usuario | Valor tecleado | Propósito declarado para el gestor de credenciales |
-| Campo secreto | Capturar el secreto | Enmascarado | — |
+| Campo contraseña | Capturar la contraseña | Enmascarado | — |
 | Acción primaria | Ingresar | "Ingresar" | Ancho completo; sin acciones secundarias |
 | Sello de versión | Identificar la instancia antes de entrar | `versionLegible` + distintivo/marcador según contrato | Abre el detalle de diagnóstico con copiado en un gesto |
 
-Omisiones declaradas (no se dibujan, ni deshabilitadas): registro de cuentas, selector o listado de cuentas, recuperación del secreto, persistencia opcional de sesión ("recordarme"), roles o permisos visibles.
+Omisiones declaradas (no se dibujan, ni deshabilitadas): registro de cuentas, selector o listado de cuentas, recuperación de la contraseña, persistencia opcional de sesión ("recordarme"), roles o permisos visibles.
 
 ## 4. Interacciones
 
 | Acción | Disparador | Resultado esperado | Precondición |
 | --- | --- | --- | --- |
-| Ingresar | Activar "Ingresar" | Se crea la sesión; navegación completa al shell de trabajo (Panel-Estado-En-Vivo) | Par usuario/secreto válido; sistema aprovisionado |
+| Ingresar | Activar "Ingresar" | Se crea la sesión; navegación completa al shell de trabajo (Panel-Estado-En-Vivo) | Par usuario/contraseña válido; sistema aprovisionado |
 | Rechazo de credenciales | Par inválido | Banda de error con rechazo indiferenciado; el foco vuelve a la banda o al primer campo | — |
 | Llegar desde el primer arranque | `destinoAlCompletar` tras crear la identidad | Banda de confirmación "identidad creada; ya podés ingresar" | Sistema recién aprovisionado |
 | Llegar por sesión vencida | La sesión expiró por inactividad o tope | Banda con estado "sesión vencida", sin culpar al usuario | Había sesión y venció |
@@ -75,7 +75,7 @@ Omisiones declaradas (no se dibujan, ni deshabilitadas): registro de cuentas, se
 | Error (acceso restringido temporalmente) | Se superó el umbral de intentos de la política | Banda de error que declara la restricción temporal, sin umbrales ni cuenta regresiva |
 | Error (formulario vencido) | La protección del formulario expiró | Banda de error que pide reintentar, sin detalle técnico |
 | Identidad recién creada | Se llega desde el primer arranque | Banda de confirmación con qué se creó y qué hacer ahora |
-| Secreto actualizado | Se llega desde el cambio de secreto | Banda de confirmación con qué cambió y el efecto sobre la sesión |
+| Contraseña actualizada | Se llega desde el cambio de contraseña | Banda de confirmación con qué cambió y el efecto sobre la sesión |
 | Sesión expirada | La sesión venció | Retorno a esta superficie con estado "sesión vencida" declarado |
 
 ## 6. Versión móvil o responsive
@@ -105,7 +105,7 @@ Igual que Alta-Inicial-Administrador: tarjeta angosta anclada arriba, sin chrome
 | Acceso de operador único aplicado | sí (shell de acceso, omisiones declaradas, catálogo de resultados, política de sesión) |
 | Identidad de versión aplicada | sí (sello obligatorio de acceso; detalle de diagnóstico) |
 | Modelo UX-UI aplicado en la Fase B2 | catálogo base |
-| Validación visual de maqueta | N/A (pendiente Fase B2) |
+| Validación de maqueta | aprobada 2026-07-20, ruta SDD/Maquetas/Sai-Service-Core/ |
 | Línea de base emitida | N/A (pendiente Fase B2) |
 
 ## 9. Control de cambios
@@ -113,3 +113,4 @@ Igual que Alta-Inicial-Administrador: tarjeta angosta anclada arriba, sin chrome
 | Versión | Fecha | Cambios |
 | --- | --- | --- |
 | 1.0 | 2026-07-20 | Redacción inicial. Superficie de acceso Acceso-Login: shell partido, omisiones del perfil de operador único, banda de resultado por código, sello de versión obligatorio, tabla de estados (vacío N/A, cargando, con datos, error y estados propios de acceso/sesión), responsive, accesibilidad AA, trazabilidad. Maqueta-aware. |
+| 1.1 | 2026-07-20 | Retroalimentación de la Fase B2 de validación de maqueta: unificación de 'parque' → 'equipos' y 'secreto' → 'contraseña'. |

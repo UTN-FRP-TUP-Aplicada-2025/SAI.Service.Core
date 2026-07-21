@@ -2,7 +2,7 @@
 
 **Proyecto:** Sai-Service-Core
 **Documento:** Modelo-Conceptual-v1.0.md
-**Versión:** 1.0
+**Versión:** 1.1
 **Estado:** Borrador
 **Fecha:** 2026-07-20
 **Autor:** Orquestador SDD (AG-02)
@@ -31,7 +31,7 @@ Quien ejecuta intervenciones y puede ser receptor de la disposición final de un
 ### Capa de inventario
 
 #### 1.6 UnidadFisica
-Supertipo conceptual de las unidades físicas del parque; aporta el ciclo de vida con estado, fecha de baja y motivo de baja, y la baja lógica. No se instancia por sí sola; la especializan Host, Dispositivo y Bateria.
+Supertipo conceptual de las unidades físicas del conjunto de equipos; aporta el ciclo de vida con estado, fecha de baja y motivo de baja, y la baja lógica. No se instancia por sí sola; la especializan Host, Dispositivo y Bateria.
 
 #### 1.7 Host
 El servidor protegido. Ejemplo: `host-i7infra`, criticidad alta, en servicio desde 2024-11-20.
@@ -259,3 +259,4 @@ Objetos de valor Valor-con-Origen y Dinero no se dibujan como entidades: envuelv
 | Versión | Fecha | Cambios |
 | --- | --- | --- |
 | 1.0 | 2026-07-20 | Modelo conceptual inicial derivado de SOLUTION-INTAKE §17 P.4 y de las instancias de §20.E-1 a §20.E-8 |
+| 1.1 | 2026-07-20 | Retroalimentación de la Fase B2: unificación de terminología "parque" → "equipos" |

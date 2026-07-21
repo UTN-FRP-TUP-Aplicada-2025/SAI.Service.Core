@@ -2,7 +2,7 @@
 
 **Proyecto:** Sai-Service-Core
 **Documento:** Wireframes-Alta-Inicial-Administrador-v1.0.md
-**Versión:** 1.0
+**Versión:** 1.1
 **Estado:** Borrador
 **Fecha:** 2026-07-20
 **Autor:** Orquestador SDD (AG-03)
@@ -14,7 +14,7 @@
 
 Nombre canónico de la superficie: **Alta-Inicial-Administrador**.
 
-Superficie de aprovisionamiento del primer arranque. La primera vez que se abre una instancia recién desplegada, cuando todavía no existe ningún administrador, el sistema pide crear la única identidad de operación (usuario y secreto). Es un acto explícito, indivisible e irreversible desde la UI, dibujado sin chrome de navegación y sin acción de cancelar, porque no hay estado previo al que volver. Al completarse, el sistema queda aprovisionado y esta superficie deja de existir para esa instancia. Origen: CU-01 (alta inicial del administrador), UF-1.
+Superficie de aprovisionamiento del primer arranque. La primera vez que se abre una instancia recién desplegada, cuando todavía no existe ningún administrador, el sistema pide crear la única identidad de operación (usuario y contraseña). Es un acto explícito, indivisible e irreversible desde la UI, dibujado sin chrome de navegación y sin acción de cancelar, porque no hay estado previo al que volver. Al completarse, el sistema queda aprovisionado y esta superficie deja de existir para esa instancia. Origen: CU-01 (alta inicial del administrador), UF-1.
 
 ## 2. Layout
 
@@ -29,10 +29,10 @@ Shell partido: shell vacío, solo el lienzo y una tarjeta de aprovisionamiento a
 |                 |  [ banda de resultado   role=alert ]  |  condicional     |
 |                 |  Usuario                              |  label           |
 |                 |  [ campo identificador             ]  |                  |
-|                 |  Secreto                              |  label           |
-|                 |  [ campo secreto                   ]  |                  |
-|                 |  <requisito de politica del secreto>  |  §4.5 declarado  |
-|                 |  Repetir secreto                      |  label           |
+|                 |  Contraseña                           |  label           |
+|                 |  [ campo contraseña                ]  |                  |
+|                 |  <requisito de politica de contraseña>|  §4.5 declarado  |
+|                 |  Repetir contraseña                   |  label           |
 |                 |  [ campo confirmacion              ]  |                  |
 |                 |  [====== Crear administrador ======]  |  ancho completo  |
 |                 |             <sello de version>        |  al pie, sutil   |
@@ -51,9 +51,9 @@ No se dibuja registro, ni selector de cuenta, ni "recordarme", ni recuperación:
 | Subtítulo de alcance | Declarar la unicidad de la identidad | "Es la única cuenta del sistema" | Estático; explica por qué faltan las opciones habituales |
 | Banda de resultado (patrón §4.4 Primer-Arranque / §4.2 Acceso-Monousuario) | Acusar error o confirmación | Texto resuelto desde el catálogo de códigos | `role="alert"` en error; no se compone en la vista |
 | Campo identificador | Capturar el usuario | Valor tecleado | Propósito declarado para el gestor de credenciales |
-| Campo secreto | Capturar el secreto | Enmascarado | — |
-| Requisito de política del secreto (patrón §4.5) | Declarar la regla antes del intento, en positivo | Regla de la política de secreto (derivada del sistema, no literal en la vista) | Asociado por `aria-describedby` |
-| Campo confirmación | Evitar el error de tipeo del secreto | Enmascarado | Valida coincidencia antes de enviar |
+| Campo contraseña | Capturar la contraseña | Enmascarado | — |
+| Requisito de política de la contraseña (patrón §4.5) | Declarar la regla antes del intento, en positivo | Regla de la política de contraseña (derivada del sistema, no literal en la vista) | Asociado por `aria-describedby` |
+| Campo confirmación | Evitar el error de tipeo de la contraseña | Enmascarado | Valida coincidencia antes de enviar |
 | Acción primaria | Ejecutar el aprovisionamiento | "Crear administrador" | Ancho completo; sin acción secundaria ni escape |
 | Sello de versión (patrón §4.1 Identidad-De-Version) | Identificar la instancia antes de autenticarse | `versionLegible` (+ distintivo si preliminar, + marcador si origen indeterminado) | Abre el detalle de diagnóstico; derivado de la construcción, no compuesto |
 
@@ -62,7 +62,7 @@ No se dibuja registro, ni selector de cuenta, ni "recordarme", ni recuperación:
 | Acción | Disparador | Resultado esperado | Precondición |
 | --- | --- | --- | --- |
 | Resolver destino | Entrada a la instancia | Si el predicado `estaAprovisionado` es falso, se muestra esta superficie; si es verdadero, redirige a Acceso-Login | Guard de ruteo consulta el predicado único |
-| Enviar el alta | Activar "Crear administrador" | Se crea la identidad; el sistema queda aprovisionado; redirige a `destinoAlCompletar` (Acceso-Login) con banda de confirmación "identidad creada" | Secreto cumple la política y coincide con la confirmación |
+| Enviar el alta | Activar "Crear administrador" | Se crea la identidad; el sistema queda aprovisionado; redirige a `destinoAlCompletar` (Acceso-Login) con banda de confirmación "identidad creada" | La contraseña cumple la política y coincide con la confirmación |
 | Abrir detalle de diagnóstico | Activar el sello de versión | Panel con el contrato de versión completo y copiado en un solo gesto | — |
 | Intento fuera de tiempo | Enviar cuando el sistema ya se aprovisionó entre la carga y el envío | Guard de la acción redirige de forma neutra a Acceso-Login, sin exponer el motivo | El predicado pasó a verdadero |
 
@@ -73,8 +73,8 @@ No se dibuja registro, ni selector de cuenta, ni "recordarme", ni recuperación:
 | Vacío | No aplica: es un acto único, no una lista | Se documenta como no aplicable; la superficie siempre presenta el formulario |
 | Cargando (resolviendo destino) | El predicado todavía no respondió | Indicador de progreso indeterminado; nunca queda en blanco ni parpadea contenido que luego se retira |
 | Con datos (formulario listo) | Predicado falso; sistema sin administrador | Tarjeta de aprovisionamiento sobre shell vacío; foco inicial en el primer campo |
-| Error (requisito no cumplido) | El secreto viola la política declarada | Borde de error en el campo + banda de error con la regla violada, enunciada igual que en el requisito |
-| Error (confirmación no coincidente) | El secreto y su repetición difieren | Banda de error con la discrepancia y qué hacer |
+| Error (requisito no cumplido) | La contraseña viola la política declarada | Borde de error en el campo + banda de error con la regla violada, enunciada igual que en el requisito |
+| Error (confirmación no coincidente) | La contraseña y su repetición difieren | Banda de error con la discrepancia y qué hacer |
 | Enviando | Se activó la acción primaria | Acción en estado de envío; sin doble envío |
 | Envío fuera de tiempo | El sistema se aprovisionó entre carga y envío | Redirección neutra a Acceso-Login; sin mensaje en la superficie abandonada |
 | Aprovisionado (redirige) | Predicado verdadero al entrar | No se muestra la superficie; guard redirige a Acceso-Login |
@@ -85,7 +85,7 @@ La tarjeta de ancho acotado ya es la forma angosta: en viewport chico ocupa el a
 
 ## 7. Notas de implementación
 
-- Accesibilidad: `<h1>` presente pese a la ausencia de navegación; banda de error `role="alert"` y banda de confirmación (en la superficie siguiente) `role="status"`; requisito de secreto asociado por `aria-describedby` y anunciado antes del intento; foco inicial en el primer campo y, tras un error, en la banda o el primer campo inválido; foco visible AA; ningún estado solo por color.
+- Accesibilidad: `<h1>` presente pese a la ausencia de navegación; banda de error `role="alert"` y banda de confirmación (en la superficie siguiente) `role="status"`; requisito de contraseña asociado por `aria-describedby` y anunciado antes del intento; foco inicial en el primer campo y, tras un error, en la banda o el primer campo inválido; foco visible AA; ningún estado solo por color.
 - Primer arranque: predicado único de aprovisionamiento (`estaAprovisionado` = existe administrador); artefacto mínimo = la cuenta de administrador; guard en tres capas (ruteo, superficie, acción) contra ese mismo predicado; sin cancelar; `destinoAlCompletar` explícito = Acceso-Login; el acto cierra el lazo con la banda de confirmación en la superficie siguiente.
 - Acceso monousuario: esta superficie crea la identidad única; comparte composición con el shell de acceso para dar continuidad entre crear la identidad y usarla.
 - Identidad de versión: el sello al pie es una de las dos ubicaciones obligatorias (superficie de acceso). Se deriva de la construcción; muestra el marcador de origen indeterminado en ejecución local y el distintivo de preliminar en artefactos `-alpha.N`.
@@ -101,14 +101,14 @@ La tarjeta de ancho acotado ya es la forma angosta: en viewport chico ocupa el a
 | Marco de experiencia aplicado | Experiencia-De-Uso-v1.0 §3.1 (puesta en marcha) |
 | Reglas de negocio relevantes | RN-01 (arranque seguro, indirecta: el acceso no altera la modalidad) |
 | US a generar en 06 | US de acceso — alta inicial del administrador (derivada de CU-01) |
-| Tests previstos en 08 | Alta única e idempotencia del arranque; guard en tres capas; rechazo de secreto que viola la política; envío fuera de tiempo redirige; acuse de recibo en la superficie siguiente |
+| Tests previstos en 08 | Alta única e idempotencia del arranque; guard en tres capas; rechazo de contraseña que viola la política; envío fuera de tiempo redirige; acuse de recibo en la superficie siguiente |
 | Catálogo de diseño aplicado | Design-Rules-Web-Generico-v1.0 + Design-Rules-Blazor-Mudblazor-v1.0 |
 | Configuración dirigida por esquema aplicada | N/A |
 | Primer arranque aplicado | sí (predicado, guard en tres capas, superficie sin chrome ni cancelar, destino al completar declarado, orientación posterior en el destino) |
 | Acceso de operador único aplicado | sí (crea la identidad única; shell de acceso compartido) |
 | Identidad de versión aplicada | sí (sello en la superficie de acceso; detalle de diagnóstico) |
 | Modelo UX-UI aplicado en la Fase B2 | catálogo base |
-| Validación visual de maqueta | N/A (pendiente Fase B2) |
+| Validación de maqueta | aprobada 2026-07-20, ruta SDD/Maquetas/Sai-Service-Core/ |
 | Línea de base emitida | N/A (pendiente Fase B2) |
 
 ## 9. Control de cambios
@@ -116,3 +116,4 @@ La tarjeta de ancho acotado ya es la forma angosta: en viewport chico ocupa el a
 | Versión | Fecha | Cambios |
 | --- | --- | --- |
 | 1.0 | 2026-07-20 | Redacción inicial. Superficie de aprovisionamiento del primer arranque con nombre canónico Alta-Inicial-Administrador: layout sin chrome, componentes, interacciones con guard en tres capas, tabla de estados (incluye vacío N/A, cargando, con datos, error), responsive, notas de accesibilidad y de las cuatro extensiones aplicables, trazabilidad. Maqueta-aware. |
+| 1.1 | 2026-07-20 | Retroalimentación de la Fase B2 de validación de maqueta: unificación de 'parque' → 'equipos' y 'secreto' → 'contraseña'. |

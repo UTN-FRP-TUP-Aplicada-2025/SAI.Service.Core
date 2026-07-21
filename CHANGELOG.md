@@ -9,6 +9,24 @@ y el versionado sigue [Semantic Versioning](https://semver.org/lang/es/).
 
 ### Añadido
 
+- **Fase B2 del SDD — validación visual de maqueta**: maqueta navegable estática en
+  `SDD/Maquetas/Sai-Service-Core/` (11 superficies, HTML/CSS/JS con Bootstrap 5, sin
+  build), aprobada por el administrador. Emite en `03-UX-UI-DX/` los artefactos de línea
+  de base del sensado de deriva: `Linea-Base-Visual-v1.0.md`, `Contrato-Datos-Maqueta-v1.0.md`
+  y `Bitacora-Validacion-Maqueta-v1.0.md`.
+
+### Cambiado
+
+- **Unificación de terminología** (retroalimentación de la Fase B2, propagada a toda la
+  cadena: intake, 00, 01, 02, 03 y maqueta):
+  - Dominio: **«parque» → «equipos»** (el término se juzgó jerga; «Dispositivo» e
+    «Inventario» colisionaban con entidades/capas del modelo conceptual, «equipos» no).
+    El flujo UF-1 pasa a «Alta de equipos y puesta en marcha».
+  - Acceso: **«secreto» → «contraseña»** en la superficie de login (los «Secretos en
+    runtime/CI» del intake §17 P.5 no se tocan: son gestión de secretos, otro concepto).
+  - Renombrado de `NB-04`, `CU-02` y el wireframe de alta a sus nuevos slugs; intake a
+    v1.2, manifiesto a v1.1.
+
 - Intake actualizado a v1.1: **Parte D — Anexos de datos** (§20 escenarios `E-1`…`E-8`
   con JSON completo; §21 cobertura, invariantes I-1 a I-21 y flujos end-to-end). El intake
   pasa a ser autocontenido.

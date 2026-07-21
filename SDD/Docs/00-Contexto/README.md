@@ -23,7 +23,7 @@ Orden de lectura sugerido: visión, alcance, roadmap y compatibilidad. La visió
 
 | Rol | Categoría | Responsabilidad principal |
 |---|---|---|
-| Administrador único | Propietario, implementador y beneficiario (una sola persona) | Aprueba el alcance, da de alta el parque, configura políticas, monitorea, consulta históricos, dispara pruebas, carga intervenciones, ejecuta la ventana de mantenimiento con presencia física y emite informes |
+| Administrador único | Propietario, implementador y beneficiario (una sola persona) | Aprueba el alcance, da de alta los equipos, configura políticas, monitorea, consulta históricos, dispara pruebas, carga intervenciones, ejecuta la ventana de mantenimiento con presencia física y emite informes |
 | Servidor protegido | Beneficiario (sistema) | Es el objeto de la protección: el apagado ordenado y el reencendido automático operan sobre él |
 | Proveedor / técnico externo | Beneficiario indirecto / ejecutor externo | Ejecuta recambios de batería, reparaciones e inspecciones; recibe las baterías retiradas para trazabilidad ambiental |
 | Sistema externo de gestión de mantenimiento | Integrador / consumidor de la interfaz de integración | Empuja intervenciones de forma automatizada, con confianza declarada menor que la del dato medido localmente |

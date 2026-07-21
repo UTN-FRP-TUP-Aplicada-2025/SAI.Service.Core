@@ -127,7 +127,7 @@ Todos los filenames NB cumplen el regex `^NB-\d{2}-([A-Z][A-Za-z0-9]*)(-[A-Z][A-
 
 ### P3-01 — NB Must Have que empaqueta capacidades Should Have del intake
 - Nivel: P3 (bajo — está divulgado y justificado).
-- Archivo/sección: `NB-04-Ciclo-De-Vida-Del-Parque-v1.0.md` cabecera (upstream `F-21, F-22, F-23`), §9 y control de cambios.
+- Archivo/sección: `NB-04-Ciclo-De-Vida-De-Los-Equipos-v1.0.md` cabecera (upstream `F-21, F-22, F-23`), §9 y control de cambios.
 - Evidencia: NB-04 es Must Have pero incorpora F-21 (sustitución del SAI), F-22 y F-23 (informe/comparación de marcas), que el intake §4 marca Should Have. El propio doc lo declara. El efecto es que el backlog no puede diferir limpiamente esas capacidades Should sin partir la NB.
 - Recomendación: aceptable si se conserva la nota; considerar separar el alcance Should (comparación de marcas / sustitución) de modo que la priorización downstream pueda diferirlo sin arrastrar el núcleo Must.
 

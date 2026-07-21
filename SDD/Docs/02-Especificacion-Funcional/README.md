@@ -9,7 +9,7 @@ Punto de entrada: [Especificacion-Funcional-v1.0.md](Especificacion-Funcional-v1
 | CU | Propósito en una línea | Estado |
 | --- | --- | --- |
 | [CU-01](Casos-De-Uso/CU-01-Autenticacion-Del-Administrador-v1.0.md) | Acceso autenticado del administrador: alta inicial, ingreso, cambio de contraseña y cierre de sesión | Borrador |
-| [CU-02](Casos-De-Uso/CU-02-Alta-Del-Parque-Y-Puesta-En-Marcha-v1.0.md) | Dar de alta equipo, batería y host descubriendo el dispositivo y sembrando las verificaciones | Borrador |
+| [CU-02](Casos-De-Uso/CU-02-Alta-De-Equipos-Y-Puesta-En-Marcha-v1.0.md) | Dar de alta equipo, batería y host descubriendo el dispositivo y sembrando las verificaciones | Borrador |
 | [CU-03](Casos-De-Uso/CU-03-Configuracion-De-Politicas-De-Apagado-v1.0.md) | Configurar la política de apagado creando una versión nueva, sin editar la vigente | Borrador |
 | [CU-04](Casos-De-Uso/CU-04-Monitoreo-En-Vivo-Del-Estado-Del-Sai-v1.0.md) | Ver el estado en vivo del equipo, persistir muestras con calidad y derivar eventos | Borrador |
 | [CU-05](Casos-De-Uso/CU-05-Ejecucion-Del-Apagado-Ordenado-Ante-Corte-v1.0.md) | Ejecutar o bloquear el apagado ordenado ante un corte sostenido, con retorno garantizado | Borrador |

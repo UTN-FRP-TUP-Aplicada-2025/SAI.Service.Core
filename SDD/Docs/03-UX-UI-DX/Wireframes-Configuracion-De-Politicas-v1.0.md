@@ -2,7 +2,7 @@
 
 **Proyecto:** Sai-Service-Core
 **Documento:** Wireframes-Configuracion-De-Politicas-v1.0.md
-**Versión:** 1.1
+**Versión:** 1.2
 **Estado:** Borrador
 **Fecha:** 2026-07-20
 **Autor:** Orquestador SDD (AG-03)
@@ -125,7 +125,7 @@ La grilla de campos pasa a una columna bajo ~768px; la barra lateral colapsa a d
 | Acceso de operador único aplicado | sí (shell de trabajo) |
 | Identidad de versión aplicada | sí (sello heredado del shell de trabajo) |
 | Modelo UX-UI aplicado en la Fase B2 | catálogo base |
-| Validación visual de maqueta | N/A (pendiente Fase B2) |
+| Validación de maqueta | aprobada 2026-07-20, ruta SDD/Maquetas/Sai-Service-Core/ |
 | Línea de base emitida | N/A (pendiente Fase B2) |
 
 ## 9. Control de cambios
@@ -134,3 +134,4 @@ La grilla de campos pasa a una columna bajo ~768px; la barra lateral colapsa a d
 | --- | --- | --- |
 | 1.0 | 2026-07-20 | Redacción inicial. Superficie de configuración dirigida por esquema Configuracion-De-Politicas: descriptores de modalidad/umbral/tiempo reservado/intervalo, presets, ayuda contextual, divulgación progresiva, explicación en palabras, modo simulación, ranura del asistente reservada, frontera PropuestaDeConfiguracion y frontera aplicación/entorno. Tabla de estados (vacío/cargando/con datos/error + simulación, previsualización, ranura deshabilitada), responsive, accesibilidad AA, trazabilidad. Maqueta-aware. |
 | 1.1 | 2026-07-20 | Corrección de conformidad D7: reemplazo de nombres de stack por vocabulario de dominio tras audit de Fase B. En la nota de frontera aplicación/entorno (§7) se sustituyeron los nombres de implementación por términos agnósticos (almacenamiento, mecanismo de acceso al equipo, adaptador de conexión, terminación segura en el borde, contenedor); sin cambios de semántica. |
+| 1.2 | 2026-07-20 | Retroalimentación de la Fase B2 de validación de maqueta: validación de maqueta aprobada (ruta SDD/Maquetas/Sai-Service-Core/). |

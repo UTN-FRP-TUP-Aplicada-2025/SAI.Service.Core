@@ -1,0 +1,611 @@
+/* ==========================================================================
+   Estilos-Maqueta.css — Sai-Service-Core
+   Materializacion de los tokens del catalogo de diseno como variables CSS.
+   Fuente de tokens:
+     - Design-Rules-Web-Generico-v1.0 (§2 sistema de tokens)
+     - Design-Rules-Blazor-Mudblazor-v1.0 (§1 theme; aproximado con Bootstrap 5)
+   Se carga DESPUES de Bootstrap y sobreescribe. Sin literales sueltos en las
+   superficies: todo valor visual sale de una variable de este archivo.
+   ========================================================================== */
+
+:root {
+  /* --- Color: superficies (§2.1) --- */
+  --color-background-primary: #FFFFFF;
+  --color-background-secondary: #F1F1EF;
+  --color-background-tertiary: #F7F6F4;
+
+  /* --- Color: texto (§2.1) --- */
+  --color-text-primary: #1A1A18;
+  --color-text-secondary: #5C5C57;
+  --color-text-tertiary: #8A8A82;
+  --color-text-danger: #A03030;
+
+  /* --- Color: bordes (§2.1) --- */
+  --color-border-secondary: #D9D9D4;
+  --color-border-tertiary: #E6E6E1;
+  --color-border-danger: #E0B4B4;
+
+  /* --- Rampa de marca y acentos (§2.1) --- */
+  --color-brand-primary: #0F6E56;
+  --color-brand-primary-dark: #04342C;
+  --color-brand-primary-tint: #E1F5EE;
+  --color-accent-module-a: #0F6E56;
+  --color-accent-module-b: #534AB7;
+  --color-accent-module-c: #854F0B;
+  --color-accent-module-d: #185FA5;
+
+  /* --- Estados semanticos: texto + tint (§2.1, siempre en par) --- */
+  --color-success-text: #0F6E56;
+  --color-success-bg: #E1F5EE;
+  --color-warning-text: #854F0B;
+  --color-warning-bg: #FAEEDA;
+  --color-danger-text: #A03030;
+  --color-danger-bg: #FBEAF0;
+  --color-info-text: #185FA5;
+  --color-info-bg: #E7F0F9;
+  --color-info-border: #BBD4EA;
+  --color-neutral-text: #5C5C57;
+  --color-neutral-bg: #F1F1EF;
+  --color-selected-bg: #F4F9F7;
+
+  /* --- Tipografia (§2.2) --- */
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --type-title-size: 17px;
+  --type-title-weight: 500;
+  --type-body-strong-size: 14px;
+  --type-body-strong-weight: 500;
+  --type-body-size: 13px;
+  --type-body-weight: 400;
+  --type-caption-size: 12px;
+  --type-caption-weight: 400;
+  --type-meta-size: 11px;
+  --type-meta-weight: 500;
+
+  /* --- Espaciado (§2.3, base 4) --- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 14px;
+  --space-5: 16px;
+  --space-6: 18px;
+  --space-7: 20px;
+  --space-8: 22px;
+  --space-9: 28px;
+
+  /* --- Radios (§2.3) --- */
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-pill: 20px;
+  --radius-icon: 12px;
+
+  /* --- Bordes hairline (§2.3) --- */
+  --border-hairline: 0.5px solid var(--color-border-tertiary);
+  --border-control: 1px solid var(--color-border-secondary);
+
+  /* --- Layout shell (§3.1) --- */
+  --chrome-width: 168px;
+
+  /* --- Movimiento (§8) --- */
+  --motion-fast: 180ms;
+  --motion-ease: ease;
+}
+
+/* ==========================================================================
+   Base
+   ========================================================================== */
+html, body {
+  height: 100%;
+}
+body {
+  font-family: var(--font-sans);
+  font-size: var(--type-body-size);
+  color: var(--color-text-primary);
+  background: var(--color-background-tertiary);
+  margin: 0;
+}
+
+/* Numeros tabulares en columnas numericas (§2.2) */
+.num, td.num, .valor-num {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+h1, .h1-vista {
+  font-size: var(--type-title-size);
+  font-weight: var(--type-title-weight);
+  line-height: 1.2;
+  margin: 0;
+  color: var(--color-text-primary);
+}
+
+/* Foco visible AA (§7): anillo de 2px que no depende solo del color */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible,
+.mq-nav-link:focus-visible,
+.mq-tarjeta-acceso:focus-visible {
+  outline: 2px solid var(--color-brand-primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-md);
+}
+
+/* Enlace de salto al contenido */
+.mq-skip {
+  position: absolute;
+  left: -999px;
+  top: var(--space-2);
+  z-index: 2000;
+  background: var(--color-background-primary);
+  color: var(--color-brand-primary);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  border: var(--border-control);
+}
+.mq-skip:focus {
+  left: var(--space-2);
+}
+
+/* ==========================================================================
+   Shell de trabajo (§3.1): barra lateral + barra superior + contenido
+   ========================================================================== */
+.mq-shell {
+  display: grid;
+  grid-template-columns: var(--chrome-width) 1fr;
+  grid-template-rows: auto 1fr;
+  grid-template-areas:
+    "chrome topbar"
+    "chrome main";
+  min-height: 100vh;
+}
+
+/* Barra lateral (chrome oscuro de marca, §3.1 / §4.1) */
+.mq-chrome {
+  grid-area: chrome;
+  background: var(--color-brand-primary-dark);
+  color: #FFFFFF;
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-4) var(--space-2);
+}
+.mq-chrome-marca {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  font-weight: 600;
+  font-size: var(--type-body-strong-size);
+  color: #FFFFFF;
+}
+.mq-chrome-marca svg { width: 20px; height: 20px; }
+
+.mq-nav {
+  margin-top: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.mq-nav-link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 40px;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  color: rgba(255,255,255,0.72);
+  text-decoration: none;
+  font-size: var(--type-body-size);
+}
+.mq-nav-link svg { width: 20px; height: 20px; flex: 0 0 auto; }
+.mq-nav-link:hover { color: #FFFFFF; background: rgba(255,255,255,0.06); }
+.mq-nav-link[aria-current="page"] {
+  background: var(--color-brand-primary);
+  color: #FFFFFF;
+}
+
+/* Barra superior */
+.mq-topbar {
+  grid-area: topbar;
+  background: var(--color-background-primary);
+  border-bottom: var(--border-hairline);
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-6);
+}
+.mq-topbar .mq-identidad {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text-secondary);
+  font-size: var(--type-caption-size);
+}
+.mq-topbar .mq-topbar-acciones {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.mq-main {
+  grid-area: main;
+  padding: var(--space-7) var(--space-7) 96px;
+  max-width: 1120px;
+}
+
+/* Shell de acceso / primer arranque (sin chrome) */
+.mq-shell-acceso {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 64px var(--space-4) 120px;
+}
+.mq-tarjeta-acceso {
+  width: 100%;
+  max-width: 380px;
+  background: var(--color-background-primary);
+  border: var(--border-hairline);
+  border-radius: var(--radius-lg);
+  padding: var(--space-8);
+}
+.mq-omisiones {
+  margin-top: var(--space-5);
+  color: var(--color-text-tertiary);
+  font-size: var(--type-caption-size);
+  text-align: center;
+  max-width: 380px;
+}
+
+/* ==========================================================================
+   Tarjetas y bloques
+   ========================================================================== */
+.mq-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--space-4);
+}
+.mq-card {
+  background: var(--color-background-primary);
+  border: var(--border-hairline);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+}
+.mq-card + .mq-card { margin-top: 0; }
+.mq-card-titulo {
+  font-size: var(--type-body-strong-size);
+  font-weight: var(--type-body-strong-weight);
+  margin: 0 0 var(--space-3);
+  color: var(--color-text-primary);
+}
+.mq-seccion { margin-bottom: var(--space-9); }
+.mq-seccion-titulo {
+  font-size: var(--type-title-size);
+  font-weight: var(--type-title-weight);
+  margin: 0 0 var(--space-4);
+}
+
+/* Filas clave/valor */
+.mq-kv { display: grid; grid-template-columns: 1fr auto; gap: var(--space-2) var(--space-4); }
+.mq-kv dt { color: var(--color-text-secondary); font-size: var(--type-caption-size); font-weight: 400; }
+.mq-kv dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
+
+.mq-label { display:block; font-size: var(--type-caption-size); color: var(--color-text-secondary); margin-bottom: var(--space-1); }
+.mq-hint { font-size: var(--type-caption-size); color: var(--color-text-tertiary); margin-top: var(--space-1); }
+
+/* Procedencia (medido/derivado/declarado/imputado) */
+.mq-proc {
+  font-size: var(--type-meta-size);
+  font-weight: var(--type-meta-weight);
+  color: var(--color-text-tertiary);
+  border: var(--border-hairline);
+  border-radius: var(--radius-pill);
+  padding: 1px var(--space-2);
+  margin-left: var(--space-2);
+  white-space: nowrap;
+}
+
+/* ==========================================================================
+   Badges / chips de estado (§4.8) — texto + tint, nunca solo color
+   ========================================================================== */
+.mq-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--type-meta-size);
+  font-weight: var(--type-meta-weight);
+  border-radius: var(--radius-pill);
+  padding: 2px var(--space-2);
+  line-height: 1.4;
+}
+.mq-badge--success { color: var(--color-success-text); background: var(--color-success-bg); }
+.mq-badge--warning { color: var(--color-warning-text); background: var(--color-warning-bg); }
+.mq-badge--danger  { color: var(--color-danger-text);  background: var(--color-danger-bg); }
+.mq-badge--info    { color: var(--color-info-text);    background: var(--color-info-bg); }
+.mq-badge--neutral { color: var(--color-neutral-text); background: var(--color-neutral-bg); }
+
+/* ==========================================================================
+   Bandas / banners de resultado y bloqueo
+   ========================================================================== */
+.mq-banda {
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--type-caption-size);
+  margin-bottom: var(--space-4);
+  border: 1px solid transparent;
+}
+.mq-banda--danger  { color: var(--color-danger-text);  background: var(--color-danger-bg);  border-color: var(--color-border-danger); }
+.mq-banda--success { color: var(--color-success-text); background: var(--color-success-bg); border-color: var(--color-brand-primary-tint); }
+.mq-banda--warning { color: var(--color-warning-text); background: var(--color-warning-bg); border-color: #ECD9B0; }
+.mq-banda--info    { color: var(--color-info-text);    background: var(--color-info-bg);    border-color: var(--color-info-border); }
+.mq-banda strong { font-weight: 600; }
+.mq-banda a { color: inherit; font-weight: 600; }
+
+/* ==========================================================================
+   Botones (§4.9) — sobre Bootstrap
+   ========================================================================== */
+.btn { font-size: var(--type-body-size); border-radius: var(--radius-md); }
+.btn-mq-primary {
+  background: var(--color-brand-primary);
+  border-color: var(--color-brand-primary);
+  color: #FFFFFF;
+}
+.btn-mq-primary:hover, .btn-mq-primary:focus { background: #0c5c48; border-color: #0c5c48; color: #FFFFFF; }
+.btn-mq-secondary {
+  background: var(--color-background-primary);
+  border: var(--border-control);
+  color: var(--color-text-secondary);
+}
+.btn-mq-secondary:hover { background: var(--color-background-secondary); color: var(--color-text-primary); }
+.btn-mq-danger {
+  background: var(--color-background-primary);
+  border: 1px solid var(--color-border-danger);
+  color: var(--color-text-danger);
+}
+.btn-mq-pill { border-radius: var(--radius-pill); }
+.btn:disabled, .btn.disabled { opacity: 0.5; }
+
+/* Controles de formulario (§4.6) */
+.form-control, .form-select {
+  font-size: var(--type-body-size);
+  border-radius: var(--radius-md);
+  border: var(--border-control);
+  color: var(--color-text-primary);
+}
+.form-control::placeholder { color: var(--color-text-tertiary); }
+.form-control:focus, .form-select:focus {
+  border-color: var(--color-brand-primary);
+  box-shadow: 0 0 0 2px var(--color-brand-primary-tint);
+}
+.form-control.is-invalid, .form-select.is-invalid {
+  border-color: var(--color-border-danger);
+}
+
+/* ==========================================================================
+   Tablas / grillas de listado (§4.3)
+   ========================================================================== */
+.mq-scroll-x { overflow-x: auto; }
+table.mq-tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--type-caption-size);
+}
+table.mq-tabla thead th {
+  font-size: var(--type-meta-size);
+  font-weight: var(--type-meta-weight);
+  text-transform: none;
+  color: var(--color-text-secondary);
+  background: var(--color-background-tertiary);
+  text-align: left;
+  padding: var(--space-2) var(--space-3);
+  border-bottom: var(--border-hairline);
+  white-space: nowrap;
+}
+table.mq-tabla tbody td {
+  padding: var(--space-2) var(--space-3);
+  border-bottom: var(--border-hairline);
+  color: var(--color-text-primary);
+}
+table.mq-tabla tbody tr:hover { background: var(--color-selected-bg); }
+
+/* ==========================================================================
+   Estados: vacio, cargando (skeleton)
+   ========================================================================== */
+.mq-vacio {
+  text-align: center;
+  padding: var(--space-9) var(--space-5);
+  color: var(--color-text-secondary);
+}
+.mq-vacio svg { width: 48px; height: 48px; color: var(--color-text-tertiary); margin-bottom: var(--space-3); }
+.mq-vacio h2 { font-size: var(--type-body-strong-size); color: var(--color-text-primary); margin: 0 0 var(--space-2); }
+.mq-vacio p { font-size: var(--type-caption-size); margin: 0 auto var(--space-4); max-width: 44ch; }
+
+.mq-skeleton {
+  background: linear-gradient(90deg, var(--color-background-secondary) 25%, #EAEAE6 37%, var(--color-background-secondary) 63%);
+  background-size: 400% 100%;
+  animation: mq-shimmer 1.2s ease infinite;
+  border-radius: var(--radius-md);
+  height: 14px;
+  margin-bottom: var(--space-2);
+}
+.mq-skeleton--titulo { height: 18px; width: 40%; }
+.mq-skeleton--bloque { height: 120px; }
+@keyframes mq-shimmer { 0% { background-position: 100% 0; } 100% { background-position: 0 0; } }
+
+/* Stepper (§4.5) */
+.mq-stepper { display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-5); flex-wrap: wrap; }
+.mq-step { display: flex; align-items: center; gap: var(--space-2); }
+.mq-step-num {
+  width: 26px; height: 26px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: var(--type-meta-size); font-weight: 600;
+  background: var(--color-background-secondary); color: var(--color-text-secondary);
+}
+.mq-step[aria-current="step"] .mq-step-num { background: var(--color-brand-primary); color: #FFFFFF; }
+.mq-step[data-estado="completado"] .mq-step-num { background: var(--color-brand-primary); color: #FFFFFF; }
+.mq-step-conector { width: 24px; height: 2px; background: var(--color-border-secondary); }
+.mq-step[data-estado="completado"] + .mq-step-conector,
+.mq-step-conector[data-pintado="si"] { background: var(--color-brand-primary); }
+
+/* Ranura del asistente (config-esquema §4.7) */
+.mq-ranura-asistente {
+  border: 1px dashed var(--color-border-secondary);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  color: var(--color-text-tertiary);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  background: var(--color-background-tertiary);
+}
+
+/* Grafico placeholder (Historicos) */
+.mq-grafico {
+  height: 220px;
+  border: var(--border-hairline);
+  border-radius: var(--radius-lg);
+  background:
+    linear-gradient(var(--color-border-tertiary) 1px, transparent 1px) 0 0 / 100% 44px,
+    var(--color-background-primary);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Sello de version (Identidad-De-Version §4.1) */
+.mq-sello {
+  font-size: var(--type-meta-size);
+  font-weight: var(--type-meta-weight);
+  color: var(--color-text-tertiary);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline dotted;
+}
+.mq-sello-linea { display: inline-flex; align-items: center; gap: var(--space-2); }
+
+/* Pie / sello de version de superficie (§4.6 Maqueta-Rules) */
+.mq-footer {
+  margin-top: var(--space-9);
+  padding-top: var(--space-4);
+  border-top: var(--border-hairline);
+  font-size: var(--type-meta-size);
+  color: var(--color-text-tertiary);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  align-items: center;
+}
+.mq-footer-acceso { margin-top: var(--space-6); text-align: center; justify-content: center; }
+
+/* ==========================================================================
+   Barra de validacion de maqueta (Maqueta-Rules §4.3)
+   NO forma parte del producto.
+   ========================================================================== */
+.mq-validacion {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  z-index: 1500;
+  background: var(--color-brand-primary-dark);
+  color: #FFFFFF;
+  border-top: 3px solid var(--color-warning-text);
+  padding: var(--space-2) var(--space-4);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+  font-size: var(--type-caption-size);
+}
+.mq-validacion-rotulo {
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.mq-validacion-rotulo svg { width: 16px; height: 16px; color: #FBD8A6; }
+.mq-validacion label { color: rgba(255,255,255,0.85); margin: 0 var(--space-1) 0 0; }
+.mq-validacion select {
+  font-size: var(--type-caption-size);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255,255,255,0.3);
+  background: #FFFFFF;
+  color: var(--color-text-primary);
+  padding: 2px var(--space-2);
+  max-width: 260px;
+}
+.mq-validacion .mq-recarga {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.mq-validacion .form-check-input { cursor: pointer; }
+.mq-validacion .mq-recarga-razon {
+  color: #FBD8A6;
+  font-size: var(--type-meta-size);
+  max-width: 240px;
+}
+.mq-validacion .form-check-input:disabled { opacity: 0.4; }
+
+/* Reserva de espacio para que la barra fija no tape el pie */
+body { padding-bottom: 64px; }
+
+/* Region viva accesible: cambios de estado se anuncian sin ser visibles */
+.mq-sr-only {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+}
+
+/* ==========================================================================
+   Index (portada)
+   ========================================================================== */
+.mq-portada { max-width: 1120px; margin: 0 auto; padding: var(--space-9) var(--space-7) 96px; }
+.mq-portada-head { margin-bottom: var(--space-9); }
+.mq-portada-head h1 { font-size: 22px; }
+.mq-portada-head p { color: var(--color-text-secondary); font-size: var(--type-body-size); max-width: 70ch; margin-top: var(--space-3); }
+.mq-tarjeta-acceso-index {
+  display: block;
+  background: var(--color-background-primary);
+  border: var(--border-hairline);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  text-decoration: none;
+  color: inherit;
+  height: 100%;
+}
+.mq-tarjeta-acceso-index:hover { border-color: var(--color-brand-primary); }
+.mq-tarjeta-acceso-index .mq-ico {
+  width: 40px; height: 40px; border-radius: var(--radius-icon);
+  background: var(--color-brand-primary-tint); color: var(--color-brand-primary);
+  display: inline-flex; align-items: center; justify-content: center; margin-bottom: var(--space-3);
+}
+.mq-tarjeta-acceso-index .mq-ico svg { width: 22px; height: 22px; }
+.mq-tarjeta-acceso-index h2 { font-size: var(--type-body-strong-size); margin: 0 0 var(--space-1); }
+.mq-tarjeta-acceso-index p { font-size: var(--type-caption-size); color: var(--color-text-secondary); margin: 0; }
+.mq-tarjeta-acceso-index .mq-cu { font-size: var(--type-meta-size); color: var(--color-text-tertiary); margin-top: var(--space-2); display: block; }
+
+/* ==========================================================================
+   Responsive (§8): la barra lateral colapsa bajo ~768px
+   ========================================================================== */
+@media (max-width: 768px) {
+  .mq-shell {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "topbar"
+      "chrome"
+      "main";
+  }
+  .mq-chrome { flex-direction: row; flex-wrap: wrap; padding: var(--space-2); }
+  .mq-nav { flex-direction: row; flex-wrap: wrap; margin-top: 0; }
+  .mq-nav-link { min-height: 36px; }
+  .mq-main { padding: var(--space-5) var(--space-4) 96px; }
+}
+
+/* Movimiento reducido (§7) */
+@media (prefers-reduced-motion: reduce) {
+  .mq-skeleton { animation: none; }
+  * { transition: none !important; }
+}

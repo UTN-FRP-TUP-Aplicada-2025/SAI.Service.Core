@@ -2,7 +2,7 @@
 
 **Proyecto:** Sai-Service-Core
 **Documento:** RN-01-Arranque-Seguro-En-Solo-Alerta-v1.0.md
-**Versión:** 1.0
+**Versión:** 1.1
 **Estado:** Borrador
 **Fecha:** 2026-07-20
 **Autor:** Orquestador SDD (AG-02)
@@ -17,7 +17,7 @@ El servicio decide apagar un servidor sin copias de respaldo, de noche y sin tes
 
 ## 3. Ámbito de aplicación
 
-- En el arranque del servicio y en cada puesta en marcha del parque.
+- En el arranque del servicio y en cada puesta en marcha de los equipos.
 - En toda ronda de evaluación de políticas del planificador, como estado base del que solo se sale por verificación cumplida.
 
 ## 4. Consecuencia si se viola
@@ -26,7 +26,7 @@ Si el sistema pudiera arrancar en una modalidad con acción sin verificaciones c
 
 ## 5. CU afectados
 
-CU-02 (Alta del parque y puesta en marcha), CU-05 (Ejecución del apagado ordenado ante corte sostenido), CU-10 (Ventana de mantenimiento y verificación de supuestos). De forma indirecta CU-01 (el acceso no altera la modalidad).
+CU-02 (Alta de equipos y puesta en marcha), CU-05 (Ejecución del apagado ordenado ante corte sostenido), CU-10 (Ventana de mantenimiento y verificación de supuestos). De forma indirecta CU-01 (el acceso no altera la modalidad).
 
 ## 6. Pruebas que la verifican
 
@@ -37,3 +37,4 @@ Prueba de que, sin verificaciones cumplidas, la modalidad efectiva en el arranqu
 | Versión | Fecha | Cambios |
 | --- | --- | --- |
 | 1.0 | 2026-07-20 | Redacción inicial derivada de SOLUTION-INTAKE §17 P.5 (arranque seguro) y PA-10 |
+| 1.1 | 2026-07-20 | Retroalimentación de la Fase B2: unificación de terminología "parque" → "equipos" |

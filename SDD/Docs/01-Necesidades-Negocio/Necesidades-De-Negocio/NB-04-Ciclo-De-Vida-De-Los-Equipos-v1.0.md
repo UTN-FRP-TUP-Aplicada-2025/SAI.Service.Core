@@ -1,10 +1,10 @@
-# NB-04 — Gestión del ciclo de vida del parque de dispositivos y baterías
+# NB-04 — Ciclo de vida de los equipos
 
 | Campo | Valor |
 | --- | --- |
 | Proyecto | Sai-Service-Core |
-| Documento | NB-04-Ciclo-De-Vida-Del-Parque-v1.0.md |
-| Versión | 1.1 |
+| Documento | NB-04-Ciclo-De-Vida-De-Los-Equipos-v1.0.md |
+| Versión | 1.2 |
 | Estado | Borrador |
 | Fecha | 2026-07-20 |
 | Autor | Orquestador SDD (AG-01) |
@@ -13,11 +13,11 @@
 
 ## 1. Descripción de la necesidad
 
-El negocio necesita modelar el ciclo de vida completo del parque: dar de alta el equipo y su batería, registrar recambios, reparaciones y sustituciones, y saber en cualquier momento qué equipo protegía al servidor en cada tramo y cuántos días quedó sin protección. Hoy no hay modelo de inventario: las herramientas existentes no distinguen el modelo de producto de la unidad física, no registran altas ni bajas, y el recambio de una batería no queda asociado al período en que estuvo montada.
+El negocio necesita modelar el ciclo de vida completo de los equipos: dar de alta el equipo y su batería, registrar recambios, reparaciones y sustituciones, y saber en cualquier momento qué equipo protegía al servidor en cada tramo y cuántos días quedó sin protección. Hoy no hay modelo de inventario: las herramientas existentes no distinguen el modelo de producto de la unidad física, no registran altas ni bajas, y el recambio de una batería no queda asociado al período en que estuvo montada.
 
 La necesidad tiene una consecuencia decisiva: cada medición debe poder atribuirse a la batería que estaba puesta cuando se tomó, y una batería puede retirarse, probarse en banco y volver a instalarse, o moverse a otro equipo. Eso solo se representa si la relación entre unidades es un vínculo con intervalo, no un atributo de la batería. Con la vigencia como dato de la batería, el caso en que un equipo se va a reparación y otro lo cubre ni siquiera es representable.
 
-Además, dar de alta el parque debe hacerse desde el panel, sin editar archivos de configuración a mano, y nada se borra: toda baja es lógica y la unidad retirada sigue consultable con su historial pero no operable. Al cerrar la vida de una batería, el negocio necesita su ficha de vida útil —cuánto duró, qué soportó, si cumplió la expectativa y cuánto costó por año— para decidir la próxima compra con datos y no por precio de lista.
+Además, dar de alta los equipos debe hacerse desde el panel, sin editar archivos de configuración a mano, y nada se borra: toda baja es lógica y la unidad retirada sigue consultable con su historial pero no operable. Al cerrar la vida de una batería, el negocio necesita su ficha de vida útil —cuánto duró, qué soportó, si cumplió la expectativa y cuánto costó por año— para decidir la próxima compra con datos y no por precio de lista.
 
 ## 2. Ejemplo de uso desde la perspectiva del negocio
 
@@ -25,7 +25,7 @@ El administrador abre el panel por primera vez, identifica el equipo, declara ma
 
 ## 3. Impacto
 
-- Trazabilidad del parque: responde qué equipo y qué batería protegían al servidor en cada tramo, algo hoy imposible.
+- Trazabilidad de los equipos: responde qué equipo y qué batería protegían al servidor en cada tramo, algo hoy imposible.
 - Atribución correcta de métricas: cada medición queda ligada al período de la batería que estaba montada.
 - Decisión de compra con datos: la ficha de vida útil y el costo por año habilitan comparar marcas por desempeño real.
 - Integridad del histórico: la baja lógica conserva el pasado de toda unidad retirada sin permitir operarla.
@@ -43,7 +43,7 @@ El administrador abre el panel por primera vez, identifica el equipo, declara ma
 
 | Criterio | Métrica | Target | Plazo |
 | --- | --- | --- | --- |
-| Alta sin edición manual de archivos | Pasos de edición de archivos de configuración para dar de alta el parque | 0 | Desde el onboarding |
+| Alta sin edición manual de archivos | Pasos de edición de archivos de configuración para dar de alta los equipos | 0 | Desde el onboarding |
 | Ausencia de borrado físico | Unidades borradas físicamente en lugar de baja lógica | 0 | Continuo |
 | Reconstrucción de cobertura | Tramos del período con equipo protector identificable | 100 % | Continuo |
 | Días sin protección cuantificados | Huecos entre coberturas medidos y reportados | 100 % de los huecos | Por período |
@@ -61,7 +61,7 @@ El administrador abre el panel por primera vez, identifica el equipo, declara ma
 
 | NB | CU prevista | Estado |
 | --- | --- | --- |
-| NB-04 | CU-02 Alta del parque y puesta en marcha | aprobada |
+| NB-04 | CU-02 Alta de equipos y puesta en marcha | aprobada |
 | NB-04 | CU-08 Registro de recambio de batería y ficha de vida útil | aprobada |
 | NB-04 | CU-09 Reparación y sustitución del SAI con cobertura suplente | aprobada |
 | NB-04 | CU-12 Informe de período y comparación de marcas | aprobada |
@@ -80,3 +80,4 @@ Must Have. El modelo de inventario y los vínculos temporales son la base sobre 
 | --- | --- | --- |
 | 1.0 | 2026-07-20 | Redacción inicial derivada de SOLUTION-INTAKE §1, §4, §7 y §8, y de Vision-Producto-v1.0.md. Incluye la sustitución del SAI (F-21) y el informe de comparación de marcas (F-22, F-23), de prioridad Should en el intake, como refinamientos sobre el mismo modelo fundacional |
 | 1.1 | 2026-07-20 | Reconciliación de trazabilidad §7 con los CU vigentes de 02 tras audit de Fase B |
+| 1.2 | 2026-07-20 | Retroalimentación de la Fase B2: unificación de terminología 'parque' → 'equipos' |

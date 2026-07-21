@@ -2,7 +2,7 @@
 
 **Proyecto:** Sai-Service-Core
 **Documento:** Roadmap-Producto-v1.0.md
-**Versión:** 1.0
+**Versión:** 1.1
 **Estado:** Borrador
 **Fecha:** 2026-07-20
 **Autor:** Orquestador SDD (AG-00)
@@ -19,9 +19,9 @@ Este documento organiza la construcción en fases con objetivo, entregable y cri
 |---|---|---|---|---|---|
 | F0 — Fundaciones y decisiones abiertas | Resolver las decisiones de arranque que condicionan la infraestructura antes de codificarla | Decisiones abiertas P-03 a P-06 (ubicación de la herramienta de acceso al equipo, cifrado en la red local, contratos aún no cerrados) | 1 | Registro de decisiones de arquitectura (ADR) del arranque | v0.0 |
 | F1 — Esqueleto caminante | Una solución que compila, corre con un script, se abre en el navegador, persiste, autentica y da sesión al administrador único | Andamiaje, panel base, persistencia y alta de administrador, sesión (etapas 1 a 4 de §15) | 4 | Servicio ejecutable con panel navegable, alta de administrador, login, cierre de sesión y cambio de contraseña | v0.4 |
-| F2 — Alta del parque y políticas | Registrar el parque y configurar políticas de apagado versionadas | UF-1 (alta del parque), UF-2 (configuración de políticas); capacidades C-01, C-02, C-05, C-06 | 2 | Alta del SAI y su batería desde el panel; política de apagado versionada; siembra de supuestos en no verificado, con el servicio forzado en solo aviso | v0.6 |
+| F2 — Alta de equipos y políticas | Registrar los equipos y configurar políticas de apagado versionadas | UF-1 (alta de equipos), UF-2 (configuración de políticas); capacidades C-01, C-02, C-05, C-06 | 2 | Alta del SAI y su batería desde el panel; política de apagado versionada; siembra de supuestos en no verificado, con el servicio forzado en solo aviso | v0.6 |
 | F3 — Monitoreo, salud e históricos | Ver el estado en vivo, probar la batería y consultar la evolución | UF-3 (monitoreo en vivo), UF-5 (prueba de batería y salud), UF-4 (históricos y gráficas); capacidades C-03, C-04, C-07, C-08, C-09, C-10 | 3 | Panel en vivo con supuestos y eventos; prueba de batería con veredicto y confianza; gráficas históricas con marcas de eventos | v0.9 |
-| F4 — Verificación y ciclo de vida del parque | Desbloquear el apagado real por evidencia y modelar recambios y sustituciones | UF-8 (ventana de mantenimiento), UF-6 (recambio de batería), UF-7 (reparación o sustitución del SAI); capacidades C-11, C-13, C-16 | 3 | Ventana de mantenimiento guiada con registro de evidencia; recambio de batería que cierra y abre vigencias; cobertura suplente con días sin protección | v0.12 |
+| F4 — Verificación y ciclo de vida de los equipos | Desbloquear el apagado real por evidencia y modelar recambios y sustituciones | UF-8 (ventana de mantenimiento), UF-6 (recambio de batería), UF-7 (reparación o sustitución del SAI); capacidades C-11, C-13, C-16 | 3 | Ventana de mantenimiento guiada con registro de evidencia; recambio de batería que cierra y abre vigencias; cobertura suplente con días sin protección | v0.12 |
 | F5 — Integración e informes | Ingerir intervenciones externas y cerrar la comparación de marcas | UF-10 (ingesta automatizada), UF-9 (informe de período y comparación de marcas); capacidades C-12, C-14 | 2 | Interfaz de integración idempotente con cliente de referencia; informe de período y comparación por costo por año de servicio | v1.0 |
 
 Los sprints estimados son orientativos y no calendarizados: al ser un solo desarrollador sin fecha impuesta, valen como magnitud relativa, no como compromiso de fecha.
@@ -35,7 +35,7 @@ Los sprints estimados son orientativos y no calendarizados: al ser un solo desar
 | F1 | Panel base (etapa 2) | S2 | v0.2 |
 | F1 | Persistencia y alta de administrador (etapa 3) | S3 | v0.3 |
 | F1 | Sesión: login, cierre de sesión, cambio de contraseña (etapa 4) | S4 | v0.4 |
-| F2 | UF-1 alta del parque | S5 | v0.5 |
+| F2 | UF-1 alta de equipos | S5 | v0.5 |
 | F2 | UF-2 configuración de políticas | S6 | v0.6 |
 | F3 | UF-3 monitoreo en vivo | S7 | v0.7 |
 | F3 | UF-5 prueba de batería y salud | S8 | v0.8 |
@@ -51,8 +51,8 @@ El orden de las épicas de flujo respeta el grafo de dependencias del intake §6
 ## 4. Dependencias entre fases
 
 - F1 depende de F0: no se codifica la infraestructura hasta cerrar las decisiones de arranque (dónde vive la herramienta de acceso al equipo y cómo se cifra el acceso en la red local).
-- F2 depende de F1: sin persistencia, sesión y panel base no hay dónde dar de alta el parque ni configurar políticas.
-- F3 depende de F2: el monitoreo evalúa las políticas configuradas en F2 sobre el parque dado de alta en F2.
+- F2 depende de F1: sin persistencia, sesión y panel base no hay dónde dar de alta los equipos ni configurar políticas.
+- F3 depende de F2: el monitoreo evalúa las políticas configuradas en F2 sobre los equipos dados de alta en F2.
 - F4 depende de F3: la ventana de mantenimiento cronometra el apagado bajo la carga observada por el monitoreo, y el recambio de batería cierra vigencias que se abrieron en F2 y midieron en F3.
 - F5 depende de F4 y de F3: el informe y la comparación de marcas consumen históricos (F3), recambios y sustituciones (F4) e ingesta externa; por eso van al final.
 

@@ -7,7 +7,7 @@
 | Repositorio | `DEV/SAI.Service.Core` (workspace local; sin remoto declarado en las fuentes) |
 | Lead técnico | Administrador único (rol combinado propietario / implementador / beneficiario) |
 | Documento | `SOLUTION-INTAKE-Sai-Service-Core-v1.0.md` |
-| Versión | 1.0 |
+| Versión | 1.2 |
 | Fecha | 2026-07-20 |
 | Stack principal | .NET 10 + Blazor (interactive server) + Entity Framework Core + SQLite |
 | Estado | Borrador |
@@ -48,7 +48,7 @@ La fuente no usa la taxonomía propietario/implementador/beneficiario; la clasif
 
 | Rol | Nombre o cargo | Categoría | Responsabilidad principal |
 |---|---|---|---|
-| Administrador único | `usr-admin` — *"Un único usuario administrador. Autenticación mínima."* | Propietario **y** Implementador **y** Beneficiario (una sola persona) | Aprueba este intake. Da de alta el parque (UF-1), configura políticas (UF-2), monitorea (UF-3), consulta históricos (UF-4), dispara pruebas manuales (UF-5), carga intervenciones (UF-6, UF-7), ejecuta la ventana de mantenimiento con presencia física (UF-8) y emite informes (UF-9). |
+| Administrador único | `usr-admin` — *"Un único usuario administrador. Autenticación mínima."* | Propietario **y** Implementador **y** Beneficiario (una sola persona) | Aprueba este intake. Da de alta los equipos (UF-1), configura políticas (UF-2), monitorea (UF-3), consulta históricos (UF-4), dispara pruebas manuales (UF-5), carga intervenciones (UF-6, UF-7), ejecuta la ventana de mantenimiento con presencia física (UF-8) y emite informes (UF-9). |
 | Técnico externo / Proveedor | `Proveedor` (razón social, contacto, especialidad); en el escenario E-6 `"ejecutadaPor": "técnico externo"`, proveedor `prov-taller-electronica-sur` (ficticio) | Ejecutor externo (beneficiario indirecto) | Ejecuta recambios de batería, reparaciones e inspecciones preventivas. Retira las baterías agotadas y consta como `disposicionFinal.receptor` para trazabilidad ambiental. |
 | Sistema externo GMAO | `fd-gmao-externo` — *"GMAO Corporativo v4"*, confianza base `media` | Integrador / consumidor de la API | Empuja intervenciones sin intervención humana vía `POST /api/v1/intervenciones` con `X-Idempotency-Key`. Es el actor de UF-10. |
 | Host protegido | `i7infra`, criticidad `alta` | Beneficiario (sistema) | Es el objeto de la protección: el apagado ordenado y el reencendido automático son sobre él. Carga variable (de 3 a 8 contenedores en menos de una semana; `ups.load` de 13 % a 30 % al sumar dos contenedores de IA — observación **O-U8**). |
@@ -165,7 +165,7 @@ Es el flujo que desbloquea el objetivo 1. Sin él, el servicio nunca sale de `So
 5. Se restaura la energía; el SAI restablece la salida.
 6. Si el host arranca solo, sin tocar el botón: `ver-bios-autoencendido` y `ver-shutdown-return` pasan a `Verificado`, y la modalidad `HostLuegoUpsConRetorno` ya es efectiva. Si no arranca: `ver-bios-autoencendido` pasa a **`Refutado`**, que bloquea permanentemente hasta que alguien lo resuelva (`Refutado` no es `Vencido`: una prueba fallida bloquea, una vencida solo pide repetirla).
 
-### Onboarding — UF-1 · Alta del parque y puesta en marcha
+### Onboarding — UF-1 · Alta de equipos y puesta en marcha
 
 1. El panel lista los candidatos USB con sus descriptores; el adaptador identifica VID:PID y devuelve `0665:5161 · INNO TECH · iSerial vacío` — candidato encontrado, **sin marca ni modelo**.
 2. El administrador declara a mano marca, modelo y potencia nominal, que quedan con procedencia `declarado`. Si la potencia nominal se desconoce, queda `null` con procedencia `imputado` — **nunca un número inventado**.
@@ -178,7 +178,7 @@ Es el flujo que desbloquea el objetivo 1. Sin él, el servicio nunca sale de `So
 
 | Flujo | Quién | Objetivo que sirve | Escenario de respaldo |
 |---|---|---|---|
-| UF-1 · Alta del parque y puesta en marcha | Administrador, primera vez | 2, 5 | E-1 |
+| UF-1 · Alta de equipos y puesta en marcha | Administrador, primera vez | 2, 5 | E-1 |
 | UF-2 · Configuración de políticas | Administrador, tras semanas de histórico | 1 | E-1, E-4 |
 | UF-3 · Monitoreo en vivo | Administrador, desde la LAN | 3, 4 | E-2, E-3, E-4 |
 | UF-4 · Históricos y gráficas | Administrador, preparando una decisión | 3, 6 | E-2, E-7 |
@@ -358,7 +358,7 @@ Tabla de proyectos (fuente del manifiesto derivado):
 
 | `Nombre-Proyecto` | `project_type` (D8) | Rol en la solución | Dependencias | `redistribuible` |
 |---|---|---|---|---|
-| Sai-Service-Core (principal) | `web-monolith` | Servicio web único que monitorea el SAI, decide y ejecuta el apagado ordenado, administra el ciclo de vida del parque y expone panel y API REST | (ninguna) | false |
+| Sai-Service-Core (principal) | `web-monolith` | Servicio web único que monitorea el SAI, decide y ejecuta el apagado ordenado, administra el ciclo de vida de los equipos y expone panel y API REST | (ninguna) | false |
 
 Proyecto principal: **Sai-Service-Core**. Grafo de dependencias: trivialmente acíclico (un nodo, sin aristas). Sin colisión de nombres.
 
@@ -405,7 +405,7 @@ Con un único proyecto no hay contratos inter-proyecto que declarar: la solució
 | **2 — Front** | Layout del panel: menú lateral y barra superior, con MudBlazor | El servicio compila y se lanza. El administrador **valida en el navegador** que el panel de control cumple con la maqueta aprobada en la especificación UX-UI (Fase B2) |
 | **3 — Persistencia y alta de administrador** | Integración de SQLite y EF Core; entidades de autenticación y autorización; primera interfaz que pide usuario y contraseña para dar de alta el administrador, con redirección a la página principal | Idem etapa 2: validación visual en el navegador contra la maqueta |
 | **4 — Sesión** | Login, cambio de contraseña, y las acciones de la barra superior del administrador: cerrar sesión y cambiar contraseña | Idem etapa 2 |
-| **5 en adelante — Un flujo de usuario por etapa** | Una etapa por cada flujo de §6, en el orden topológico de su grafo de dependencias: **UF-1** (alta del parque) → **UF-2** (políticas) → **UF-3** (monitoreo en vivo) → **UF-5** (prueba de batería) → **UF-4** (históricos y gráficas) → **UF-8** (ventana de mantenimiento) → **UF-6** (recambio de batería) → **UF-7** (reparación/sustitución del SAI) → **UF-10** (ingesta automatizada) → **UF-9** (informe de período y comparación de marcas) | En cada etapa se implementa todo lo necesario para el flujo y se **verifica en el navegador que las pantallas funcionan** |
+| **5 en adelante — Un flujo de usuario por etapa** | Una etapa por cada flujo de §6, en el orden topológico de su grafo de dependencias: **UF-1** (alta de equipos) → **UF-2** (políticas) → **UF-3** (monitoreo en vivo) → **UF-5** (prueba de batería) → **UF-4** (históricos y gráficas) → **UF-8** (ventana de mantenimiento) → **UF-6** (recambio de batería) → **UF-7** (reparación/sustitución del SAI) → **UF-10** (ingesta automatizada) → **UF-9** (informe de período y comparación de marcas) | En cada etapa se implementa todo lo necesario para el flujo y se **verifica en el navegador que las pantallas funcionan** |
 
 El orden de las etapas 5 en adelante respeta el grafo de dependencias de los flujos declarado en §6: ningún flujo se construye antes que aquellos de los que depende. UF-9 va último porque consume las salidas de UF-4, UF-6, UF-7 y UF-10.
 
@@ -473,7 +473,7 @@ El panel Blazor no produce sample: se demuestra ejecutando el propio servicio.
 | `Nombre-Proyecto` | Sai-Service-Core |
 | `nombre-proyecto-codigo` | `SAI.Service.Core` |
 | `project_type` (D8) | `web-monolith` |
-| Rol | Servicio web único que monitorea el SAI, decide y ejecuta el apagado ordenado, administra el ciclo de vida del parque y expone panel y API REST |
+| Rol | Servicio web único que monitorea el SAI, decide y ejecuta el apagado ordenado, administra el ciclo de vida de los equipos y expone panel y API REST |
 | `redistribuible` | false |
 
 ### §17.P.1 Stack tecnológico
@@ -584,7 +584,7 @@ Para `input.voltage` los agregados conservan **mínimo y máximo además del pro
 |---|---|---|
 | Unitarias | `Domain` y `Application`: los 21 invariantes I-1 a I-21 escritos como pruebas, el `ResolutorTemporal`, `Costos.cuadra()`, `Intervencion.aplicar()` y sus `Efectos`, la máquina de estados de `UnidadFisica`, el cálculo de derivados de prueba de batería y la lógica de degradación de modalidad | xUnit + FluentAssertions |
 | Integración | `Infrastructure`: EF Core contra SQLite en archivo temporal (migraciones incluidas), adaptador NUT contra el **adaptador simulado**, y la API de ingesta con sus cuatro caminos (201/200/409/422) | xUnit + `WebApplicationFactory` + SQLite físico |
-| End-to-end | Los flujos de usuario críticos sobre el panel, contra el adaptador simulado: UF-1 (alta del parque), UF-3 (monitoreo en vivo) y el camino de apagado completo de UF-8 | bUnit para componentes Blazor; Playwright para los recorridos de panel |
+| End-to-end | Los flujos de usuario críticos sobre el panel, contra el adaptador simulado: UF-1 (alta de equipos), UF-3 (monitoreo en vivo) y el camino de apagado completo de UF-8 | bUnit para componentes Blazor; Playwright para los recorridos de panel |
 
 **Cobertura mínima, bloqueante en el pipeline: 80 % de líneas y 70 % de ramas** sobre el conjunto de la solución, con un umbral elevado y separado para `SAI.Service.Core.Domain`: **90 % de líneas y 85 % de ramas**. La asimetría es deliberada: el dominio es donde viven las decisiones irreversibles.
 
@@ -806,7 +806,7 @@ gantt
 
 ---
 
-### §20.E-1 · Alta del parque: catálogo, inventario y vínculos
+### §20.E-1 · Alta de equipos: catálogo, inventario y vínculos
 
 Procedencia: `SAI.Service.Core.Documentacion/PROMPTs/Generar-SDD/Inputs/Planteo-Analisis-Unificado-Antecedente-SAI-Service.md`, líneas 2699–2914. Estado: declarado / medido — inventario y catálogo del relevamiento verificado (2026-07-19).
 
@@ -2109,3 +2109,4 @@ Cada uno es una prueba que puede escribirse **antes** de la primera línea de im
 |---|---|---|---|
 | 1.0 | 2026-07-20 | Intake unificado inicial de la solución SAI.Service.Core, derivado de `Planteo-Analisis-Unificado-Antecedente-SAI-Service.md`, `Topologia-Proyecto-Solucion.md`, `Entorno-Desarrollo.md` y el tool-prompt `Crear-SDD-Documento-Intake.md`. | Orquestador SDD (Claude Code) |
 | 1.1 | 2026-07-20 | Se agrega la **Parte D — Anexos de datos**: los ocho escenarios `E-1`…`E-8` con su JSON completo (§20, transcriptos del Anexo A de la fuente, líneas 2653–3827) y las matrices de cobertura, invariantes y flujos *end-to-end* (§21, Anexo B). El intake pasa a ser autocontenido: las referencias a escenarios del cuerpo (§6, §7) resuelven dentro del documento y ya no dependen de un archivo externo. Alineado con `SOLUTION-INTAKE-template.md` v1.1. | Orquestador SDD (Claude Code) |
+| 1.2 | 2026-07-20 | Retroalimentación de la Fase B2 de validación de maqueta: unificación de la terminología de dominio «parque» → «equipos» (§2, §6, §13, §15, §17 P.2, §20). El flujo UF-1 pasa a llamarse «Alta de equipos y puesta en marcha». Motivo: «parque» se juzgó jerga poco clara y las alternativas «Dispositivo»/«Inventario» colisionaban con entidades y capas del modelo conceptual; «equipos» no colisiona. No se tocaron los «Secretos en runtime/CI» de §17 P.5 (concepto distinto de la contraseña de acceso). | Orquestador SDD (Claude Code) |

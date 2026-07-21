@@ -4,7 +4,7 @@
 | --- | --- |
 | Proyecto | Sai-Service-Core |
 | Documento | NB-06-Evaluacion-De-Salud-De-Baterias-v1.0.md |
-| Versión | 1.2 |
+| Versión | 1.3 |
 | Estado | Borrador |
 | Fecha | 2026-07-20 |
 | Autor | Orquestador SDD (AG-01) |
@@ -69,7 +69,7 @@ Cada trimestre el servicio prueba la batería solo, con una cadencia de muestreo
 ## 8. Dependencias con otras NB
 
 - Depende de NB-03 (Historia trazable con procedencia): la tendencia se construye sobre la serie de pruebas guardada con el origen de cada valor.
-- Depende de NB-04 (Ciclo de vida del parque): el veredicto se atribuye a la batería montada en el período de la prueba, resuelta por el vínculo temporal.
+- Depende de NB-04 (Ciclo de vida de los equipos): el veredicto se atribuye a la batería montada en el período de la prueba, resuelta por el vínculo temporal.
 
 ## 9. Prioridad MoSCoW
 
@@ -82,3 +82,4 @@ Must Have. El SOLUTION-INTAKE §4 marca F-16 y F-17 (prueba de batería y veredi
 | 1.0 | 2026-07-20 | Redacción inicial derivada de SOLUTION-INTAKE §1, §3, §4, §7, §8 y §11, y de Vision-Producto-v1.0.md |
 | 1.1 | 2026-07-20 | Corrección de prioridad MoSCoW a Must Have por alineación con SOLUTION-INTAKE §4 tras audit de Fase A |
 | 1.2 | 2026-07-20 | Reconciliación de trazabilidad §7 con los CU vigentes de 02 tras audit de Fase B |
+| 1.3 | 2026-07-20 | Retroalimentación de la Fase B2: unificación de terminología 'parque' → 'equipos' |

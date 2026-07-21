@@ -14,7 +14,7 @@ Artefacto derivado. El orquestador SDD lo construyó a partir de `SOLUTION-INTAK
 | Proyecto principal | `Sai-Service-Core` |
 | Intake (origen) | `SOLUTION-INTAKE-Sai-Service-Core-v1.0.md` (de su §13 se deriva este manifiesto) |
 | Documento | `SOLUTION-MANIFEST-Sai-Service-Core-v1.0.md` |
-| Versión | 1.0 |
+| Versión | 1.1 |
 | Fecha | 2026-07-20 |
 | Estado | En revisión |
 
@@ -34,7 +34,7 @@ Nota de derivación: el intake §13 declara que el nombre legible ya es dotted P
 
 | `Nombre-Proyecto` | `nombre-proyecto-codigo` | `project_type` (D8) | Rol en la solución | `redistribuible` | Dependencias | Path `/src` |
 |---|---|---|---|---|---|---|
-| `Sai-Service-Core` | `SAI.Service.Core` | `web-monolith` | Servicio web único que monitorea el SAI, decide y ejecuta el apagado ordenado, administra el ciclo de vida del parque y expone panel y API REST (principal) | false | — | `src/SAI.Service.Core/` |
+| `Sai-Service-Core` | `SAI.Service.Core` | `web-monolith` | Servicio web único que monitorea el SAI, decide y ejecuta el apagado ordenado, administra el ciclo de vida de los equipos y expone panel y API REST (principal) | false | — | `src/SAI.Service.Core/` |
 
 Nota de derivación: el sufijo orientativo `.Web` de `SOLUTION-MANIFEST-template.md` §2.1 no se aplica a la raíz del proyecto. El intake §13 fija que el nombre de código del proyecto es `SAI.Service.Core`, materializado como cinco assemblies `SAI.Service.Core.<Capa>` (`Domain`, `Application`, `Infrastructure`, `Api`, `Web`) bajo `src/`. Esas capas son internas al único proyecto D8, no proyectos de la solución.
 
@@ -78,3 +78,4 @@ Caso degenerado (solución de un único proyecto): el orquestador aplana el layo
 | Versión | Fecha | Cambios | Autor |
 |---|---|---|---|
 | 1.0 | 2026-07-20 | Manifiesto inicial derivado de `SOLUTION-INTAKE-Sai-Service-Core-v1.0.md` §13 durante la Fase de validación de intake. | Orquestador SDD |
+| 1.1 | 2026-07-20 | Actualización de la descripción de rol: «ciclo de vida del parque» → «ciclo de vida de los equipos», por unificación de terminología de la Fase B2. | Orquestador SDD |
