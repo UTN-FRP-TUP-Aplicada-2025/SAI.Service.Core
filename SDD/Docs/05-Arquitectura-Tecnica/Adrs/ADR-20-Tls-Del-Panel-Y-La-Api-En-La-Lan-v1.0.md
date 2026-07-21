@@ -3,7 +3,7 @@
 **Proyecto:** Sai-Service-Core
 **Documento:** ADR-20-Tls-Del-Panel-Y-La-Api-En-La-Lan-v1.0.md
 **Versión:** 1.0
-**Estado:** Propuesto
+**Estado:** Superado por ADR-26
 **Fecha:** 2026-07-20
 **Autor:** Orquestador SDD (AG-05)
 **Categoría:** Seguridad
@@ -60,3 +60,4 @@ Qué falta para decidir: (a) determinar si se acepta la advertencia de certifica
 | Versión | Fecha | Descripción |
 | --- | --- | --- |
 | 1.0 | 2026-07-20 | Versión inicial. Decisión abierta de Sprint 0 (P-04). |
+| 1.1 | 2026-07-21 | Decisión cerrada en el Sprint 0; este ADR queda superado por ADR-26. Ver ese ADR para la decisión adoptada. |

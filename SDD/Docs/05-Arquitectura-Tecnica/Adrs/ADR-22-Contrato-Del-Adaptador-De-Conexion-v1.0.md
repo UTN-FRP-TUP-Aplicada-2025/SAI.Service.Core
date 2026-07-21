@@ -3,7 +3,7 @@
 **Proyecto:** Sai-Service-Core
 **Documento:** ADR-22-Contrato-Del-Adaptador-De-Conexion-v1.0.md
 **Versión:** 1.0
-**Estado:** Propuesto
+**Estado:** Superado por ADR-27
 **Fecha:** 2026-07-20
 **Autor:** Orquestador SDD (AG-05)
 **Categoría:** Extensibilidad
@@ -60,3 +60,4 @@ Qué falta para decidir: (a) fijar la firma de las cuatro operaciones (leer esta
 | Versión | Fecha | Descripción |
 | --- | --- | --- |
 | 1.0 | 2026-07-20 | Versión inicial. Decisión abierta (P-06). |
+| 1.1 | 2026-07-21 | Decisión cerrada en el Sprint 0; este ADR queda superado por ADR-27. Ver ese ADR para la decisión adoptada. |

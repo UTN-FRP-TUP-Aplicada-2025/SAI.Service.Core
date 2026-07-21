@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <!--
+    Capa Web: COMPOSITION ROOT y host del proceso. Panel Blazor (interactive
+    server) con MudBlazor y la barra superior + menu lateral + sello de version.
+    Referencia Api e Infrastructure para componer el DI (ADR-15, §17.P.2).
+    Es el unico proyecto que arranca (dotnet run).
+  -->
+  <PropertyGroup>
+    <RootNamespace>SAI.Service.Core.Web</RootNamespace>
+    <AssemblyName>SAI.Service.Core.Web</AssemblyName>
+    <UserSecretsId>sai-service-core-web</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SAI.Service.Core.Api\SAI.Service.Core.Api.csproj" />
+    <ProjectReference Include="..\SAI.Service.Core.Infrastructure\SAI.Service.Core.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Libreria de componentes impuesta por el stack (§17.P.1). verificar version para .NET 10. -->
+    <PackageReference Include="MudBlazor" Version="8.5.0" />
+  </ItemGroup>
+
+</Project>

@@ -9,6 +9,17 @@ y el versionado sigue [Semantic Versioning](https://semver.org/lang/es/).
 
 ### Añadido
 
+- **Sprint 0 — Arranque (primer código)**: andamiaje de la solución .NET 10 en cinco
+  assemblies (Clean Architecture: `Domain`, `Application`, `Infrastructure`, `Api`, `Web`),
+  con tres proyectos de prueba (xUnit + FluentAssertions), Dev Container, scripts de
+  build/run, pipeline de CI inicial y el panel base en Blazor interactive server +
+  MudBlazor (menú lateral, barra superior y sello de versión según la maqueta aprobada).
+  Es esqueleto: compila y corre, sin lógica de negocio (stubs para el adaptador simulado,
+  el `DbContext` y la ranura de Identity). Se cierran las tres decisiones de Sprint 0 con
+  **ADR-25** (NUT en el contenedor), **ADR-26** (TLS autofirmado en Kestrel) y **ADR-27**
+  (contrato del puerto `IAdaptadorConexion`); ADR-19/20/22 pasan a *Superado*. ADR-21
+  (contrato del 409) queda diferido a la Etapa 5.
+
 - **Fase H del SDD — README raíz y handoff**: `SDD/Docs/README.md` (índice maestro de
   toda la documentación, tabla de proyectos, mapa de las categorías 00→11 con las
   omisiones declaradas —04 por no-LLM, 10 por ADR-23—, flujos de lectura por audiencia,

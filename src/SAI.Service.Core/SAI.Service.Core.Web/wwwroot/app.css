@@ -1,0 +1,22 @@
+/* Estilos propios del panel SAI.Service.Core.
+   MudBlazor aporta el grueso del estilo (tema, tipografia, grilla). Aca solo
+   van ajustes minimos del andamiaje de Sprint 0. */
+
+html, body {
+    margin: 0;
+    font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+}
+
+/* Enlace "saltar al contenido" para accesibilidad (equivalente a mq-skip). */
+.skip-link {
+    position: absolute;
+    left: -999px;
+    top: 0;
+    z-index: 2000;
+    padding: 0.5rem 1rem;
+    background: #fff;
+}
+
+.skip-link:focus {
+    left: 0;
+}

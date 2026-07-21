@@ -1,0 +1,30 @@
+<Project>
+
+  <!--
+    Propiedades comunes a todos los proyectos de la solucion SAI.Service.Core.
+    Fija el marco unico (.NET 10), las reglas de compilacion estrictas del
+    pipeline (STAGE-01: cero warnings) y el analisis de codigo recomendado.
+    Ver ADR-15 (Clean Architecture en cinco assemblies) y §17.P.1/P.8 del intake.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+
+    <!-- STAGE-01 del pipeline: cero errores y cero warnings. -->
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+
+    <!-- Analizadores de .NET en nivel recomendado (STAGE-02). -->
+    <AnalysisLevel>latest-recommended</AnalysisLevel>
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+
+    <!-- Cultura invariante en release para evitar sorpresas de formato. -->
+    <InvariantGlobalization>true</InvariantGlobalization>
+
+    <!-- Version de referencia; en el pipeline real la calcula MinVer (§17.P.7). -->
+    <Version>0.1.0-alpha.1</Version>
+  </PropertyGroup>
+
+</Project>

@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Capa Infrastructure: EF Core + SQLite, adaptador simulado y el cableado de DI.
+    Depende de Application (y transitiva de Domain). Implementa los puertos.
+  -->
+  <PropertyGroup>
+    <RootNamespace>SAI.Service.Core.Infrastructure</RootNamespace>
+    <AssemblyName>SAI.Service.Core.Infrastructure</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SAI.Service.Core.Application\SAI.Service.Core.Application.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Provisto por el SDK de .NET 10; version alineada al TFM. -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.0" />
+    <!-- Identity: la ranura de autenticacion de administrador unico (ADR-16). -->
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.0" />
+  </ItemGroup>
+
+</Project>

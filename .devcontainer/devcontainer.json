@@ -1,0 +1,27 @@
+{
+  "name": "SAI.Service.Core (.NET 10)",
+  "image": "mcr.microsoft.com/devcontainers/dotnet:1-10.0",
+  "//image": "verificar tag: imagen de Dev Container con el SDK de .NET 10 (§17.P.1).",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+  },
+  "//features": "docker-in-docker habilita 'docker build' de la imagen de produccion desde dentro del contenedor (STAGE-08).",
+  "forwardPorts": [8080, 8443],
+  "portsAttributes": {
+    "8080": { "label": "SAI HTTP" },
+    "8443": { "label": "SAI HTTPS" }
+  },
+  "postCreateCommand": "dotnet restore SAI.Service.Core.sln && dotnet dev-certs https",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-dotnettools.csdevkit",
+        "ms-dotnettools.csharp"
+      ],
+      "settings": {
+        "dotnet.defaultSolution": "SAI.Service.Core.sln"
+      }
+    }
+  },
+  "remoteUser": "vscode"
+}
