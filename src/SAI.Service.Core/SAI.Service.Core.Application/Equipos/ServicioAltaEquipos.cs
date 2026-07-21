@@ -93,6 +93,10 @@ public sealed class ServicioAltaEquipos(IRepositorioEquipos repositorio)
     /// Sin política configurada todavía (llega en un incremento posterior), la modalidad solicitada
     /// es <see cref="Modalidad.SoloAlerta"/>, por lo que la efectiva también lo es hasta verificar.
     /// </summary>
+    /// <summary>Lista las verificaciones sembradas con su estado (para el panel de verificaciones).</summary>
+    public Task<IReadOnlyList<Verificacion>> ListarVerificacionesAsync(CancellationToken ct) =>
+        repositorio.ListarVerificacionesAsync(ct);
+
     public async Task<EstadoPuestaEnMarcha> ConsultarEstadoAsync(CancellationToken ct)
     {
         var verificaciones = await repositorio.ListarVerificacionesAsync(ct);

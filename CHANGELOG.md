@@ -9,6 +9,19 @@ y el versionado sigue [Semantic Versioning](https://semver.org/lang/es/).
 
 ### Añadido
 
+- **Etapa 2 · Incremento C2 — Panel de alta de equipos** (US-04, US-05, CU-02): el **wizard**
+  interactivo (MudBlazor) de alta en `AltaDeEquipos.razor` con los cuatro pasos —descubrir el
+  dispositivo (`IDescubridorSai`; `DISPOSITIVO_NO_DESCUBIERTO` si no hay candidatos; badge «sin marca
+  ni modelo»), probar la conexión por efecto observado (`IAdaptadorConexion`; bloquea el avance si
+  falla, `PRUEBA_CONEXION_FALLIDA`), declarar catálogo e inventario, y confirmar el alta (llama al
+  caso de uso, traduce los errores de dominio como `VIDA_FLOTACION_SIN_TEMPERATURA`)—. El panel
+  principal (`PanelEstadoEnVivo.razor`) muestra el **aviso permanente de puesta en marcha**
+  («operativo · n de 4 supuestos verificados») con enlace a la ventana de mantenimiento cuando el
+  servicio está en solo aviso (US-05), y el `PanelDeVerificaciones.razor` lista el estado de los
+  cuatro supuestos. Los componentes interactivos usan un alcance por operación (`IServiceScopeFactory`)
+  para no sostener el `DbContext` durante todo el circuito. Con esto la **Etapa 2 queda completa** y
+  el alta de equipos se valida en el navegador.
+
 - **Etapa 2 · Incremento C1 — Persistencia y alta de equipos** (US-04, US-05, parte de CU-02):
   **persistencia EF Core** del dominio de equipos sobre SQLite (ADR-18): catálogo, inventario
   (`UnidadFisica` con TPH), vínculos temporales y verificaciones, con `Vigencia`/`Valor<T>` como

@@ -1,11 +1,334 @@
 @page "/alta-de-equipos"
 @attribute [Authorize]
+@using SAI.Service.Core.Application.Abstractions
+@using SAI.Service.Core.Application.Equipos
+@using SAI.Service.Core.Domain.Valores
+@using Microsoft.Extensions.DependencyInjection
+@inject IDescubridorSai Descubridor
+@inject IAdaptadorConexion Adaptador
+@inject IServiceScopeFactory FabricaAlcances
+@inject NavigationManager Navegacion
+@inject ISnackbar Notificador
 
 <PageTitle>Alta de equipos — SAI.Service.Core</PageTitle>
 
-<h1 class="mud-typography mud-typography-h4">Alta de equipos</h1>
+<h1 class="mud-typography mud-typography-h4 mb-4">Alta de equipos</h1>
 
-<MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Class="mt-4">
-    Superficie placeholder de Sprint 0. El descubrimiento del dispositivo, los datos
-    declarados del SAI, la bateria montada y el host protegido se implementan en EP-04.
-</MudAlert>
+<MudPaper Elevation="1" Class="pa-2 mb-4" Style="border-radius:10px;">
+    <MudText Typo="Typo.body2" Class="mud-text-secondary pa-2">
+        Paso @_paso de 4 · @NombrePaso(_paso)
+    </MudText>
+</MudPaper>
+
+@* --- Paso 1: descubrir --------------------------------------------------- *@
+@if (_paso == 1)
+{
+    <MudPaper Elevation="1" Class="pa-4" Style="border-radius:10px;">
+        <MudText Typo="Typo.h6" GutterBottom="true">Descubrir el dispositivo</MudText>
+        <MudText Typo="Typo.body2" Class="mud-text-secondary mb-4">
+            Buscá el SAI conectado por la herramienta de acceso (NUT). Lo que el equipo no expone
+            (marca, modelo, serie) lo declarás a mano en el paso siguiente.
+        </MudText>
+
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Search"
+                   OnClick="Descubrir" Disabled="_cargando">Descubrir dispositivos</MudButton>
+
+        @if (_cargando)
+        {
+            <MudProgressLinear Indeterminate="true" Color="Color.Primary" Class="mt-4" />
+        }
+        else if (_candidatos is not null && _candidatos.Count == 0)
+        {
+            <MudAlert Severity="Severity.Warning" Variant="Variant.Filled" Class="mt-4">
+                <b>DISPOSITIVO_NO_DESCUBIERTO</b>: no se encontró ningún SAI en el bus. Verificá la conexión
+                y que la herramienta de acceso esté corriendo; no se inventa un dispositivo.
+            </MudAlert>
+        }
+        else if (_candidatos is not null)
+        {
+            <MudRadioGroup T="string" @bind-Value="_candidatoSeleccionado" Class="mt-4">
+                @foreach (var candidato in _candidatos)
+                {
+                    <MudRadio T="string" Value="@candidato.NombreNut" Color="Color.Primary" Class="d-block">
+                        <MudText Typo="Typo.body1">@candidato.Descriptor</MudText>
+                        @if (candidato.VendorId is null)
+                        {
+                            <MudChip T="string" Size="Size.Small" Color="Color.Warning" Variant="Variant.Text">sin marca ni modelo</MudChip>
+                        }
+                    </MudRadio>
+                }
+            </MudRadioGroup>
+        }
+    </MudPaper>
+}
+
+@* --- Paso 2: probar conexión -------------------------------------------- *@
+@if (_paso == 2)
+{
+    <MudPaper Elevation="1" Class="pa-4" Style="border-radius:10px;">
+        <MudText Typo="Typo.h6" GutterBottom="true">Probar la conexión</MudText>
+        <MudText Typo="Typo.body2" Class="mud-text-secondary mb-4">
+            La prueba se valida por efecto observado: lee una variable real del equipo. Hay que pasarla
+            para continuar con el alta.
+        </MudText>
+
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Bolt"
+                   OnClick="ProbarConexion" Disabled="_cargando">Probar conexión</MudButton>
+
+        @if (_cargando)
+        {
+            <MudProgressLinear Indeterminate="true" Color="Color.Primary" Class="mt-4" />
+        }
+        else if (_conectividad is not null)
+        {
+            <MudAlert Severity="@(_conectividad.Conectado ? Severity.Success : Severity.Error)"
+                      Variant="Variant.Filled" Class="mt-4">
+                @_conectividad.Detalle
+                @if (_conectividad.Conectado && _conectividad.LatenciaMilisegundos is { } ms)
+                {
+                    <span> (@ms.ToString("0.0") ms)</span>
+                }
+            </MudAlert>
+        }
+    </MudPaper>
+}
+
+@* --- Paso 3: declarar catálogo e inventario ----------------------------- *@
+@if (_paso == 3)
+{
+    <MudPaper Elevation="1" Class="pa-4" Style="border-radius:10px;">
+        <MudText Typo="Typo.h6" GutterBottom="true">Declarar catálogo e inventario</MudText>
+
+        <MudText Typo="Typo.subtitle2" Class="mt-2">Fabricante y modelos (catálogo)</MudText>
+        <MudGrid>
+            <MudItem xs="12" sm="6"><MudTextField @bind-Value="_form.FabricanteCodigo" Label="Código de fabricante" Required="true" /></MudItem>
+            <MudItem xs="12" sm="6"><MudTextField @bind-Value="_form.FabricanteNombre" Label="Nombre de fabricante" Required="true" /></MudItem>
+            <MudItem xs="12" sm="6"><MudTextField @bind-Value="_form.ModeloDispCodigo" Label="Código de modelo (SAI)" Required="true" /></MudItem>
+            <MudItem xs="12" sm="6"><MudTextField @bind-Value="_form.ModeloDispNombre" Label="Nombre de modelo (SAI)" Required="true" /></MudItem>
+            <MudItem xs="12" sm="4"><MudNumericField @bind-Value="_form.PotenciaVaValor" Label="Potencia nominal (VA)" /></MudItem>
+            <MudItem xs="12" sm="4">
+                <MudSelect T="Origen" @bind-Value="_form.PotenciaOrigen" Label="Procedencia de la potencia">
+                    <MudSelectItem T="Origen" Value="Origen.Declarado">Declarado</MudSelectItem>
+                    <MudSelectItem T="Origen" Value="Origen.Imputado">Imputado (desconocida)</MudSelectItem>
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="12" sm="4"><MudNumericField @bind-Value="_form.TensionNominalV" Label="Tensión nominal (V)" /></MudItem>
+
+            <MudItem xs="12" sm="6"><MudTextField @bind-Value="_form.ModeloBatCodigo" Label="Código de modelo (batería)" Required="true" /></MudItem>
+            <MudItem xs="12" sm="6"><MudTextField @bind-Value="_form.ModeloBatNombre" Label="Nombre de modelo (batería)" Required="true" /></MudItem>
+            <MudItem xs="12" sm="4"><MudNumericField @bind-Value="_form.VidaMin" Label="Vida de flotación mín. (años)" /></MudItem>
+            <MudItem xs="12" sm="4"><MudNumericField @bind-Value="_form.VidaMax" Label="Vida de flotación máx. (años)" /></MudItem>
+            <MudItem xs="12" sm="4"><MudNumericField @bind-Value="_form.TemperaturaRef" Label="Temperatura de referencia (°C)" HelperText="Requerida si declarás vida de flotación (I-21)" /></MudItem>
+        </MudGrid>
+
+        <MudText Typo="Typo.subtitle2" Class="mt-4">Inventario</MudText>
+        <MudGrid>
+            <MudItem xs="12" sm="6"><MudTextField @bind-Value="_form.HostCodigo" Label="Código del host protegido" Required="true" /></MudItem>
+            <MudItem xs="12" sm="6"><MudTextField @bind-Value="_form.Criticidad" Label="Criticidad del host" /></MudItem>
+            <MudItem xs="12" sm="6"><MudTextField @bind-Value="_form.DispositivoCodigo" Label="Código del SAI (unidad)" Required="true" /></MudItem>
+            <MudItem xs="12" sm="6"><MudTextField @bind-Value="_form.NumeroSerie" Label="Número de serie (puede faltar)" /></MudItem>
+            <MudItem xs="12" sm="6"><MudTextField @bind-Value="_form.BateriaCodigo" Label="Código de la batería (unidad)" Required="true" /></MudItem>
+            <MudItem xs="12" sm="6"><MudTextField @bind-Value="_form.Posicion" Label="Posición de montaje" Required="true" /></MudItem>
+        </MudGrid>
+    </MudPaper>
+}
+
+@* --- Paso 4: confirmar -------------------------------------------------- *@
+@if (_paso == 4)
+{
+    <MudPaper Elevation="1" Class="pa-4" Style="border-radius:10px;">
+        <MudText Typo="Typo.h6" GutterBottom="true">Confirmar el alta</MudText>
+        <MudText Typo="Typo.body2" Class="mud-text-secondary mb-4">
+            Se crean el catálogo y el inventario, se abren el montaje de la batería y la cobertura del
+            host, y se siembran los cuatro supuestos sin verificar. El servicio arranca en <b>solo aviso</b>.
+        </MudText>
+
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Save"
+                   OnClick="Confirmar" Disabled="_cargando">Dar de alta</MudButton>
+
+        @if (_cargando)
+        {
+            <MudProgressLinear Indeterminate="true" Color="Color.Primary" Class="mt-4" />
+        }
+        else if (_errorAlta is not null)
+        {
+            <MudAlert Severity="Severity.Error" Variant="Variant.Filled" Class="mt-4"><b>@_errorAlta</b></MudAlert>
+        }
+    </MudPaper>
+}
+
+@* --- Navegación --------------------------------------------------------- *@
+<div class="d-flex mt-4" style="gap:0.75rem;">
+    <MudButton Variant="Variant.Outlined" OnClick="Anterior" Disabled="_paso == 1 || _cargando">Anterior</MudButton>
+    <MudSpacer />
+    @if (_paso < 4)
+    {
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Siguiente" Disabled="!PuedeAvanzar() || _cargando">Siguiente</MudButton>
+    }
+</div>
+
+@code {
+    private int _paso = 1;
+    private bool _cargando;
+
+    private IReadOnlyList<DispositivoDescubierto>? _candidatos;
+    private string? _candidatoSeleccionado;
+    private ResultadoConectividad? _conectividad;
+    private string? _errorAlta;
+
+    private readonly FormularioAlta _form = new();
+
+    private static string NombrePaso(int paso) => paso switch
+    {
+        1 => "Descubrir el dispositivo",
+        2 => "Probar la conexión",
+        3 => "Declarar catálogo e inventario",
+        4 => "Confirmar",
+        _ => string.Empty,
+    };
+
+    private bool PuedeAvanzar() => _paso switch
+    {
+        1 => _candidatoSeleccionado is not null,
+        2 => _conectividad?.Conectado == true,
+        3 => DatosMinimosCompletos(),
+        _ => false,
+    };
+
+    private bool DatosMinimosCompletos() =>
+        !string.IsNullOrWhiteSpace(_form.FabricanteCodigo) && !string.IsNullOrWhiteSpace(_form.FabricanteNombre)
+        && !string.IsNullOrWhiteSpace(_form.ModeloDispCodigo) && !string.IsNullOrWhiteSpace(_form.ModeloDispNombre)
+        && !string.IsNullOrWhiteSpace(_form.ModeloBatCodigo) && !string.IsNullOrWhiteSpace(_form.ModeloBatNombre)
+        && !string.IsNullOrWhiteSpace(_form.HostCodigo) && !string.IsNullOrWhiteSpace(_form.DispositivoCodigo)
+        && !string.IsNullOrWhiteSpace(_form.BateriaCodigo) && !string.IsNullOrWhiteSpace(_form.Posicion);
+
+    private void Anterior()
+    {
+        if (_paso > 1)
+        {
+            _paso--;
+        }
+    }
+
+    private void Siguiente()
+    {
+        if (PuedeAvanzar() && _paso < 4)
+        {
+            _paso++;
+        }
+    }
+
+    private async Task Descubrir()
+    {
+        _cargando = true;
+        _candidatoSeleccionado = null;
+        try
+        {
+            _candidatos = await Descubridor.DescubrirAsync(CancellationToken.None);
+            if (_candidatos.Count == 1)
+            {
+                _candidatoSeleccionado = _candidatos[0].NombreNut;
+                var serie = _candidatos[0].NumeroSerie;
+                if (!string.IsNullOrWhiteSpace(serie))
+                {
+                    _form.NumeroSerie = serie;
+                }
+            }
+        }
+        finally
+        {
+            _cargando = false;
+        }
+    }
+
+    private async Task ProbarConexion()
+    {
+        _cargando = true;
+        try
+        {
+            _conectividad = await Adaptador.ProbarConectividadAsync(CancellationToken.None);
+        }
+        finally
+        {
+            _cargando = false;
+        }
+    }
+
+    private async Task Confirmar()
+    {
+        _cargando = true;
+        _errorAlta = null;
+        try
+        {
+            var solicitud = ConstruirSolicitud();
+            using var alcance = FabricaAlcances.CreateScope();
+            var servicio = alcance.ServiceProvider.GetRequiredService<ServicioAltaEquipos>();
+            var resultado = await servicio.RegistrarAsync(solicitud, CancellationToken.None);
+
+            if (resultado.Exito)
+            {
+                Notificador.Add("Equipo dado de alta. El servicio arranca en solo aviso (0 de 4 supuestos verificados).", Severity.Success);
+                Navegacion.NavigateTo("/");
+            }
+            else
+            {
+                _errorAlta = TraducirError(resultado.CodigoError);
+            }
+        }
+        finally
+        {
+            _cargando = false;
+        }
+    }
+
+    private SolicitudAltaEquipos ConstruirSolicitud()
+    {
+        Valor<double>? potencia = _form.PotenciaVaValor is { } va
+            ? new Valor<double>(va, _form.PotenciaOrigen)
+            : null;
+
+        return new SolicitudAltaEquipos(
+            Instante: DateTimeOffset.UtcNow,
+            Fabricante: new DatosFabricante(_form.FabricanteCodigo.Trim(), _form.FabricanteNombre.Trim()),
+            ModeloDispositivo: new DatosModeloDispositivo(_form.ModeloDispCodigo.Trim(), _form.ModeloDispNombre.Trim(), _form.LineaTopologia, _form.TensionNominalV, potencia),
+            ModeloBateria: new DatosModeloBateria(_form.ModeloBatCodigo.Trim(), _form.ModeloBatNombre.Trim(), _form.Tecnologia, _form.CapacidadAh, _form.BatTensionV, _form.VidaMin, _form.VidaMax, _form.TemperaturaRef),
+            Host: new DatosHost(_form.HostCodigo.Trim(), _form.Criticidad),
+            Dispositivo: new DatosDispositivo(_form.DispositivoCodigo.Trim(), _form.NumeroSerie),
+            Bateria: new DatosBateria(_form.BateriaCodigo.Trim()),
+            Posicion: _form.Posicion.Trim());
+    }
+
+    private static string TraducirError(string? codigo) => codigo switch
+    {
+        "VIDA_FLOTACION_SIN_TEMPERATURA" => "La vida de flotación exige una temperatura de referencia (I-21). Completá la temperatura o quitá la vida de flotación.",
+        "MONTAJE_SOLAPADO" => "Ya hay una batería vigente en esa posición del dispositivo.",
+        "COBERTURA_SOLAPADA" => "Ese host ya tiene una cobertura vigente.",
+        _ => $"No se pudo dar de alta el equipo ({codigo ?? "error desconocido"}).",
+    };
+
+    private sealed class FormularioAlta
+    {
+        public string FabricanteCodigo { get; set; } = "fab-innotech";
+        public string FabricanteNombre { get; set; } = "INNO TECH";
+        public string ModeloDispCodigo { get; set; } = "mod-sai-qx";
+        public string ModeloDispNombre { get; set; } = string.Empty;
+        public string? LineaTopologia { get; set; }
+        public double? TensionNominalV { get; set; }
+        public double? PotenciaVaValor { get; set; }
+        public Origen PotenciaOrigen { get; set; } = Origen.Declarado;
+        public string ModeloBatCodigo { get; set; } = "mod-bat-12v";
+        public string ModeloBatNombre { get; set; } = string.Empty;
+        public string? Tecnologia { get; set; }
+        public double? CapacidadAh { get; set; }
+        public double? BatTensionV { get; set; }
+        public double? VidaMin { get; set; }
+        public double? VidaMax { get; set; }
+        public double? TemperaturaRef { get; set; }
+        public string HostCodigo { get; set; } = "host-01";
+        public string? Criticidad { get; set; }
+        public string DispositivoCodigo { get; set; } = "ups-01";
+        public string? NumeroSerie { get; set; }
+        public string BateriaCodigo { get; set; } = "bat-01";
+        public string Posicion { get; set; } = "principal";
+    }
+}

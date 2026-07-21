@@ -1,13 +1,56 @@
 @page "/"
 @page "/panel-estado-en-vivo"
 @attribute [Authorize]
+@using SAI.Service.Core.Application.Equipos
+@using SAI.Service.Core.Domain.Verificaciones
+@using Microsoft.Extensions.DependencyInjection
+@inject IServiceScopeFactory FabricaAlcances
 
 <PageTitle>Panel de estado en vivo — SAI.Service.Core</PageTitle>
 
 <h1 class="mud-typography mud-typography-h4">Panel de estado en vivo</h1>
 
+@if (_estado is null)
+{
+    <MudProgressLinear Indeterminate="true" Color="Color.Primary" Class="mt-4" />
+}
+else if (!_estado.HayEquipos)
+{
+    <MudAlert Severity="Severity.Info" Variant="Variant.Filled" Class="mt-4">
+        Todavía no hay equipos dados de alta.
+        <MudLink Href="/alta-de-equipos" Color="Color.Inherit"><b>Dar de alta un equipo</b></MudLink>.
+    </MudAlert>
+}
+else
+{
+    @* Aviso permanente de puesta en marcha (US-05): «n de 4 supuestos verificados», no
+       enterrado en configuración. En solo aviso, enlace a la ventana de mantenimiento. *@
+    <MudAlert Severity="@(_estado.Degradado ? Severity.Warning : Severity.Success)"
+              Variant="Variant.Filled" Icon="@(_estado.Degradado ? Icons.Material.Filled.Shield : Icons.Material.Filled.VerifiedUser)"
+              Class="mt-4">
+        <b>operativo</b> · @_estado.SupuestosVerificados de @_estado.SupuestosTotales supuestos verificados.
+        @if (_estado.Degradado)
+        {
+            <span>
+                El servicio está en <b>solo aviso</b> hasta verificar los supuestos: no ejecutará ningún apagado.
+                <MudLink Href="/panel-de-verificaciones" Color="Color.Inherit"><b>Ir a la ventana de mantenimiento</b></MudLink>.
+            </span>
+        }
+    </MudAlert>
+}
+
 <MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Class="mt-4">
-    Superficie placeholder de Sprint 0 (andamiaje). El estado en vivo del SAI, la
-    conectividad, la bateria, los supuestos y los eventos recientes se implementan
-    en etapas posteriores (EP-05). Sin logica de negocio todavia.
+    El estado en vivo del SAI (conectividad, tensión, batería, eventos recientes) se implementa
+    en la Etapa 3 (EP-05). Este panel ya muestra el estado de puesta en marcha y la degradación.
 </MudAlert>
+
+@code {
+    private EstadoPuestaEnMarcha? _estado;
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var alcance = FabricaAlcances.CreateScope();
+        var servicio = alcance.ServiceProvider.GetRequiredService<ServicioAltaEquipos>();
+        _estado = await servicio.ConsultarEstadoAsync(CancellationToken.None);
+    }
+}
