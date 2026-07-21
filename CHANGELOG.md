@@ -9,6 +9,15 @@ y el versionado sigue [Semantic Versioning](https://semver.org/lang/es/).
 
 ### Añadido
 
+- **Fase H del SDD — README raíz y handoff**: `SDD/Docs/README.md` (índice maestro de
+  toda la documentación, tabla de proyectos, mapa de las categorías 00→11 con las
+  omisiones declaradas —04 por no-LLM, 10 por ADR-23—, flujos de lectura por audiencia,
+  glosario y la sección de onboarding del desarrollador comprometida en ADR-23). Auditoría
+  final consolidada del entregable completo: **APROBADO CON OBSERVACIONES, apto para el
+  handoff a codificación** (13/13 enlaces del README sin roturas, cadena de trazabilidad
+  D6 completa sin huérfanos, terminología consistente). Con esto la documentación SDD
+  (Fases A-H) queda generada y auditada.
+
 - **Fase G del SDD — 11-Examples**: dos samples documentados —`Ejemplo-01-Datos-Seed`
   (básico: explorar el sistema con datos precargados y el adaptador de conexión simulado,
   sin hardware) y `Ejemplo-02-Api-Ingesta` (intermedio: los cuatro caminos del contrato de

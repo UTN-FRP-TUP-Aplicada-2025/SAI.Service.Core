@@ -161,3 +161,16 @@ El Mini-Plan declara el sprint goal de cada etapa como una sola frase orientada 
 ## 7. Veredicto final
 
 **NO APROBADO — BLOQUEADO.** 0 P0, 1 P1, 1 P2, 3 P3. La Fase D es estructural y trazablemente sólida y el modo de un solo desarrollador está correctamente aplicado; el único bloqueo es el hallazgo P1-01 (stack y protocolos concretos del dominio fuente en la categoría 06), corregible con un reproceso acotado que sustituya los nombres de tecnología por referencias a las ADR de 05, como ya hace el Mini-Plan de 07. Corregido P1-01 (y, deseablemente, P2-01), la Fase D queda en condiciones de aprobación. La categoría 07 no tiene observaciones bloqueantes.
+
+---
+
+## 8. Addendum de cierre (2026-07-21)
+
+El hallazgo bloqueante **P1-01** (nombres de stack/protocolo concretos en la categoría 06) fue corregido tras este informe:
+
+- `Backlog-Tecnico-v1.0.md` (v1.1), `Product-Backlog-v1.0.md` (v1.1) y las historias US-03, US-17, US-22, US-25, US-26 (v1.1): los nombres de tecnología se sustituyeron por la capacidad más su ADR (por ejemplo, «la herramienta de acceso al SAI»/ADR-01, «el algoritmo de hash del proveedor de identidad»/ADR-16, «el anclaje por ruta física»/ADR-03, «el formato de error estándar del contrato REST»/ADR-17), en línea con el Mini-Plan de 07.
+- La historia US-25 se renombró de `US-25-...-Sin-Nut` a `US-25-Adaptador-De-Conexion-Directo-v1.0.md` para quitar el nombre de producto del identificador.
+- El hallazgo **P2-01** también se corrigió: la fuente upstream de BT-06 pasó a `03 Experiencia-De-Uso` y la de BT-19 a `CU-04`.
+- Verificación: grep sin coincidencias visibles de `NUT`/`upsd`/`PBKDF2`/`cookie`/`udev`/`wtmp`/`problem+json`/`SQLite`/`EF Core`/`Blazor`/`Docker` en el texto de 06 (solo sobreviven en las filas de control de cambios que describen el propio cambio).
+
+**Veredicto actualizado tras corrección: APROBADO CON OBSERVACIONES.** El P1-01 y el P2-01 quedan resueltos; los P3 (negritas de énfasis, DoR check con 6 de 7 ítems, «cinco assemblies» en el Mini-Plan) se documentan y no bloquean. La Fase D queda cerrada y trazablemente uniforme con el resto de las fases A-G.
