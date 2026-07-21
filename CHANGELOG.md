@@ -9,6 +9,16 @@ y el versionado sigue [Semantic Versioning](https://semver.org/lang/es/).
 
 ### Añadido
 
+- **Fase C del SDD — 05-Arquitectura-Tecnica**: documento maestro de arquitectura
+  (cuatro vistas, cross-cutting, 25 NFR numéricos, riesgos; estilo Clean Architecture
+  en cinco assemblies justificado contra dos alternativas), 22 ADR individuales
+  (18 Aceptado derivados de los pre-ADR del intake + autenticación, errores de la API y
+  motor SQLite; 4 Propuesto por las decisiones abiertas de Sprint 0) con su índice,
+  modelo de datos lógico (23 tablas SQLite con EF Core, herencia TPH, 26 índices,
+  migración inicial, trazado al modelo conceptual), flujo de ejecución del planificador,
+  contratos REST de la API de ingesta y documento de extensibilidad del adaptador de
+  conexión. Auditoría independiente de la fase.
+
 - **Fase B2 del SDD — validación visual de maqueta**: maqueta navegable estática en
   `SDD/Maquetas/Sai-Service-Core/` (11 superficies, HTML/CSS/JS con Bootstrap 5, sin
   build), aprobada por el administrador. Emite en `03-UX-UI-DX/` los artefactos de línea
