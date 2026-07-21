@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SAI.Service.Core.Application.Abstractions;
+using SAI.Service.Core.Application.Equipos;
 using SAI.Service.Core.Infrastructure.Adaptadores;
 using SAI.Service.Core.Infrastructure.Adaptadores.Nut;
 using SAI.Service.Core.Infrastructure.Persistencia;
@@ -61,6 +62,10 @@ public static class DependencyInjection
             services.AddSingleton<IAdaptadorConexion>(sp => sp.GetRequiredService<AdaptadorConexionSimulado>());
             services.AddSingleton<IDescubridorSai>(sp => sp.GetRequiredService<AdaptadorConexionSimulado>());
         }
+
+        // Alta de equipos (CU-02): repositorio EF y el caso de uso. Scoped, sobre el DbContext.
+        services.AddScoped<IRepositorioEquipos, Persistencia.RepositorioEquipos>();
+        services.AddScoped<ServicioAltaEquipos>();
 
         return services;
     }

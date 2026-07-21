@@ -9,6 +9,22 @@ y el versionado sigue [Semantic Versioning](https://semver.org/lang/es/).
 
 ### Añadido
 
+- **Etapa 2 · Incremento C1 — Persistencia y alta de equipos** (US-04, US-05, parte de CU-02):
+  **persistencia EF Core** del dominio de equipos sobre SQLite (ADR-18): catálogo, inventario
+  (`UnidadFisica` con TPH), vínculos temporales y verificaciones, con `Vigencia`/`Valor<T>` como
+  complex types, **índices únicos parciales** `WHERE Hasta IS NULL` ("a lo sumo uno vigente", RC-02),
+  CHECKs (baja lógica coherente, intervalo, I-21) y migración `EsquemaEquipos`. **Dominio**: entidad
+  `Verificacion` (cuatro supuestos), enum `Modalidad` y `EvaluadorModalidad` (degradación a
+  `SoloAlerta` mientras no estén los cuatro supuestos verificados, RN-01/RN-02). **Caso de uso de
+  alta** (`ServicioAltaEquipos`, CU-02): crea catálogo e inventario, abre `MontajeBateria` y
+  `CoberturaHost` con fin abierto (validando el no solapamiento), siembra las cuatro verificaciones
+  en `NuncaVerificado` y deja la modalidad efectiva forzada a `SoloAlerta`, todo transaccional (si
+  algo falla no quedan entidades a medias). Decisión de mapeo: las entidades se persisten por su
+  `Codigo` como clave (el dominio se referencia por código; desvío documentado del modelo lógico que
+  usaba Id int), con un constructor privado de materialización que **no** introduce dependencia de
+  EF en el dominio. 9 pruebas nuevas (dominio + integración contra la base real). *El panel MudBlazor
+  de alta y el banner de degradación llegan en el Incremento C2.*
+
 - **Etapa 2 · Incremento B — Adaptador de conexión NUT real + descubrimiento** (BT-15, US-03):
   `AdaptadorConexionNut` que habla con el SAI a través de **NUT** (Network UPS Tools) por su
   protocolo de red, sin traductor de dialecto propio (ADR-01). Cliente NUT mínimo (`ClienteNut`

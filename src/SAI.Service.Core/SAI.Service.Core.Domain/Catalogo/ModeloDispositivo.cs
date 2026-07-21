@@ -29,6 +29,15 @@ public sealed class ModeloDispositivo
     /// </summary>
     public Valor<double>? PotenciaVaNominal { get; }
 
+    // Constructor de materialización (EF Core): construye la instancia y luego asigna las
+    // propiedades por campo/setter. No introduce dependencia de framework en el dominio.
+    private ModeloDispositivo()
+    {
+        Codigo = null!;
+        FabricanteCodigo = null!;
+        Nombre = null!;
+    }
+
     /// <summary>Construye un modelo de dispositivo de catálogo.</summary>
     public ModeloDispositivo(
         string codigo,
