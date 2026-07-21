@@ -9,6 +9,13 @@ y el versionado sigue [Semantic Versioning](https://semver.org/lang/es/).
 
 ### Añadido
 
+- **Fase D del SDD — 06-Backlog-Tecnico y 07-Plan-Sprint**: Product Backlog
+  (7 épicas, 26 historias de usuario en archivos individuales, MoSCoW 18/6/2 con
+  estimación Fibonacci), Backlog Técnico (30 tareas técnicas trazadas a ADR/componentes/
+  contratos), Definition-of-Ready y, por ser proyecto de un solo desarrollador,
+  `Mini-Plan-v1.0.md` (6 etapas: Sprint 0 de arranque + una por flujo, 17 riesgos) en
+  lugar del plan de sprint completo. Auditoría independiente de la fase.
+
 - **Fase C del SDD — 05-Arquitectura-Tecnica**: documento maestro de arquitectura
   (cuatro vistas, cross-cutting, 25 NFR numéricos, riesgos; estilo Clean Architecture
   en cinco assemblies justificado contra dos alternativas), 22 ADR individuales
