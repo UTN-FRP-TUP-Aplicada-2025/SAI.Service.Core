@@ -38,6 +38,15 @@ public interface IRepositorioMonitoreo
     /// <summary>Últimos <paramref name="cantidad"/> eventos del dispositivo, más reciente primero (panel en vivo).</summary>
     Task<IReadOnlyList<Evento>> EventosRecientesAsync(string dispositivoCodigo, int cantidad, CancellationToken ct);
 
+    /// <summary>Muestras del dispositivo en un período (histórico), ordenadas por instante ascendente.</summary>
+    Task<IReadOnlyList<Muestra>> MuestrasPorPeriodoAsync(string dispositivoCodigo, DateTimeOffset desde, DateTimeOffset hasta, CancellationToken ct);
+
+    /// <summary>Agregados persistidos de una variable en un período, ordenados por inicio de ventana.</summary>
+    Task<IReadOnlyList<Agregado>> AgregadosPorPeriodoAsync(string dispositivoCodigo, string variable, DateTimeOffset desde, DateTimeOffset hasta, CancellationToken ct);
+
+    /// <summary>Eventos del dispositivo en un período (marcas y conteo de microcortes), por instante ascendente.</summary>
+    Task<IReadOnlyList<Evento>> EventosPorPeriodoAsync(string dispositivoCodigo, DateTimeOffset desde, DateTimeOffset hasta, CancellationToken ct);
+
     /// <summary>Montaje de batería vigente (fin abierto) del dispositivo, o <c>null</c>. Se congela en la prueba (I-15).</summary>
     Task<MontajeBateria?> MontajeVigenteAsync(string dispositivoCodigo, CancellationToken ct);
 
