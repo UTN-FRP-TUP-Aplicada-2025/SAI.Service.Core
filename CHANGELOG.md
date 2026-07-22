@@ -9,6 +9,21 @@ y el versionado sigue [Semantic Versioning](https://semver.org/lang/es/).
 
 ### Añadido
 
+- **Etapa 3 · Incremento C — Prueba de batería y veredicto de salud** (BT-21, US-12, US-13): la
+  **prueba de batería** que recoge una serie densa (1 Hz) de tensión y deriva un veredicto de salud.
+  Dominio: `PruebaBateria` (append-only; **congela** el montaje vigente, I-15/RC-07), enums
+  `VeredictoSalud` y `ConfianzaVeredicto`, y `CalculadorSaludBateria` (función pura, BT-21/ADR-13): la
+  salud es una **tendencia relativa** de la caída de tensión contra la línea base a **carga igualada**
+  (nunca una magnitud cuantitativa), la **confianza arranca baja** y sube con cuatro pruebas
+  comparables, y el veredicto siempre lleva la **reserva por falta de sensor de temperatura** (R-09);
+  usa solo `battery.voltage` medido e **ignora las muestras perdidas** (no interpola, CL-13).
+  Orquestador `ServicioPruebaBateria` (CU-07): valida la precondición de flotación
+  (`FLOTACION_INSUFICIENTE`), congela el montaje, lanza el autotest por el adaptador, recoge la serie
+  y persiste la prueba. Mapeo EF + migración `EsquemaSaludBateria`. Panel `PruebaDeBateria.razor`
+  (lanzar prueba, veredicto/confianza/reserva, historial). El adaptador simulado emite una **curva de
+  descarga** durante la prueba; el lanzamiento real por NUT (INSTCMD con credenciales) queda diferido
+  a la Etapa 4. 8 pruebas nuevas. Con esto se completa la **Etapa 3** salvo los históricos (Incremento D).
+
 - **Etapa 3 · Incremento B2 — Panel de estado en vivo** (US-07): el panel principal
   (`PanelEstadoEnVivo.razor`) muestra el **estado en vivo** del SAI —badge en línea / en batería,
   tensiones de entrada y salida y carga; tensión de batería `[medido]` y carga de batería

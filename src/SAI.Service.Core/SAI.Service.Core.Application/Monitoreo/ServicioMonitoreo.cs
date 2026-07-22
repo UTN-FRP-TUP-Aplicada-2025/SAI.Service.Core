@@ -44,20 +44,7 @@ public sealed class ServicioMonitoreo(IRepositorioMonitoreo repositorio, IAdapta
                      ?? await AbrirSesionAsync(dispositivo, intervaloSeg, ct);
 
         var estado = await adaptador.LeerEstadoAsync(ct);
-        var lecturas = new Dictionary<string, double?>(StringComparer.Ordinal)
-        {
-            [Variables.TensionEntrada] = estado.TensionEntradaVoltios,
-            [Variables.TensionSalida] = estado.TensionSalidaVoltios,
-            [Variables.CargaSalida] = estado.CargaSalidaPorcentaje,
-            [Variables.CargaBateria] = estado.CargaBateriaPorcentaje,
-            [Variables.EstadoUps] = estado.EstadoUps switch
-            {
-                Abstractions.EstadoUps.EnBateria => Variables.CodigoEnBateria,
-                Abstractions.EstadoUps.EnLinea => Variables.CodigoEnLinea,
-                _ => null,
-            },
-            [Variables.TensionBateria] = estado.TensionBateriaVoltios,
-        };
+        var lecturas = MapeoLecturas.DesdeEstado(estado);
 
         var muestra = Muestra.Registrar(
             $"mue-{Guid.NewGuid():N}",

@@ -1,5 +1,6 @@
 using SAI.Service.Core.Domain.Inventario;
 using SAI.Service.Core.Domain.Monitoreo;
+using SAI.Service.Core.Domain.Vinculos;
 
 namespace SAI.Service.Core.Application.Monitoreo;
 
@@ -36,4 +37,19 @@ public interface IRepositorioMonitoreo
 
     /// <summary>Últimos <paramref name="cantidad"/> eventos del dispositivo, más reciente primero (panel en vivo).</summary>
     Task<IReadOnlyList<Evento>> EventosRecientesAsync(string dispositivoCodigo, int cantidad, CancellationToken ct);
+
+    /// <summary>Montaje de batería vigente (fin abierto) del dispositivo, o <c>null</c>. Se congela en la prueba (I-15).</summary>
+    Task<MontajeBateria?> MontajeVigenteAsync(string dispositivoCodigo, CancellationToken ct);
+
+    /// <summary>Último evento de corte de suministro del dispositivo, o <c>null</c> (para la precondición de flotación).</summary>
+    Task<Evento?> UltimoCorteAsync(string dispositivoCodigo, CancellationToken ct);
+
+    /// <summary>Pruebas de un montaje (para la línea base y el conteo de comparables), más antigua primero.</summary>
+    Task<IReadOnlyList<PruebaBateria>> PruebasDeMontajeAsync(string montajeCodigo, CancellationToken ct);
+
+    /// <summary>Últimas pruebas de un dispositivo, más reciente primero (historial del panel).</summary>
+    Task<IReadOnlyList<PruebaBateria>> PruebasDeDispositivoAsync(string dispositivoCodigo, int cantidad, CancellationToken ct);
+
+    /// <summary>Guarda la prueba junto con su serie densa y la sesión densa (y su fuente, si es nueva), transaccional.</summary>
+    Task GuardarPruebaConSerieAsync(PruebaBateria prueba, IReadOnlyList<Muestra> serie, SesionSondeo sesionDensa, FuenteDatos? nuevaFuente, CancellationToken ct);
 }

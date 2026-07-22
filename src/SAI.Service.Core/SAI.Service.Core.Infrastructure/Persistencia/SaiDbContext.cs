@@ -66,6 +66,9 @@ public class SaiDbContext(DbContextOptions<SaiDbContext> options)
     /// <summary>Eventos derivados del sondeo (append-only).</summary>
     public DbSet<Evento> Eventos => Set<Evento>();
 
+    /// <summary>Pruebas de batería con su veredicto de salud (append-only, CU-07).</summary>
+    public DbSet<PruebaBateria> PruebasBateria => Set<PruebaBateria>();
+
     /// <inheritdoc />
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
