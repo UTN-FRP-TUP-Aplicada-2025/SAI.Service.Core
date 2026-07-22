@@ -82,6 +82,28 @@ public sealed class RepositorioMonitoreo(SaiDbContext contexto) : IRepositorioMo
             .ToListAsync(ct);
 
     /// <inheritdoc />
+    public async Task<IReadOnlyList<Muestra>> MuestrasPorPeriodoAsync(string dispositivoCodigo, DateTimeOffset desde, DateTimeOffset hasta, CancellationToken ct) =>
+        await contexto.Muestras
+            .Where(m => m.DispositivoCodigo == dispositivoCodigo && m.Instante >= desde && m.Instante <= hasta)
+            .OrderBy(m => m.Instante)
+            .Take(10000)
+            .ToListAsync(ct);
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<Agregado>> AgregadosPorPeriodoAsync(string dispositivoCodigo, string variable, DateTimeOffset desde, DateTimeOffset hasta, CancellationToken ct) =>
+        await contexto.Agregados
+            .Where(a => a.DispositivoCodigo == dispositivoCodigo && a.Variable == variable && a.VentanaInicio >= desde && a.VentanaInicio <= hasta)
+            .OrderBy(a => a.VentanaInicio)
+            .ToListAsync(ct);
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<Evento>> EventosPorPeriodoAsync(string dispositivoCodigo, DateTimeOffset desde, DateTimeOffset hasta, CancellationToken ct) =>
+        await contexto.Eventos
+            .Where(e => e.DispositivoCodigo == dispositivoCodigo && e.Instante >= desde && e.Instante <= hasta)
+            .OrderBy(e => e.Instante)
+            .ToListAsync(ct);
+
+    /// <inheritdoc />
     public Task<MontajeBateria?> MontajeVigenteAsync(string dispositivoCodigo, CancellationToken ct) =>
         contexto.Montajes.FirstOrDefaultAsync(m => m.DispositivoCodigo == dispositivoCodigo && m.Vigencia.Hasta == null, ct);
 

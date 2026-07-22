@@ -9,6 +9,18 @@ y el versionado sigue [Semantic Versioning](https://semver.org/lang/es/).
 
 ### Añadido
 
+- **Etapa 3 · Incremento D — Históricos y gráficas** (US-11): el panel `HistoricosYGraficas.razor`
+  grafica la evolución de las variables (tensión de entrada/salida, carga, tensión de batería) en un
+  período con `MudChart`, con la lista de **eventos** del período y el **conteo de microcortes** (que
+  sale de los eventos, nunca del promedio de la serie agregada, CL-16). `ServicioHistoricos` elige la
+  fuente según la **retención** (muestras crudas dentro de 30 días, agregados horarios más atrás),
+  computando los agregados **on-demand** con el `CalculadorAgregado` ya existente cuando no hay
+  agregados persistidos, y adjuntando **cobertura** y **advertencia** a la serie agregada (I-20,
+  RN-10); un período sin datos responde `PERIODO_SIN_DATOS` sin dibujar una serie vacía. Consultas de
+  lectura por período en el repositorio. 2 pruebas nuevas. **Con esto se completa la Etapa 3**
+  (monitoreo en vivo, salud e históricos). *La purga por retención de muestras (choca con el
+  interceptor append-only) queda diferida.*
+
 - **Etapa 3 · Incremento C — Prueba de batería y veredicto de salud** (BT-21, US-12, US-13): la
   **prueba de batería** que recoge una serie densa (1 Hz) de tensión y deriva un veredicto de salud.
   Dominio: `PruebaBateria` (append-only; **congela** el montaje vigente, I-15/RC-07), enums

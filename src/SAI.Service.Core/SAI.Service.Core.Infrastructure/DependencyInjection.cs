@@ -75,6 +75,7 @@ public static class DependencyInjection
         services.AddScoped<IRepositorioMonitoreo, RepositorioMonitoreo>();
         services.AddScoped<ServicioMonitoreo>();
         services.AddScoped<ServicioPanelEnVivo>();
+        services.AddScoped<ServicioHistoricos>();
         services.AddSingleton(LeerOpcionesPrueba(configuration));
         services.AddScoped<ServicioPruebaBateria>();
         services.AddHostedService<ServicioSondeo>();

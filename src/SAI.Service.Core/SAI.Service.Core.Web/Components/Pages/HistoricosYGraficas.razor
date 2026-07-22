@@ -1,11 +1,152 @@
 @page "/historicos-y-graficas"
 @attribute [Authorize]
+@using SAI.Service.Core.Application.Monitoreo
+@using SAI.Service.Core.Domain.Monitoreo
+@using Microsoft.Extensions.DependencyInjection
+@inject IServiceScopeFactory FabricaAlcances
 
-<PageTitle>Historicos y graficas — SAI.Service.Core</PageTitle>
+<PageTitle>Históricos y gráficas — SAI.Service.Core</PageTitle>
 
-<h1 class="mud-typography mud-typography-h4">Historicos y graficas</h1>
+<h1 class="mud-typography mud-typography-h4 mb-4">Históricos y gráficas</h1>
 
-<MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Class="mt-4">
-    Superficie placeholder de Sprint 0. Las series de muestras y agregados, el rango
-    de fechas y las marcas de evento se implementan en EP-05.
-</MudAlert>
+<MudPaper Elevation="1" Class="pa-4 mb-4" Style="border-radius:10px;">
+    <MudGrid>
+        <MudItem xs="12" sm="4">
+            <MudSelect T="int" Label="Período" @bind-Value="_horas" Dense="true">
+                <MudSelectItem T="int" Value="1">Última hora</MudSelectItem>
+                <MudSelectItem T="int" Value="6">Últimas 6 horas</MudSelectItem>
+                <MudSelectItem T="int" Value="24">Últimas 24 horas</MudSelectItem>
+                <MudSelectItem T="int" Value="168">Últimos 7 días</MudSelectItem>
+                <MudSelectItem T="int" Value="720">Últimos 30 días</MudSelectItem>
+            </MudSelect>
+        </MudItem>
+        <MudItem xs="12" sm="6">
+            <MudSelect T="string" Label="Variables" MultiSelection="true" @bind-SelectedValues="_variables" Dense="true">
+                <MudSelectItem T="string" Value="@Variables.TensionEntrada">Tensión de entrada</MudSelectItem>
+                <MudSelectItem T="string" Value="@Variables.TensionSalida">Tensión de salida</MudSelectItem>
+                <MudSelectItem T="string" Value="@Variables.CargaSalida">Carga de salida</MudSelectItem>
+                <MudSelectItem T="string" Value="@Variables.TensionBateria">Tensión de batería</MudSelectItem>
+            </MudSelect>
+        </MudItem>
+        <MudItem xs="12" sm="2" Class="d-flex align-center">
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Consultar" Disabled="_cargando">Graficar</MudButton>
+        </MudItem>
+    </MudGrid>
+</MudPaper>
+
+@if (_cargando)
+{
+    <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+}
+else if (_resultado is null)
+{
+    <MudAlert Severity="Severity.Info" Variant="Variant.Outlined">Elegí un período y variables, y tocá «Graficar».</MudAlert>
+}
+else if (_resultado.Codigo == CodigoResultadoHistorico.PeriodoSinDatos)
+{
+    <MudAlert Severity="Severity.Warning" Variant="Variant.Filled"><b>PERIODO_SIN_DATOS</b>: no hay muestras, agregados ni eventos en el período.</MudAlert>
+}
+else
+{
+    @if (_resultado.Resolucion == ResolucionSerie.Agregados && _resultado.Series.FirstOrDefault(s => s.Cobertura is not null) is { } agr)
+    {
+        <MudAlert Severity="Severity.Info" Variant="Variant.Filled" Class="mb-3">
+            Serie <b>agregada</b> (horaria): cobertura @agr.Cobertura!.Value.ToString("0.000"). Conserva mínimo y máximo además del
+            promedio; el promedio horario no representa los microcortes. @agr.Advertencia
+        </MudAlert>
+    }
+
+    <MudPaper Elevation="1" Class="pa-4 mb-4" Style="border-radius:10px;">
+        <MudChart ChartType="ChartType.Line" ChartSeries="@_chartSeries" XAxisLabels="@_labels"
+                  Width="100%" Height="340px" ChartOptions="@_opciones" />
+    </MudPaper>
+
+    <MudPaper Elevation="1" Class="pa-4" Style="border-radius:10px;">
+        <div class="d-flex align-center mb-2">
+            <MudText Typo="Typo.subtitle1">Eventos del período</MudText>
+            <MudSpacer />
+            <MudChip T="string" Size="Size.Small" Color="Color.Info" Variant="Variant.Text">microcortes: @_resultado.ConteoMicrocortes</MudChip>
+        </div>
+        @if (_resultado.Marcas.Count == 0)
+        {
+            <MudText Typo="Typo.body2" Class="mud-text-secondary">Sin eventos en el período.</MudText>
+        }
+        else
+        {
+            <MudSimpleTable Dense="true" Hover="true" Style="background:transparent;">
+                <thead><tr><th>Hora</th><th>Evento</th><th>Regla</th></tr></thead>
+                <tbody>
+                    @foreach (var m in _resultado.Marcas)
+                    {
+                        <tr>
+                            <td>@m.Instante.ToLocalTime().ToString("dd/MM HH:mm:ss")</td>
+                            <td>@m.Tipo</td>
+                            <td>@m.ReglaCodigo v@m.ReglaVersion</td>
+                        </tr>
+                    }
+                </tbody>
+            </MudSimpleTable>
+        }
+    </MudPaper>
+}
+
+@code {
+    private int _horas = 6;
+    private IEnumerable<string> _variables = new[] { Variables.TensionEntrada, Variables.TensionSalida };
+    private bool _cargando;
+    private ResultadoHistorico? _resultado;
+    private List<ChartSeries> _chartSeries = [];
+    private string[] _labels = [];
+    private readonly ChartOptions _opciones = new() { InterpolationOption = InterpolationOption.NaturalSpline, YAxisTicks = 10 };
+
+    private async Task Consultar()
+    {
+        _cargando = true;
+        try
+        {
+            var variables = _variables.ToList();
+            var hasta = DateTimeOffset.UtcNow;
+            var desde = hasta.AddHours(-_horas);
+
+            using var alcance = FabricaAlcances.CreateScope();
+            _resultado = await alcance.ServiceProvider.GetRequiredService<ServicioHistoricos>()
+                .ConsultarAsync(variables, desde, hasta, resolucionForzada: null, CancellationToken.None);
+
+            ConstruirGrafico();
+        }
+        finally
+        {
+            _cargando = false;
+        }
+    }
+
+    private void ConstruirGrafico()
+    {
+        _chartSeries = [];
+        _labels = [];
+        if (_resultado is null || _resultado.Codigo != CodigoResultadoHistorico.Ok)
+        {
+            return;
+        }
+
+        _chartSeries = [.. _resultado.Series.Select(s => new ChartSeries
+        {
+            Name = EtiquetaVariable(s.Variable),
+            Data = [.. s.Puntos.Select(p => p.Valor ?? 0d)],
+        })];
+
+        // Etiquetas de tiempo espaciadas para no saturar el eje.
+        var puntos = _resultado.Series.FirstOrDefault()?.Puntos ?? [];
+        var paso = Math.Max(1, puntos.Count / 8);
+        _labels = [.. puntos.Select((p, i) => i % paso == 0 ? p.Instante.ToLocalTime().ToString("HH:mm") : string.Empty)];
+    }
+
+    private static string EtiquetaVariable(string variable) => variable switch
+    {
+        var v when v == Variables.TensionEntrada => "Entrada (V)",
+        var v when v == Variables.TensionSalida => "Salida (V)",
+        var v when v == Variables.CargaSalida => "Carga (%)",
+        var v when v == Variables.TensionBateria => "Batería (V)",
+        _ => variable,
+    };
+}
