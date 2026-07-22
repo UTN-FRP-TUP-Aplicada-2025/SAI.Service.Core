@@ -9,6 +9,20 @@ y el versionado sigue [Semantic Versioning](https://semver.org/lang/es/).
 
 ### Añadido
 
+- **Etapa 3 · Incremento A — Sondeo y persistencia de muestras** (BT-17, BT-18, US-08, US-10):
+  el **planificador de sondeo** (`ServicioSondeo`, un `BackgroundService`) que a cadencia
+  configurable (`Sai:Sondeo:IntervaloSeg`, 5 s por defecto) lee el estado del SAI por el adaptador y
+  persiste una `Muestra` **append-only** con su **calidad** (completa / parcial / perdida, tolerando
+  huecos por variable) y la **procedencia por variable** (US-10: `input.voltage`/`output.voltage`/
+  `ups.load` medidos, `battery.charge` **derivada**). Dominio de monitoreo nuevo: `FuenteDatos`,
+  `SesionSondeo` (con el mapa variable→origen), `Muestra` y `Agregado` (que **no hereda** de
+  `Muestra`, ADR-08, y conserva mínimo/máximo/promedio con cobertura y advertencia), más
+  `CalculadorAgregado`. Mapeo EF (diccionarios como JSON, todas `IEntidadHistoria` protegidas por el
+  interceptor append-only) y migración `EsquemaMonitoreo`. Cada ronda corre en su propio alcance de
+  DI (un `DbContext` por ronda). Delimitación: la derivación de **eventos** y la alerta de pérdida de
+  comunicación van al Incremento B; la purga por retención (choca con append-only) queda diferida.
+  13 pruebas nuevas (dominio + integración). *El panel en vivo llega en el Incremento B.*
+
 - **Etapa 2 · Incremento C2 — Panel de alta de equipos** (US-04, US-05, CU-02): el **wizard**
   interactivo (MudBlazor) de alta en `AltaDeEquipos.razor` con los cuatro pasos —descubrir el
   dispositivo (`IDescubridorSai`; `DISPOSITIVO_NO_DESCUBIERTO` si no hay candidatos; badge «sin marca
