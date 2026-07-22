@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using SAI.Service.Core.Domain.Catalogo;
 using SAI.Service.Core.Domain.Inventario;
+using SAI.Service.Core.Domain.Monitoreo;
 using SAI.Service.Core.Domain.Verificaciones;
 using SAI.Service.Core.Domain.Vinculos;
 using SAI.Service.Core.Infrastructure.Persistencia.Configuraciones;
@@ -46,6 +47,18 @@ public class SaiDbContext(DbContextOptions<SaiDbContext> options)
     /// <summary>Verificaciones de los cuatro supuestos de seguridad operativa (ADR-10).</summary>
     public DbSet<Verificacion> Verificaciones => Set<Verificacion>();
 
+    /// <summary>Historia de monitoreo: fuentes de datos (Etapa 3).</summary>
+    public DbSet<FuenteDatos> FuentesDatos => Set<FuenteDatos>();
+
+    /// <summary>Historia de monitoreo: sesiones de sondeo.</summary>
+    public DbSet<SesionSondeo> SesionesSondeo => Set<SesionSondeo>();
+
+    /// <summary>Historia de monitoreo: muestras del sondeo (append-only).</summary>
+    public DbSet<Muestra> Muestras => Set<Muestra>();
+
+    /// <summary>Historia de monitoreo: agregados por ventana (append-only).</summary>
+    public DbSet<Agregado> Agregados => Set<Agregado>();
+
     /// <inheritdoc />
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -54,5 +67,8 @@ public class SaiDbContext(DbContextOptions<SaiDbContext> options)
 
         // Catálogo / inventario / vínculos / verificaciones del dominio de equipos (Etapa 2).
         ModeloEquipos.Configurar(builder);
+
+        // Historia de monitoreo: fuentes, sesiones, muestras y agregados (Etapa 3).
+        ModeloMonitoreo.Configurar(builder);
     }
 }

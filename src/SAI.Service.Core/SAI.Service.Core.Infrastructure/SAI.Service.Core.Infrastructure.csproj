@@ -16,6 +16,8 @@
   <ItemGroup>
     <!-- Provisto por el SDK de .NET 10; version alineada al TFM. -->
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.0" />
+    <!-- Planificador de sondeo (BT-17): BackgroundService / AddHostedService. -->
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.0" />
     <!--
       Pin transitivo: EF Core Sqlite 10.0.0 arrastra SQLitePCLRaw.bundle_e_sqlite3 2.1.11,
       cuya lib nativa (SQLitePCLRaw.lib.e_sqlite3 2.1.11) tiene la vulnerabilidad alta

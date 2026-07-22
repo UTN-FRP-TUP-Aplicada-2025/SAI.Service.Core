@@ -1,7 +1,10 @@
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using SAI.Service.Core.Infrastructure.Monitoreo;
 using SAI.Service.Core.Infrastructure.Persistencia;
 
 namespace SAI.Service.Core.Integration.Tests;
@@ -30,6 +33,19 @@ public sealed class FabricaSai : WebApplicationFactory<Program>
                 ["Jwt:Emisor"] = "sai-service-core",
                 ["Jwt:Audiencia"] = "sai-service-core-api",
             });
+        });
+
+        // El planificador de sondeo no debe correr en las pruebas (escribiría muestras en segundo
+        // plano y las haría no deterministas): se quita el hosted service. Las pruebas ejercitan el
+        // orquestador de sondeo directamente cuando lo necesitan.
+        builder.ConfigureTestServices(services =>
+        {
+            var poller = services.SingleOrDefault(d =>
+                d.ServiceType == typeof(IHostedService) && d.ImplementationType == typeof(ServicioSondeo));
+            if (poller is not null)
+            {
+                services.Remove(poller);
+            }
         });
     }
 
