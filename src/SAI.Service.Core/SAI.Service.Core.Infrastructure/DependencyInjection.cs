@@ -2,8 +2,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SAI.Service.Core.Application.Abstractions;
+using SAI.Service.Core.Application.Acciones;
 using SAI.Service.Core.Application.Equipos;
 using SAI.Service.Core.Application.Monitoreo;
+using SAI.Service.Core.Domain.Verificaciones;
 using SAI.Service.Core.Infrastructure.Adaptadores;
 using SAI.Service.Core.Infrastructure.Adaptadores.Nut;
 using SAI.Service.Core.Infrastructure.Monitoreo;
@@ -82,6 +84,11 @@ public static class DependencyInjection
         services.AddScoped<ServicioHistoricos>();
         services.AddSingleton(LeerOpcionesPrueba(configuration));
         services.AddScoped<ServicioPruebaBateria>();
+
+        // Ejecución del apagado ordenado (Etapa 4·B, CU-05): política de apagado y orquestador.
+        services.AddSingleton(LeerOpcionesApagado(configuration));
+        services.AddScoped<ServicioApagadoOrdenado>();
+
         services.AddHostedService<ServicioSondeo>();
 
         return services;
@@ -98,6 +105,8 @@ public static class DependencyInjection
             Puerto = int.TryParse(seccion["Puerto"], out var puerto) ? puerto : defecto.Puerto,
             Ups = seccion["Ups"] ?? defecto.Ups,
             TimeoutSegundos = int.TryParse(seccion["TimeoutSegundos"], out var timeout) ? timeout : defecto.TimeoutSegundos,
+            Usuario = seccion["Usuario"] ?? defecto.Usuario,
+            Password = seccion["Password"] ?? defecto.Password,
         };
     }
 
@@ -110,6 +119,22 @@ public static class DependencyInjection
         {
             IntervaloSeg = int.TryParse(seccion["IntervaloSeg"], out var intervalo) ? intervalo : defecto.IntervaloSeg,
             Habilitado = bool.TryParse(seccion["Habilitado"], out var habilitado) ? habilitado : defecto.Habilitado,
+        };
+    }
+
+    // Lee 'Sai:Apagado' de forma manual (sin el binder de configuración).
+    private static OpcionesApagado LeerOpcionesApagado(IConfiguration configuration)
+    {
+        var seccion = configuration.GetSection(OpcionesApagado.Seccion);
+        var defecto = new OpcionesApagado();
+        var reservado = int.TryParse(seccion["TiempoReservadoSeg"], out var t) ? t : defecto.TiempoReservadoSeg;
+        return new OpcionesApagado
+        {
+            ModalidadSolicitada = Enum.TryParse<Modalidad>(seccion["ModalidadSolicitada"], ignoreCase: true, out var m)
+                ? m
+                : defecto.ModalidadSolicitada,
+            // Se acota al techo duro de 540 s (RN-04, I-10) por si la configuración lo excede.
+            TiempoReservadoSeg = Math.Clamp(reservado, 0, Domain.Acciones.Accion.TechoDuroApagadoSeg),
         };
     }
 

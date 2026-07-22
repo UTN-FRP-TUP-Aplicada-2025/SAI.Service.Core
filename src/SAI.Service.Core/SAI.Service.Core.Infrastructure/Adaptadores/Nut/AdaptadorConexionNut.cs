@@ -144,22 +144,66 @@ public sealed class AdaptadorConexionNut : IAdaptadorConexion, IDescubridorSai
         return descubiertos;
     }
 
-    /// <inheritdoc />
-    public Task<ResultadoAccion> OrdenarApagadoConRetornoAsync(TimeSpan retardo, CancellationToken ct) =>
-        Task.FromResult(new ResultadoAccion(
-            Aceptada: false,
-            Motivo: "El apagado real por NUT se habilita en la Etapa 4 (US-14): requiere credenciales de "
-                + "administrador y la ventana de mantenimiento con bloqueo por verificación (RN-02). "
-                + "En este incremento el adaptador NUT es de solo lectura.",
-            MarcaTiempoUtc: DateTimeOffset.UtcNow));
+    // Comando INSTCMD de apagado con retorno del SAI (ADR-09): corta la salida y la repone al volver
+    // la energía. NUNCA se emite shutdown.stop (el ciclo forzado no se cancela).
+    private const string CmdApagadoConRetorno = "shutdown.return";
+
+    // Comando INSTCMD del autotest rápido de batería (US-12).
+    private const string CmdTestBateria = "test.battery.start.quick";
+
+    // Variables NUT de temporización del apagado con retorno (ADR-27 §6.2): retardo de corte y de
+    // reposición de la salida. El retorno fijo de 180 s da la transición ausencia→presencia (ADR-09).
+    private const string VarRetardoApagado = "ups.delay.shutdown";
+    private const string VarRetardoRetorno = "ups.delay.start";
+    private const int RetardoRetornoSeg = 180;
 
     /// <inheritdoc />
-    public Task<ResultadoAccion> LanzarTestBateriaAsync(CancellationToken ct) =>
-        Task.FromResult(new ResultadoAccion(
-            Aceptada: false,
-            Motivo: "El test de batería por NUT se habilita en una etapa posterior (requiere comando de "
-                + "escritura con credenciales de administrador). En este incremento el adaptador NUT es de solo lectura.",
-            MarcaTiempoUtc: DateTimeOffset.UtcNow));
+    public async Task<ResultadoAccion> OrdenarApagadoConRetornoAsync(TimeSpan retardo, CancellationToken ct)
+    {
+        var ahora = DateTimeOffset.UtcNow;
+        var retardoApagadoSeg = Math.Max(0, (int)Math.Round(retardo.TotalSeconds));
+        var ajustes = new[]
+        {
+            (VarRetardoApagado, retardoApagadoSeg.ToString(CultureInfo.InvariantCulture)),
+            (VarRetardoRetorno, RetardoRetornoSeg.ToString(CultureInfo.InvariantCulture)),
+        };
+
+        try
+        {
+            await _cliente.EnviarComandoInstantaneoAsync(CmdApagadoConRetorno, ajustes, ct);
+
+            // Efecto observado (ADR-11): el equipo admitió la orden (respondió OK, no ERR). El corte
+            // físico ocurre tras el retardo; no se cancela aunque vuelva la red (ciclo forzado, ADR-09).
+            return new ResultadoAccion(
+                Aceptada: true,
+                Motivo: $"El SAI admitió '{CmdApagadoConRetorno}' (retardo de corte {retardoApagadoSeg} s, retorno {RetardoRetornoSeg} s). "
+                    + "El corte ocurrirá al vencer el retardo y no se cancelará (ciclo forzado).",
+                MarcaTiempoUtc: ahora);
+        }
+        catch (NutException e)
+        {
+            // Falla de transporte o rechazo del servidor: no se observó el efecto (ADR-11).
+            return new ResultadoAccion(false, e.Message, ahora);
+        }
+    }
+
+    /// <inheritdoc />
+    public async Task<ResultadoAccion> LanzarTestBateriaAsync(CancellationToken ct)
+    {
+        var ahora = DateTimeOffset.UtcNow;
+        try
+        {
+            await _cliente.EnviarComandoInstantaneoAsync(CmdTestBateria, [], ct);
+            return new ResultadoAccion(
+                Aceptada: true,
+                Motivo: $"El SAI admitió '{CmdTestBateria}': autotest rápido de batería iniciado.",
+                MarcaTiempoUtc: ahora);
+        }
+        catch (NutException e)
+        {
+            return new ResultadoAccion(false, e.Message, ahora);
+        }
+    }
 
     // ups.status puede traer varios flags (p. ej. "OL CHRG", "OB DISCHRG"). La presencia de "OB"
     // indica que el equipo pasó a batería (DM-05).

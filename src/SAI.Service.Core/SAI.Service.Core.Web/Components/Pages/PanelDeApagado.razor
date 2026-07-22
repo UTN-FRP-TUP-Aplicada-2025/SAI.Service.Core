@@ -1,0 +1,154 @@
+@page "/panel-de-apagado"
+@attribute [Authorize]
+@using SAI.Service.Core.Application.Acciones
+@using SAI.Service.Core.Domain.Acciones
+@using SAI.Service.Core.Domain.Verificaciones
+@using Microsoft.Extensions.DependencyInjection
+@inject IServiceScopeFactory FabricaAlcances
+
+<PageTitle>Apagado ordenado — SAI.Service.Core</PageTitle>
+
+<h1 class="mud-typography mud-typography-h4 mb-4">Apagado ordenado</h1>
+
+@if (_situacion is null)
+{
+    <MudAlert Severity="Severity.Info" Variant="Variant.Filled">
+        No hay un equipo en servicio. <MudLink Href="/alta-de-equipos" Color="Color.Inherit"><b>Dá de alta un equipo</b></MudLink>.
+    </MudAlert>
+}
+else
+{
+    var s = _situacion;
+    var armado = s.Efectiva != Modalidad.SoloAlerta;
+    var bloqueado = s.Solicitada != Modalidad.SoloAlerta && s.Efectiva == Modalidad.SoloAlerta;
+
+    <MudAlert Severity="@(armado ? Severity.Success : bloqueado ? Severity.Warning : Severity.Info)" Variant="Variant.Filled" Class="mb-4" role="alert">
+        Modalidad solicitada: <b>@EtiquetaModalidad(s.Solicitada)</b> · efectiva: <b>@EtiquetaModalidad(s.Efectiva)</b>
+        (<b>@s.Verificados de @s.Requeridos</b> supuestos verificados).
+        @if (armado)
+        {
+            <span> <b>Armado</b>: ante un disparo se ordena el apagado con retorno (retardo @s.TiempoReservadoSeg s). El ciclo forzado no se cancela.</span>
+        }
+        else if (bloqueado)
+        {
+            <span> <b>Bloqueado por verificación</b> (RN-02): degrada a solo aviso hasta verificar los cuatro supuestos.
+                <MudLink Href="/panel-de-verificaciones" Color="Color.Inherit"><b>Ir a verificaciones</b></MudLink>.</span>
+        }
+        else
+        {
+            <span> <b>Solo aviso</b>: estado base seguro (RN-01), no se apaga nada.</span>
+        }
+    </MudAlert>
+
+    <MudPaper Elevation="1" Class="pa-4 mb-4" Style="border-radius:10px;">
+        <MudText Typo="Typo.subtitle1" Class="mb-2">Simular un disparo</MudText>
+        <MudText Typo="Typo.body2" Class="mud-text-secondary mb-3">
+            Ejecuta la decisión de apagado contra el adaptador configurado (en desarrollo, el simulado: sin efecto real
+            sobre ningún host). Registra la acción por efecto observado (ADR-11): bloqueo, solo aviso o apagado ejecutado.
+        </MudText>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="_ocupado" OnClick="SimularDisparo">
+            Simular disparo de apagado
+        </MudButton>
+    </MudPaper>
+
+    @if (_mensaje is not null)
+    {
+        <MudAlert Severity="@_severidad" Variant="Variant.Filled" Class="mb-4">@_mensaje</MudAlert>
+    }
+
+    <MudText Typo="Typo.subtitle1" Class="mb-2">Últimas acciones</MudText>
+    @if (s.Acciones.Count == 0)
+    {
+        <MudText Typo="Typo.body2" Class="mud-text-secondary">Todavía no se registró ninguna acción de apagado.</MudText>
+    }
+    else
+    {
+        <MudSimpleTable Dense="true" Hover="true" Bordered="true" Style="border-radius:10px;overflow:hidden;">
+            <thead>
+                <tr><th>Instante (UTC)</th><th>Solicitada → efectiva</th><th>Resultado</th><th>Detalle</th></tr>
+            </thead>
+            <tbody>
+                @foreach (var a in s.Acciones)
+                {
+                    <tr>
+                        <td>@a.Instante.UtcDateTime.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                        <td>@EtiquetaModalidad(a.ModalidadSolicitada) → @EtiquetaModalidad(a.ModalidadEfectiva)</td>
+                        <td><MudChip T="string" Size="Size.Small" Color="@ColorEstado(a.Estado)" Variant="Variant.Text">@EtiquetaEstado(a.Estado)</MudChip></td>
+                        <td><MudText Typo="Typo.caption">@a.Detalle</MudText></td>
+                    </tr>
+                }
+            </tbody>
+        </MudSimpleTable>
+    }
+}
+
+@code {
+    private SituacionApagado? _situacion;
+    private bool _ocupado;
+    private string? _mensaje;
+    private Severity _severidad = Severity.Info;
+
+    protected override async Task OnInitializedAsync() => await Cargar();
+
+    private async Task Cargar()
+    {
+        using var alcance = FabricaAlcances.CreateScope();
+        _situacion = await alcance.ServiceProvider.GetRequiredService<ServicioApagadoOrdenado>().SituacionAsync(CancellationToken.None);
+    }
+
+    private async Task SimularDisparo()
+    {
+        _ocupado = true;
+        try
+        {
+            using var alcance = FabricaAlcances.CreateScope();
+            var accion = await alcance.ServiceProvider.GetRequiredService<ServicioApagadoOrdenado>().EjecutarDisparoAsync(null, CancellationToken.None);
+            if (accion is null)
+            {
+                _mensaje = "No hay un equipo en servicio para actuar.";
+                _severidad = Severity.Warning;
+            }
+            else
+            {
+                _mensaje = $"{EtiquetaEstado(accion.Estado)}: {accion.Detalle}";
+                _severidad = accion.Estado switch
+                {
+                    EstadoAccion.Ejecutada => Severity.Success,
+                    EstadoAccion.EfectoNoConfirmado => Severity.Error,
+                    _ => Severity.Warning,
+                };
+            }
+        }
+        finally
+        {
+            _ocupado = false;
+            await Cargar();
+        }
+    }
+
+    private static string EtiquetaModalidad(Modalidad modalidad) => modalidad switch
+    {
+        Modalidad.SoloAlerta => "Solo aviso",
+        Modalidad.ApagarHostConRetorno => "Apagar host (con retorno)",
+        Modalidad.ApagarHostLuegoUpsConRetorno => "Apagar host y SAI (con retorno)",
+        Modalidad.CicloForzado => "Ciclo forzado",
+        _ => modalidad.ToString(),
+    };
+
+    private static string EtiquetaEstado(EstadoAccion estado) => estado switch
+    {
+        EstadoAccion.BloqueadaPorVerificacion => "Bloqueada por verificación",
+        EstadoAccion.SoloAviso => "Solo aviso",
+        EstadoAccion.Ejecutada => "Ejecutada",
+        EstadoAccion.EfectoNoConfirmado => "Efecto no confirmado",
+        _ => estado.ToString(),
+    };
+
+    private static Color ColorEstado(EstadoAccion estado) => estado switch
+    {
+        EstadoAccion.Ejecutada => Color.Success,
+        EstadoAccion.EfectoNoConfirmado => Color.Error,
+        EstadoAccion.BloqueadaPorVerificacion => Color.Warning,
+        _ => Color.Default,
+    };
+}

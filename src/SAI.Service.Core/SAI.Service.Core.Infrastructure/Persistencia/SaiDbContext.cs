@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using SAI.Service.Core.Domain.Acciones;
 using SAI.Service.Core.Domain.Catalogo;
 using SAI.Service.Core.Domain.Inventario;
 using SAI.Service.Core.Domain.Monitoreo;
@@ -68,6 +69,9 @@ public class SaiDbContext(DbContextOptions<SaiDbContext> options)
 
     /// <summary>Pruebas de batería con su veredicto de salud (append-only, CU-07).</summary>
     public DbSet<PruebaBateria> PruebasBateria => Set<PruebaBateria>();
+
+    /// <summary>Historia de acciones de apagado (Etapa 4·B, CU-05, ADR-04).</summary>
+    public DbSet<Accion> Acciones => Set<Accion>();
 
     /// <inheritdoc />
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)

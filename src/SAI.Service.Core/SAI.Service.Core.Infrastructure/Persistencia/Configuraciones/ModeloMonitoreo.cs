@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using SAI.Service.Core.Domain.Acciones;
 using SAI.Service.Core.Domain.Inventario;
 using SAI.Service.Core.Domain.Monitoreo;
 using SAI.Service.Core.Domain.Valores;
@@ -27,6 +28,7 @@ internal static class ModeloMonitoreo
     {
         ConfigurarEventos(builder);
         ConfigurarPruebas(builder);
+        ConfigurarAcciones(builder);
 
         builder.Entity<FuenteDatos>(e =>
         {
@@ -152,6 +154,29 @@ internal static class ModeloMonitoreo
 
             e.HasIndex(v => new { v.DispositivoCodigo, v.Instante });
             e.HasIndex(v => new { v.ReglaDerivacionCodigo, v.ReglaVersion });
+        });
+    }
+
+    private static void ConfigurarAcciones(ModelBuilder builder)
+    {
+        builder.Entity<Accion>(e =>
+        {
+            e.ToTable("Accion");
+            e.HasKey(a => a.Codigo);
+            e.Property(a => a.Codigo);
+            e.Property(a => a.DispositivoCodigo).IsRequired();
+            e.Property(a => a.Instante).IsRequired();
+            e.Property(a => a.ModalidadSolicitada).HasConversion<string>().IsRequired();
+            e.Property(a => a.ModalidadEfectiva).HasConversion<string>().IsRequired();
+            e.Property(a => a.Estado).HasConversion<string>().IsRequired();
+            e.Property(a => a.TiempoReservadoSeg).IsRequired();
+            e.Property(a => a.Detalle).IsRequired();
+            e.Property(a => a.EventoDisparoCodigo);
+
+            e.HasOne<UnidadFisica>().WithMany().HasPrincipalKey(u => u.Codigo)
+                .HasForeignKey(a => a.DispositivoCodigo).OnDelete(DeleteBehavior.Restrict);
+
+            e.HasIndex(a => new { a.DispositivoCodigo, a.Instante });
         });
     }
 

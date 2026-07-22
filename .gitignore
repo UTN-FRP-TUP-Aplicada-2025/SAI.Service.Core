@@ -433,3 +433,9 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# Bases SQLite de desarrollo/diseño (artefactos de ejecución, ADR-18)
+sai.db
+sai.db-*
+sai-design.db
+sai-design.db-*

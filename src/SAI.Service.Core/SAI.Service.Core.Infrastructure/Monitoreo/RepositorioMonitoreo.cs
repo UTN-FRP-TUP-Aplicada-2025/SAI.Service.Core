@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using SAI.Service.Core.Application.Monitoreo;
+using SAI.Service.Core.Domain.Acciones;
 using SAI.Service.Core.Domain.Inventario;
 using SAI.Service.Core.Domain.Monitoreo;
 using SAI.Service.Core.Domain.Vinculos;
@@ -78,6 +79,21 @@ public sealed class RepositorioMonitoreo(SaiDbContext contexto) : IRepositorioMo
         await contexto.Eventos
             .Where(e => e.DispositivoCodigo == dispositivoCodigo)
             .OrderByDescending(e => e.Instante)
+            .Take(cantidad)
+            .ToListAsync(ct);
+
+    /// <inheritdoc />
+    public async Task GuardarAccionAsync(Accion accion, CancellationToken ct)
+    {
+        contexto.Acciones.Add(accion);
+        await contexto.SaveChangesAsync(ct);
+    }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<Accion>> AccionesRecientesAsync(string dispositivoCodigo, int cantidad, CancellationToken ct) =>
+        await contexto.Acciones
+            .Where(a => a.DispositivoCodigo == dispositivoCodigo)
+            .OrderByDescending(a => a.Instante)
             .Take(cantidad)
             .ToListAsync(ct);
 

@@ -16,4 +16,11 @@ public enum Modalidad
 
     /// <summary>Apaga el host y luego el propio SAI, ambos con retorno.</summary>
     ApagarHostLuegoUpsConRetorno = 3,
+
+    /// <summary>
+    /// Ciclo forzado (ADR-09): iniciada la secuencia, el corte del SAI <b>no se cancela</b> aunque
+    /// vuelva la red (nunca se emite <c>shutdown.stop</c>). Garantiza la transición ausencia→presencia
+    /// de energía que la BIOS necesita para autoencender el host (CL-01).
+    /// </summary>
+    CicloForzado = 4,
 }

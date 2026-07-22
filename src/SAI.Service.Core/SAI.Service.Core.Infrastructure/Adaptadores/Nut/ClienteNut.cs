@@ -27,6 +27,9 @@ public sealed class ClienteNut : IClienteNut
     /// <summary>Punto final legible del servidor NUT (para diagnóstico).</summary>
     public string PuntoFinal => $"{_opciones.Host}:{_opciones.Puerto}";
 
+    /// <summary>Verdadero si hay credenciales de escritura configuradas.</summary>
+    public bool TieneCredencialesEscritura => _opciones.TieneCredencialesEscritura;
+
     /// <summary>Devuelve el banner de versión del servidor (<c>VER</c>): confirma que responde.</summary>
     /// <exception cref="NutException">Si no se pudo conectar o el servidor no respondió.</exception>
     public Task<string> ObtenerVersionAsync(CancellationToken ct) =>
@@ -76,6 +79,54 @@ public sealed class ClienteNut : IClienteNut
             IReadOnlyDictionary<string, string> resultado = variables;
             return resultado;
         }, ct);
+
+    /// <summary>
+    /// Ejecuta un comando instantáneo de escritura en una sesión autenticada (US-14): login, fija los
+    /// ajustes previos (<c>SET VAR</c>) y emite <c>INSTCMD</c>. Cada paso debe responder <c>OK</c>.
+    /// </summary>
+    /// <exception cref="NutException">Si faltan credenciales, no se pudo conectar o un paso no dio OK.</exception>
+    public Task EnviarComandoInstantaneoAsync(string comando, IReadOnlyList<(string Variable, string Valor)> ajustesPrevios, CancellationToken ct)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(comando);
+        ArgumentNullException.ThrowIfNull(ajustesPrevios);
+        if (!_opciones.TieneCredencialesEscritura)
+        {
+            throw new NutException(
+                $"No hay credenciales de escritura para '{comando}' en {PuntoFinal}: configurá Sai:Nut:Usuario y Sai:Nut:Password (rol de escritura).");
+        }
+
+        return ConConexionAsync(async (lector, escritor, token) =>
+        {
+            await AutenticarAsync(lector, escritor, token);
+            foreach (var (variable, valor) in ajustesPrevios)
+            {
+                await EnviarYEsperarOkAsync(lector, escritor, $"SET VAR {_opciones.Ups} {variable} {ProtocoloNut.Entrecomillar(valor)}", token);
+            }
+
+            await EnviarYEsperarOkAsync(lector, escritor, $"INSTCMD {_opciones.Ups} {comando}", token);
+            return true; // ConConexionAsync es genérico; el resultado no se usa.
+        }, ct);
+    }
+
+    private async Task AutenticarAsync(StreamReader lector, StreamWriter escritor, CancellationToken ct)
+    {
+        await EnviarYEsperarOkAsync(lector, escritor, $"USERNAME {_opciones.Usuario}", ct);
+        await EnviarYEsperarOkAsync(lector, escritor, $"PASSWORD {_opciones.Password}", ct);
+        await EnviarYEsperarOkAsync(lector, escritor, $"LOGIN {_opciones.Ups}", ct);
+    }
+
+    // Envía una línea de escritura y exige OK; cualquier otra respuesta (ERR/vacío) es una falla (ADR-11).
+    private async Task EnviarYEsperarOkAsync(StreamReader lector, StreamWriter escritor, string comando, CancellationToken ct)
+    {
+        await escritor.WriteLineAsync(comando.AsMemory(), ct);
+        var respuesta = await lector.ReadLineAsync(ct);
+        if (respuesta is null || !ProtocoloNut.EsOk(respuesta))
+        {
+            // No se registra el comando entero para no filtrar la clave del PASSWORD en logs/errores.
+            var verbo = comando.Split(' ', 2)[0];
+            throw new NutException($"El servidor NUT en {PuntoFinal} rechazó '{verbo}': {respuesta ?? "(sin respuesta)"}.");
+        }
+    }
 
     private static async Task<List<string>> LeerListaAsync(
         StreamWriter escritor,
