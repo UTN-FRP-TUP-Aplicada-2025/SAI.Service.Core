@@ -9,6 +9,16 @@ y el versionado sigue [Semantic Versioning](https://semver.org/lang/es/).
 
 ### Añadido
 
+- **Etapa 3 · Incremento B2 — Panel de estado en vivo** (US-07): el panel principal
+  (`PanelEstadoEnVivo.razor`) muestra el **estado en vivo** del SAI —badge en línea / en batería,
+  tensiones de entrada y salida y carga; tensión de batería `[medido]` y carga de batería
+  `[derivado]` con su **procedencia visible** (US-10); conectividad con antigüedad del último sondeo
+  y calidad; y los **eventos recientes** (tipo, duración±incertidumbre, regla vX)—, con **refresco
+  automático** cada 5 s que siempre relee de la base (no cachea, para no mostrar un valor viejo al
+  reconectarse el circuito). Consulta de solo lectura `ServicioPanelEnVivo` (última muestra +
+  procedencia + eventos). Con esto se completa la **Etapa 3**. Prueba de integración del servicio del
+  panel.
+
 - **Etapa 3 · Incremento B1 — Eventos y derivación** (BT-19, BT-20, US-09): la **derivación de
   eventos por reglas versionadas** (RC-09) que corre tras cada muestra. Se extiende la lectura del
   SAI con `ups.status` (en línea / en batería) y `battery.voltage` (medidos) en `EstadoSai`, las

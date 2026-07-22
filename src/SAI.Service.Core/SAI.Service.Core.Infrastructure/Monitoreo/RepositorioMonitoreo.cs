@@ -71,4 +71,12 @@ public sealed class RepositorioMonitoreo(SaiDbContext contexto) : IRepositorioMo
         contexto.Eventos.AddRange(eventos);
         await contexto.SaveChangesAsync(ct);
     }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<Evento>> EventosRecientesAsync(string dispositivoCodigo, int cantidad, CancellationToken ct) =>
+        await contexto.Eventos
+            .Where(e => e.DispositivoCodigo == dispositivoCodigo)
+            .OrderByDescending(e => e.Instante)
+            .Take(cantidad)
+            .ToListAsync(ct);
 }
