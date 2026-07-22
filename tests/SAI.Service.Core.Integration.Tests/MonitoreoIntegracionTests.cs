@@ -90,6 +90,25 @@ public class MonitoreoIntegracionTests
     }
 
     [Fact]
+    public async Task ElPanelEnVivoDevuelveLaUltimaMuestraConProcedencia()
+    {
+        using var fabrica = new FabricaSai();
+        using var scope = fabrica.Services.CreateScope();
+        var sp = scope.ServiceProvider;
+        await sp.GetRequiredService<ServicioAltaEquipos>().RegistrarAsync(SolicitudValida(), CancellationToken.None);
+        await sp.GetRequiredService<ServicioMonitoreo>().SondearAsync(5, CancellationToken.None);
+
+        var vivo = await sp.GetRequiredService<ServicioPanelEnVivo>().ObtenerAsync(CancellationToken.None);
+
+        vivo.HayDispositivo.Should().BeTrue();
+        vivo.Conectado.Should().BeTrue();
+        vivo.CalidadUltima.Should().Be(CalidadMuestra.Completa);
+        vivo.Lecturas.Should().Contain(l => l.Variable == Variables.CargaBateria && l.Origen == Origen.Derivado,
+            "US-10: la carga de batería se muestra derivada");
+        vivo.Lecturas.Should().Contain(l => l.Variable == Variables.TensionEntrada && l.Origen == Origen.Medido);
+    }
+
+    [Fact]
     public async Task LasReglasDeDerivacionSeSembranAlArranque()
     {
         using var fabrica = new FabricaSai();

@@ -33,4 +33,7 @@ public interface IRepositorioMonitoreo
 
     /// <summary>Agrega los eventos derivados (append-only).</summary>
     Task GuardarEventosAsync(IReadOnlyList<Evento> eventos, CancellationToken ct);
+
+    /// <summary>Últimos <paramref name="cantidad"/> eventos del dispositivo, más reciente primero (panel en vivo).</summary>
+    Task<IReadOnlyList<Evento>> EventosRecientesAsync(string dispositivoCodigo, int cantidad, CancellationToken ct);
 }

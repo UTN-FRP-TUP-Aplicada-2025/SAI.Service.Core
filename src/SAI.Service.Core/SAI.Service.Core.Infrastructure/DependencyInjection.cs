@@ -74,6 +74,7 @@ public static class DependencyInjection
         services.AddSingleton(LeerOpcionesSondeo(configuration));
         services.AddScoped<IRepositorioMonitoreo, RepositorioMonitoreo>();
         services.AddScoped<ServicioMonitoreo>();
+        services.AddScoped<ServicioPanelEnVivo>();
         services.AddHostedService<ServicioSondeo>();
 
         return services;

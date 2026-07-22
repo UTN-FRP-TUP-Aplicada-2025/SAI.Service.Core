@@ -2,55 +2,229 @@
 @page "/panel-estado-en-vivo"
 @attribute [Authorize]
 @using SAI.Service.Core.Application.Equipos
-@using SAI.Service.Core.Domain.Verificaciones
+@using SAI.Service.Core.Application.Monitoreo
+@using SAI.Service.Core.Domain.Monitoreo
+@using SAI.Service.Core.Domain.Valores
 @using Microsoft.Extensions.DependencyInjection
+@implements IDisposable
 @inject IServiceScopeFactory FabricaAlcances
 
 <PageTitle>Panel de estado en vivo — SAI.Service.Core</PageTitle>
 
-<h1 class="mud-typography mud-typography-h4">Panel de estado en vivo</h1>
+<div class="d-flex align-center mb-2">
+    <h1 class="mud-typography mud-typography-h4">Panel de estado en vivo</h1>
+    <MudSpacer />
+    @if (_vivo?.InstanteUltimaMuestra is { } instante)
+    {
+        <MudChip T="string" Size="Size.Small" Variant="Variant.Text" Icon="@Icons.Material.Filled.Update">
+            actualizado hace @Antiguedad(instante)
+        </MudChip>
+    }
+</div>
 
-@if (_estado is null)
+@* --- Aviso permanente de puesta en marcha (US-05) --------------------------- *@
+@if (_puesta is not null && _puesta.HayEquipos)
 {
-    <MudProgressLinear Indeterminate="true" Color="Color.Primary" Class="mt-4" />
-}
-else if (!_estado.HayEquipos)
-{
-    <MudAlert Severity="Severity.Info" Variant="Variant.Filled" Class="mt-4">
-        Todavía no hay equipos dados de alta.
-        <MudLink Href="/alta-de-equipos" Color="Color.Inherit"><b>Dar de alta un equipo</b></MudLink>.
-    </MudAlert>
-}
-else
-{
-    @* Aviso permanente de puesta en marcha (US-05): «n de 4 supuestos verificados», no
-       enterrado en configuración. En solo aviso, enlace a la ventana de mantenimiento. *@
-    <MudAlert Severity="@(_estado.Degradado ? Severity.Warning : Severity.Success)"
-              Variant="Variant.Filled" Icon="@(_estado.Degradado ? Icons.Material.Filled.Shield : Icons.Material.Filled.VerifiedUser)"
-              Class="mt-4">
-        <b>operativo</b> · @_estado.SupuestosVerificados de @_estado.SupuestosTotales supuestos verificados.
-        @if (_estado.Degradado)
+    <MudAlert Severity="@(_puesta.Degradado ? Severity.Warning : Severity.Success)"
+              Variant="Variant.Filled" Class="mb-4"
+              Icon="@(_puesta.Degradado ? Icons.Material.Filled.Shield : Icons.Material.Filled.VerifiedUser)">
+        <b>operativo</b> · @_puesta.SupuestosVerificados de @_puesta.SupuestosTotales supuestos verificados.
+        @if (_puesta.Degradado)
         {
             <span>
-                El servicio está en <b>solo aviso</b> hasta verificar los supuestos: no ejecutará ningún apagado.
-                <MudLink Href="/panel-de-verificaciones" Color="Color.Inherit"><b>Ir a la ventana de mantenimiento</b></MudLink>.
+                Servicio en <b>solo aviso</b> hasta verificar los supuestos: no ejecutará ningún apagado.
+                <MudLink Href="/panel-de-verificaciones" Color="Color.Inherit"><b>Ventana de mantenimiento</b></MudLink>.
             </span>
         }
     </MudAlert>
 }
 
-<MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Class="mt-4">
-    El estado en vivo del SAI (conectividad, tensión, batería, eventos recientes) se implementa
-    en la Etapa 3 (EP-05). Este panel ya muestra el estado de puesta en marcha y la degradación.
-</MudAlert>
+@if (_vivo is null)
+{
+    <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+}
+else if (!_vivo.HayDispositivo)
+{
+    <MudAlert Severity="Severity.Info" Variant="Variant.Filled">
+        Todavía no hay equipos en servicio. <MudLink Href="/alta-de-equipos" Color="Color.Inherit"><b>Dar de alta un equipo</b></MudLink>.
+    </MudAlert>
+}
+else
+{
+    <MudGrid>
+        @* Estado del SAI *@
+        <MudItem xs="12" md="6" lg="4">
+            <MudPaper Elevation="1" Class="pa-4" Style="border-radius:10px;height:100%;">
+                <MudText Typo="Typo.subtitle1" GutterBottom="true">Estado del SAI</MudText>
+                @{
+                    var enBateria = Valor(Variables.EstadoUps) is { } e && e >= 0.5;
+                }
+                <MudChip T="string" Color="@(enBateria ? Color.Warning : Color.Success)" Variant="Variant.Filled"
+                         Icon="@(enBateria ? Icons.Material.Filled.BatteryAlert : Icons.Material.Filled.Power)">
+                    @(enBateria ? "En batería (OB)" : "En línea (OL)")
+                </MudChip>
+                <div class="mt-3">
+                    <MudText Typo="Typo.body1">@FilaTexto("Tensión de entrada", Variables.TensionEntrada, "V")</MudText>
+                    <MudText Typo="Typo.body1">@FilaTexto("Tensión de salida", Variables.TensionSalida, "V")</MudText>
+                    <MudText Typo="Typo.body1">@FilaTexto("Carga de salida", Variables.CargaSalida, "%")</MudText>
+                </div>
+            </MudPaper>
+        </MudItem>
+
+        @* Batería *@
+        <MudItem xs="12" md="6" lg="4">
+            <MudPaper Elevation="1" Class="pa-4" Style="border-radius:10px;height:100%;">
+                <MudText Typo="Typo.subtitle1" GutterBottom="true">Batería</MudText>
+                <div class="mt-3">
+                    <MudText Typo="Typo.body1">@FilaTexto("Tensión de batería", Variables.TensionBateria, "V")</MudText>
+                    <MudText Typo="Typo.body1">@FilaTexto("Carga de batería", Variables.CargaBateria, "%")</MudText>
+                </div>
+            </MudPaper>
+        </MudItem>
+
+        @* Conectividad *@
+        <MudItem xs="12" md="6" lg="4">
+            <MudPaper Elevation="1" Class="pa-4" Style="border-radius:10px;height:100%;">
+                <MudText Typo="Typo.subtitle1" GutterBottom="true">Conectividad</MudText>
+                <MudChip T="string" Color="@(_vivo.Conectado ? Color.Success : Color.Error)" Variant="Variant.Filled"
+                         Icon="@(_vivo.Conectado ? Icons.Material.Filled.CheckCircle : Icons.Material.Filled.CloudOff)">
+                    @(_vivo.Conectado ? "SAI en línea" : "Sin comunicación")
+                </MudChip>
+                <div class="mt-3">
+                    <MudText Typo="Typo.body2" Class="mud-text-secondary">
+                        Último sondeo: @(_vivo.InstanteUltimaMuestra is { } i ? $"hace {Antiguedad(i)}" : "—")
+                    </MudText>
+                    <MudText Typo="Typo.body2" Class="mud-text-secondary">
+                        Calidad: @(_vivo.CalidadUltima?.ToString().ToLowerInvariant() ?? "—")
+                    </MudText>
+                </div>
+            </MudPaper>
+        </MudItem>
+
+        @* Eventos recientes *@
+        <MudItem xs="12">
+            <MudPaper Elevation="1" Class="pa-4" Style="border-radius:10px;">
+                <MudText Typo="Typo.subtitle1" GutterBottom="true">Eventos recientes</MudText>
+                @if (_vivo.EventosRecientes.Count == 0)
+                {
+                    <MudText Typo="Typo.body2" Class="mud-text-secondary">Sin eventos registrados.</MudText>
+                }
+                else
+                {
+                    <MudSimpleTable Dense="true" Hover="true" Style="background:transparent;">
+                        <thead>
+                            <tr><th>Hora</th><th>Evento</th><th>Duración</th><th>Regla</th></tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var evento in _vivo.EventosRecientes)
+                            {
+                                <tr>
+                                    <td>@evento.Instante.ToLocalTime().ToString("HH:mm:ss")</td>
+                                    <td><MudChip T="string" Size="Size.Small" Color="@ColorEvento(evento.Tipo)" Variant="Variant.Text">@EtiquetaEvento(evento.Tipo)</MudChip></td>
+                                    <td>@Duracion(evento)</td>
+                                    <td>@evento.ReglaCodigo v@evento.ReglaVersion</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </MudSimpleTable>
+                }
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+}
 
 @code {
-    private EstadoPuestaEnMarcha? _estado;
+    private EstadoEnVivo? _vivo;
+    private EstadoPuestaEnMarcha? _puesta;
+    private PeriodicTimer? _temporizador;
+    private readonly CancellationTokenSource _cts = new();
 
     protected override async Task OnInitializedAsync()
     {
+        await Refrescar();
+        _ = RefrescarEnBucleAsync();
+    }
+
+    private async Task RefrescarEnBucleAsync()
+    {
+        _temporizador = new PeriodicTimer(TimeSpan.FromSeconds(5));
+        try
+        {
+            while (await _temporizador.WaitForNextTickAsync(_cts.Token))
+            {
+                await Refrescar();
+                await InvokeAsync(StateHasChanged);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // El componente se está descartando.
+        }
+    }
+
+    // Siempre relee de la base (no cachea): al reconectarse el circuito refleja el estado vigente (US-07).
+    private async Task Refrescar()
+    {
         using var alcance = FabricaAlcances.CreateScope();
-        var servicio = alcance.ServiceProvider.GetRequiredService<ServicioAltaEquipos>();
-        _estado = await servicio.ConsultarEstadoAsync(CancellationToken.None);
+        var sp = alcance.ServiceProvider;
+        _vivo = await sp.GetRequiredService<ServicioPanelEnVivo>().ObtenerAsync(_cts.Token);
+        _puesta = await sp.GetRequiredService<ServicioAltaEquipos>().ConsultarEstadoAsync(_cts.Token);
+    }
+
+    private double? Valor(string variable) =>
+        _vivo?.Lecturas.FirstOrDefault(l => l.Variable == variable)?.Valor;
+
+    private string FilaTexto(string etiqueta, string variable, string unidad)
+    {
+        var lectura = _vivo?.Lecturas.FirstOrDefault(l => l.Variable == variable);
+        var valor = lectura?.Valor is { } v
+            ? $"{v.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture)} {unidad}"
+            : "—";
+        var marca = lectura?.Origen is { } o ? $" [{o.ToString().ToLowerInvariant()}]" : string.Empty;
+        return $"{etiqueta}: {valor}{marca}";
+    }
+
+    private static string Antiguedad(DateTimeOffset instante)
+    {
+        var seg = Math.Max(0, (DateTimeOffset.UtcNow - instante).TotalSeconds);
+        return seg < 60 ? $"{seg:0} s" : $"{seg / 60:0} min";
+    }
+
+    private static string Duracion(EventoEnVivo evento)
+    {
+        if (evento.DuracionSeg is not { } d)
+        {
+            return "—";
+        }
+
+        return evento.IncertidumbreDuracionSeg is { } inc
+            ? $"{d:0} s (±{inc:0} s)"
+            : $"{d:0} s";
+    }
+
+    private static string EtiquetaEvento(TipoEvento tipo) => tipo switch
+    {
+        TipoEvento.CorteSuministro => "Corte de suministro",
+        TipoEvento.RetornoRed => "Retorno de red",
+        TipoEvento.Microcorte => "Microcorte",
+        TipoEvento.DesconexionUsb => "Pérdida de comunicación",
+        TipoEvento.TensionFueraDeRango => "Tensión fuera de rango",
+        TipoEvento.DisparoApagado => "Disparo de apagado (solo aviso)",
+        _ => tipo.ToString(),
+    };
+
+    private static Color ColorEvento(TipoEvento tipo) => tipo switch
+    {
+        TipoEvento.RetornoRed => Color.Success,
+        TipoEvento.Microcorte => Color.Info,
+        TipoEvento.CorteSuministro or TipoEvento.DisparoApagado or TipoEvento.DesconexionUsb => Color.Error,
+        _ => Color.Warning,
+    };
+
+    public void Dispose()
+    {
+        _cts.Cancel();
+        _temporizador?.Dispose();
+        _cts.Dispose();
     }
 }
