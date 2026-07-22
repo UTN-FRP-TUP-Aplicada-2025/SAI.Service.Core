@@ -1,11 +1,159 @@
 @page "/prueba-de-bateria"
 @attribute [Authorize]
+@using SAI.Service.Core.Application.Monitoreo
+@using SAI.Service.Core.Domain.Monitoreo
+@using Microsoft.Extensions.DependencyInjection
+@inject IServiceScopeFactory FabricaAlcances
 
-<PageTitle>Prueba de bateria — SAI.Service.Core</PageTitle>
+<PageTitle>Prueba de batería — SAI.Service.Core</PageTitle>
 
-<h1 class="mud-typography mud-typography-h4">Prueba de bateria</h1>
+<h1 class="mud-typography mud-typography-h4 mb-4">Prueba de batería</h1>
 
-<MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Class="mt-4">
-    Superficie placeholder de Sprint 0. La precondicion, la prueba en curso, el
-    veredicto y el historial se implementan en EP-05/EP-06.
-</MudAlert>
+<MudPaper Elevation="1" Class="pa-4 mb-4" Style="border-radius:10px;">
+    <MudText Typo="Typo.body2" Class="mud-text-secondary mb-3">
+        Lanza un autotest: eleva el sondeo a 1 Hz, congela el montaje vigente y recoge la serie de
+        tensión de batería para derivar el veredicto de salud (tendencia relativa a carga igualada).
+    </MudText>
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.BatteryChargingFull"
+               OnClick="Lanzar" Disabled="_ejecutando">Lanzar prueba de batería</MudButton>
+
+    @if (_ejecutando)
+    {
+        <div class="mt-4">
+            <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+            <MudText Typo="Typo.body2" Class="mud-text-secondary mt-1">Prueba en curso (recogiendo la serie a 1 Hz)…</MudText>
+        </div>
+    }
+    else if (_error is not null)
+    {
+        <MudAlert Severity="Severity.Warning" Variant="Variant.Filled" Class="mt-4"><b>@_error</b></MudAlert>
+    }
+    else if (_ultima is not null)
+    {
+        <MudPaper Elevation="0" Class="pa-3 mt-4" Style="background:var(--mud-palette-background-grey);border-radius:10px;">
+            <div class="d-flex align-center flex-wrap" style="gap:0.5rem;">
+                <MudChip T="string" Color="@ColorVeredicto(_ultima.Veredicto)" Variant="Variant.Filled">@EtiquetaVeredicto(_ultima.Veredicto)</MudChip>
+                <MudChip T="string" Color="@ColorConfianza(_ultima.Confianza)" Variant="Variant.Text">confianza: @(_ultima.Confianza?.ToString().ToLowerInvariant() ?? "—")</MudChip>
+                <MudChip T="string" Color="@(_ultima.Comparable ? Color.Success : Color.Default)" Variant="Variant.Text">@(_ultima.Comparable ? "comparable" : "no comparable")</MudChip>
+            </div>
+            <MudText Typo="Typo.body2" Class="mt-2">Caída de tensión: <b>@Caida(_ultima)</b> · Carga concurrente: @(_ultima.CargaPorcentaje?.ToString() ?? "—") %</MudText>
+            <MudText Typo="Typo.body2" Class="mud-text-secondary">Muestras: @_muestras · perdidas: @_perdidas</MudText>
+            <MudText Typo="Typo.caption" Class="mud-text-secondary">Reserva: @CalculadorSaludBateria.ReservaTemperatura.</MudText>
+        </MudPaper>
+    }
+</MudPaper>
+
+<MudPaper Elevation="1" Class="pa-4" Style="border-radius:10px;">
+    <MudText Typo="Typo.subtitle1" GutterBottom="true">Historial de pruebas</MudText>
+    @if (_historial is null)
+    {
+        <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+    }
+    else if (_historial.Count == 0)
+    {
+        <MudText Typo="Typo.body2" Class="mud-text-secondary">Todavía no hay pruebas registradas.</MudText>
+    }
+    else
+    {
+        <MudSimpleTable Dense="true" Hover="true" Style="background:transparent;">
+            <thead>
+                <tr><th>Fecha</th><th>Caída</th><th>Carga</th><th>Comparable</th><th>Veredicto</th><th>Confianza</th></tr>
+            </thead>
+            <tbody>
+                @foreach (var p in _historial)
+                {
+                    <tr>
+                        <td>@p.Instante.ToLocalTime().ToString("dd/MM HH:mm")</td>
+                        <td>@Caida(p)</td>
+                        <td>@(p.CargaPorcentaje?.ToString() ?? "—") %</td>
+                        <td>@(p.Comparable ? "sí" : "no")</td>
+                        <td>@EtiquetaVeredicto(p.Veredicto)</td>
+                        <td>@(p.Confianza?.ToString().ToLowerInvariant() ?? "—")</td>
+                    </tr>
+                }
+            </tbody>
+        </MudSimpleTable>
+    }
+</MudPaper>
+
+@code {
+    private bool _ejecutando;
+    private string? _error;
+    private PruebaBateria? _ultima;
+    private int _muestras;
+    private int _perdidas;
+    private IReadOnlyList<PruebaBateria>? _historial;
+
+    protected override async Task OnInitializedAsync() => await CargarHistorial();
+
+    private async Task Lanzar()
+    {
+        _ejecutando = true;
+        _error = null;
+        _ultima = null;
+        try
+        {
+            using var alcance = FabricaAlcances.CreateScope();
+            var resultado = await alcance.ServiceProvider.GetRequiredService<ServicioPruebaBateria>().EjecutarAsync(CancellationToken.None);
+            if (resultado.Exito)
+            {
+                _ultima = resultado.Prueba;
+                _muestras = resultado.MuestrasTomadas;
+                _perdidas = resultado.MuestrasPerdidas;
+            }
+            else
+            {
+                _error = TraducirError(resultado.CodigoError);
+            }
+        }
+        finally
+        {
+            _ejecutando = false;
+            await CargarHistorial();
+        }
+    }
+
+    private async Task CargarHistorial()
+    {
+        using var alcance = FabricaAlcances.CreateScope();
+        _historial = await alcance.ServiceProvider.GetRequiredService<ServicioPruebaBateria>().HistorialAsync(CancellationToken.None);
+    }
+
+    private static string Caida(PruebaBateria p) =>
+        p.CaidaTension.Contenido is { } v
+            ? $"{v.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)} V"
+            : "no calculable";
+
+    private static string TraducirError(string? codigo) => codigo switch
+    {
+        "FLOTACION_INSUFICIENTE" => "No pasó suficiente tiempo en flotación tras el último corte: esperá antes de probar.",
+        "TEST_NO_DISPONIBLE" => "El autotest por NUT requiere credenciales de escritura (diferido). Probá con el adaptador simulado.",
+        "SIN_DISPOSITIVO" => "No hay un SAI en servicio para probar.",
+        "SIN_BATERIA" => "El SAI no tiene una batería montada vigente.",
+        _ => $"No se pudo ejecutar la prueba ({codigo ?? "error desconocido"}).",
+    };
+
+    private static string EtiquetaVeredicto(VeredictoSalud? veredicto) => veredicto switch
+    {
+        VeredictoSalud.SinDegradacionDetectable => "Sin degradación detectable",
+        VeredictoSalud.Degradada => "Se comporta peor que la línea base",
+        VeredictoSalud.DegradacionSevera => "Degradación marcada",
+        null => "sin veredicto (no comparable)",
+        _ => veredicto.ToString()!,
+    };
+
+    private static Color ColorVeredicto(VeredictoSalud? veredicto) => veredicto switch
+    {
+        VeredictoSalud.SinDegradacionDetectable => Color.Success,
+        VeredictoSalud.Degradada => Color.Warning,
+        VeredictoSalud.DegradacionSevera => Color.Error,
+        _ => Color.Default,
+    };
+
+    private static Color ColorConfianza(ConfianzaVeredicto? confianza) => confianza switch
+    {
+        ConfianzaVeredicto.Alta => Color.Success,
+        ConfianzaVeredicto.Media => Color.Info,
+        _ => Color.Warning,
+    };
+}

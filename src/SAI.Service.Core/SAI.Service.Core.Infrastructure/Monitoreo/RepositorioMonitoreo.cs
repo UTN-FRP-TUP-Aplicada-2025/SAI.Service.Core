@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using SAI.Service.Core.Application.Monitoreo;
 using SAI.Service.Core.Domain.Inventario;
 using SAI.Service.Core.Domain.Monitoreo;
+using SAI.Service.Core.Domain.Vinculos;
 using SAI.Service.Core.Infrastructure.Persistencia;
 
 namespace SAI.Service.Core.Infrastructure.Monitoreo;
@@ -79,4 +80,44 @@ public sealed class RepositorioMonitoreo(SaiDbContext contexto) : IRepositorioMo
             .OrderByDescending(e => e.Instante)
             .Take(cantidad)
             .ToListAsync(ct);
+
+    /// <inheritdoc />
+    public Task<MontajeBateria?> MontajeVigenteAsync(string dispositivoCodigo, CancellationToken ct) =>
+        contexto.Montajes.FirstOrDefaultAsync(m => m.DispositivoCodigo == dispositivoCodigo && m.Vigencia.Hasta == null, ct);
+
+    /// <inheritdoc />
+    public Task<Evento?> UltimoCorteAsync(string dispositivoCodigo, CancellationToken ct) =>
+        contexto.Eventos
+            .Where(e => e.DispositivoCodigo == dispositivoCodigo && e.Tipo == TipoEvento.CorteSuministro)
+            .OrderByDescending(e => e.Instante)
+            .FirstOrDefaultAsync(ct);
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<PruebaBateria>> PruebasDeMontajeAsync(string montajeCodigo, CancellationToken ct) =>
+        await contexto.PruebasBateria
+            .Where(p => p.MontajeBateriaCodigo == montajeCodigo)
+            .OrderBy(p => p.Instante)
+            .ToListAsync(ct);
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<PruebaBateria>> PruebasDeDispositivoAsync(string dispositivoCodigo, int cantidad, CancellationToken ct) =>
+        await contexto.PruebasBateria
+            .Where(p => p.DispositivoCodigo == dispositivoCodigo)
+            .OrderByDescending(p => p.Instante)
+            .Take(cantidad)
+            .ToListAsync(ct);
+
+    /// <inheritdoc />
+    public async Task GuardarPruebaConSerieAsync(PruebaBateria prueba, IReadOnlyList<Muestra> serie, SesionSondeo sesionDensa, FuenteDatos? nuevaFuente, CancellationToken ct)
+    {
+        if (nuevaFuente is not null)
+        {
+            contexto.FuentesDatos.Add(nuevaFuente);
+        }
+
+        contexto.SesionesSondeo.Add(sesionDensa);
+        contexto.Muestras.AddRange(serie);
+        contexto.PruebasBateria.Add(prueba);
+        await contexto.SaveChangesAsync(ct);
+    }
 }

@@ -15,6 +15,13 @@ public sealed class AdaptadorConexionSimulado : IAdaptadorConexion, IDescubridor
 {
     private static DateTimeOffset Ahora => DateTimeOffset.UtcNow;
 
+    // Descarga simulada de la prueba de batería: al lanzarla, la tensión de batería cae y se recupera
+    // durante una ventana, para que la serie densa muestre una caída real (US-12/US-13, demo).
+    private static readonly TimeSpan DuracionDescarga = TimeSpan.FromSeconds(12);
+    private const double TensionReposoBateria = 13.2;
+    private const double CaidaMaximaDescarga = 0.7;
+    private DateTimeOffset? _descargaInicio;
+
     /// <inheritdoc />
     public Task<IReadOnlyList<DispositivoDescubierto>> DescubrirAsync(CancellationToken ct)
     {
@@ -32,16 +39,27 @@ public sealed class AdaptadorConexionSimulado : IAdaptadorConexion, IDescubridor
     }
 
     /// <inheritdoc />
-    public Task<EstadoSai> LeerEstadoAsync(CancellationToken ct) =>
-        Task.FromResult(new EstadoSai(
+    public Task<EstadoSai> LeerEstadoAsync(CancellationToken ct)
+    {
+        var ahora = Ahora;
+        var tensionBateria = TensionReposoBateria;
+        if (_descargaInicio is { } inicio && ahora - inicio <= DuracionDescarga)
+        {
+            // Caída con forma de valle (mínimo a mitad de la ventana) y recuperación.
+            var progreso = (ahora - inicio).TotalSeconds / DuracionDescarga.TotalSeconds;
+            tensionBateria = TensionReposoBateria - (CaidaMaximaDescarga * Math.Sin(progreso * Math.PI));
+        }
+
+        return Task.FromResult(new EstadoSai(
             Alcanzable: true,
             TensionEntradaVoltios: 220.0,
             TensionSalidaVoltios: 220.0,
             CargaSalidaPorcentaje: 35.0,
             CargaBateriaPorcentaje: 100.0,
             EstadoUps: EstadoUps.EnLinea,
-            TensionBateriaVoltios: 13.2,
-            MarcaTiempoUtc: Ahora));
+            TensionBateriaVoltios: Math.Round(tensionBateria, 2),
+            MarcaTiempoUtc: ahora));
+    }
 
     /// <inheritdoc />
     public Task<ResultadoConectividad> ProbarConectividadAsync(CancellationToken ct) =>
@@ -58,9 +76,12 @@ public sealed class AdaptadorConexionSimulado : IAdaptadorConexion, IDescubridor
             MarcaTiempoUtc: Ahora));
 
     /// <inheritdoc />
-    public Task<ResultadoAccion> LanzarTestBateriaAsync(CancellationToken ct) =>
-        Task.FromResult(new ResultadoAccion(
+    public Task<ResultadoAccion> LanzarTestBateriaAsync(CancellationToken ct)
+    {
+        _descargaInicio = Ahora;
+        return Task.FromResult(new ResultadoAccion(
             Aceptada: true,
-            Motivo: "Adaptador simulado: test de bateria aceptado. Sin efecto real.",
+            Motivo: "Adaptador simulado: test de bateria iniciado (descarga simulada de la tension de bateria).",
             MarcaTiempoUtc: Ahora));
+    }
 }

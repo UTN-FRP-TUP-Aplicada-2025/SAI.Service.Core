@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SAI.Service.Core.Domain.Inventario;
 using SAI.Service.Core.Domain.Monitoreo;
 using SAI.Service.Core.Domain.Valores;
+using SAI.Service.Core.Domain.Vinculos;
 
 namespace SAI.Service.Core.Infrastructure.Persistencia.Configuraciones;
 
@@ -25,6 +26,7 @@ internal static class ModeloMonitoreo
     public static void Configurar(ModelBuilder builder)
     {
         ConfigurarEventos(builder);
+        ConfigurarPruebas(builder);
 
         builder.Entity<FuenteDatos>(e =>
         {
@@ -150,6 +152,36 @@ internal static class ModeloMonitoreo
 
             e.HasIndex(v => new { v.DispositivoCodigo, v.Instante });
             e.HasIndex(v => new { v.ReglaDerivacionCodigo, v.ReglaVersion });
+        });
+    }
+
+    private static void ConfigurarPruebas(ModelBuilder builder)
+    {
+        builder.Entity<PruebaBateria>(e =>
+        {
+            e.ToTable("PruebaBateria");
+            e.HasKey(p => p.Codigo);
+            e.Property(p => p.Codigo);
+            e.Property(p => p.DispositivoCodigo).IsRequired();
+            e.Property(p => p.MontajeBateriaCodigo).IsRequired();
+            e.Property(p => p.Instante).IsRequired();
+            e.Property(p => p.CargaPorcentaje);
+            e.Property(p => p.Comparable).IsRequired();
+            e.Property(p => p.Veredicto).HasConversion<string>();
+            e.Property(p => p.Confianza).HasConversion<string>();
+            e.ComplexProperty(p => p.CaidaTension, v =>
+            {
+                v.Property(x => x.Contenido).HasColumnName("CaidaTensionValor");
+                v.Property(x => x.Origen).HasColumnName("CaidaTensionOrigen").HasConversion<string>();
+            });
+
+            e.HasOne<UnidadFisica>().WithMany().HasPrincipalKey(u => u.Codigo)
+                .HasForeignKey(p => p.DispositivoCodigo).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne<MontajeBateria>().WithMany().HasPrincipalKey(m => m.Codigo)
+                .HasForeignKey(p => p.MontajeBateriaCodigo).OnDelete(DeleteBehavior.Restrict);
+
+            e.HasIndex(p => p.MontajeBateriaCodigo);
+            e.HasIndex(p => new { p.DispositivoCodigo, p.Instante });
         });
     }
 

@@ -2,8 +2,10 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using SAI.Service.Core.Application.Monitoreo;
 using SAI.Service.Core.Infrastructure.Monitoreo;
 using SAI.Service.Core.Infrastructure.Persistencia;
 
@@ -46,6 +48,16 @@ public sealed class FabricaSai : WebApplicationFactory<Program>
             {
                 services.Remove(poller);
             }
+
+            // La prueba de batería, sin demoras ni precondición de flotación, para ser determinista.
+            services.RemoveAll<OpcionesPrueba>();
+            services.AddSingleton(new OpcionesPrueba
+            {
+                NumeroMuestras = 5,
+                IntervaloMuestraMs = 0,
+                FlotacionMinimaSeg = 0,
+                ToleranciaCargaPct = 5,
+            });
         });
     }
 

@@ -75,6 +75,8 @@ public static class DependencyInjection
         services.AddScoped<IRepositorioMonitoreo, RepositorioMonitoreo>();
         services.AddScoped<ServicioMonitoreo>();
         services.AddScoped<ServicioPanelEnVivo>();
+        services.AddSingleton(LeerOpcionesPrueba(configuration));
+        services.AddScoped<ServicioPruebaBateria>();
         services.AddHostedService<ServicioSondeo>();
 
         return services;
@@ -103,6 +105,20 @@ public static class DependencyInjection
         {
             IntervaloSeg = int.TryParse(seccion["IntervaloSeg"], out var intervalo) ? intervalo : defecto.IntervaloSeg,
             Habilitado = bool.TryParse(seccion["Habilitado"], out var habilitado) ? habilitado : defecto.Habilitado,
+        };
+    }
+
+    // Lee 'Sai:Prueba' de forma manual (sin el binder de configuración).
+    private static OpcionesPrueba LeerOpcionesPrueba(IConfiguration configuration)
+    {
+        var seccion = configuration.GetSection(OpcionesPrueba.Seccion);
+        var defecto = new OpcionesPrueba();
+        return new OpcionesPrueba
+        {
+            NumeroMuestras = int.TryParse(seccion["NumeroMuestras"], out var n) ? n : defecto.NumeroMuestras,
+            IntervaloMuestraMs = int.TryParse(seccion["IntervaloMuestraMs"], out var i) ? i : defecto.IntervaloMuestraMs,
+            FlotacionMinimaSeg = int.TryParse(seccion["FlotacionMinimaSeg"], out var f) ? f : defecto.FlotacionMinimaSeg,
+            ToleranciaCargaPct = int.TryParse(seccion["ToleranciaCargaPct"], out var t) ? t : defecto.ToleranciaCargaPct,
         };
     }
 }
