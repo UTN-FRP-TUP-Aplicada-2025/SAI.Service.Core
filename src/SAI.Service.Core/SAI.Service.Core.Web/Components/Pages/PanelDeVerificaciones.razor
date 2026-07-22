@@ -47,30 +47,44 @@ else
         El apagado real por NUT está diferido; acá se ejercita el camino contra el adaptador configurado.
     </MudAlert>
 
+    @if (_ocupado)
+    {
+        <MudProgressLinear Indeterminate="true" Color="Color.Primary" Class="mb-2" />
+        <MudText Typo="Typo.caption" Class="mud-text-secondary d-block mb-2">Ejecutando la verificación…</MudText>
+    }
+
     <MudGrid>
         @foreach (var v in _verificaciones.OrderBy(x => x.Supuesto))
         {
             var estado = v.EstadoEfectivo(ahora);
             <MudItem xs="12" md="6">
                 <MudPaper Elevation="1" Class="pa-4" Style="border-radius:10px;height:100%;">
-                    <div class="d-flex align-center mb-2">
+                    <div class="d-flex align-center mb-1">
                         <MudIcon Icon="@IconoEstado(estado)" Color="@ColorEstado(estado)" Class="mr-2" />
                         <MudText Typo="Typo.subtitle1">@EtiquetaSupuesto(v.Supuesto)</MudText>
                         <MudSpacer />
                         <MudChip T="string" Size="Size.Small" Color="@ColorEstado(estado)" Variant="Variant.Text">@EtiquetaEstado(estado)</MudChip>
                     </div>
+                    <MudText Typo="Typo.caption" Class="mud-text-secondary d-block mb-2">@DescripcionSupuesto(v.Supuesto)</MudText>
                     @if (v.Evidencia is not null)
                     {
-                        <MudText Typo="Typo.caption" Class="mud-text-secondary d-block mb-2">Evidencia: @v.Evidencia</MudText>
+                        <MudText Typo="Typo.caption" Class="mud-text-secondary d-block mb-2"><b>Evidencia:</b> @v.Evidencia</MudText>
                     }
 
-                    @if (estado != EstadoVerificacion.Refutado)
+                    @if (estado == EstadoVerificacion.Verificado)
+                    {
+                        <MudText Typo="Typo.caption" Color="Color.Success" Class="d-block">
+                            <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Size="Size.Small" Class="mr-1" Style="vertical-align:middle;" />
+                            Verificado @(v.VigenciaHasta is { } h ? $"· vigente hasta {h.UtcDateTime:yyyy-MM-dd}" : "· sin caducidad")
+                        </MudText>
+                    }
+                    else if (estado == EstadoVerificacion.NuncaVerificado || estado == EstadoVerificacion.Vencido)
                     {
                         @switch (v.Supuesto)
                         {
                             case Supuesto.PresupuestoDeApagado:
                                 <div class="d-flex align-center" style="gap:0.5rem;">
-                                    <MudNumericField T="int" @bind-Value="_segundos" Label="Segundos" Min="1" Style="max-width:120px;" Margin="Margin.Dense" />
+                                    <MudNumericField T="int" @bind-Value="_segundos" Label="Segundos" Min="1" Style="max-width:120px;" Margin="Margin.Dense" Disabled="_ocupado" />
                                     <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="_ocupado" OnClick="VerificarPresupuesto">Verificar</MudButton>
                                 </div>
                                 break;
@@ -143,11 +157,25 @@ else
 
     private static string EtiquetaSupuesto(Supuesto supuesto) => supuesto switch
     {
-        Supuesto.PresupuestoDeApagado => "Presupuesto de apagado",
+        Supuesto.PresupuestoDeApagado => "Tiempo de apagado del host",
         Supuesto.SenalEnBateria => "Señal en batería",
         Supuesto.ReencendidoPorPlaca => "Reencendido por placa",
         Supuesto.CorteConRetorno => "Corte con retorno",
         _ => supuesto.ToString(),
+    };
+
+    // Contexto breve de en qué consiste cada verificación (para el operador).
+    private static string DescripcionSupuesto(Supuesto supuesto) => supuesto switch
+    {
+        Supuesto.PresupuestoDeApagado =>
+            "Cronometrá a mano cuánto tarda el host en apagarse de forma ordenada bajo carga (con los contenedores detenidos) y confirmá que entra dentro del tiempo reservado. Vigencia 180 días.",
+        Supuesto.SenalEnBateria =>
+            "Cortá la energía de red y confirmá que el equipo reporta que pasó a batería (ups.status = OB): es la señal que dispara el apagado. Vigencia 365 días.",
+        Supuesto.CorteConRetorno =>
+            "Ejecutá un apagado con retorno y confirmá que el SAI corta la salida y la repone. Prueba el camino real de corte y reencendido del equipo. Sin caducidad.",
+        Supuesto.ReencendidoPorPlaca =>
+            "Al volver la energía, confirmá que el host arranca solo (autoencendido de la placa/BIOS). Si no arranca, se refuta: es un bloqueo permanente. Vigencia 365 días.",
+        _ => string.Empty,
     };
 
     private static string EtiquetaEstado(EstadoVerificacion estado) => estado switch
