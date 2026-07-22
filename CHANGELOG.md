@@ -9,6 +9,28 @@ y el versionado sigue [Semantic Versioning](https://semver.org/lang/es/).
 
 ### Añadido
 
+- **Etapa 4 · Incremento C — Recambio de batería y ficha de vida útil** (CU-08, US-18, US-19,
+  BT-26, BT-27): el recambio de batería como **un solo acto** (`ServicioRecambioBateria`): valida el
+  **cuadre de costos** (RN-08: total = repuestos + mano de obra, misma moneda) y que **todo importe
+  lleve moneda y fecha** (RN-07) *antes* de aplicar efectos (postcondición de fallo: nada se aplica),
+  cierra la vigencia del montaje vigente y abre la de la batería nueva **sin hueco** (RC-03), da de
+  **baja** la batería retirada (conservando su historia, I-5) y pone **en servicio** la entrante, y
+  registra la intervención con su proveedor, ejecutor, hallazgos y **disposición final** (destino +
+  receptor, trazabilidad ambiental). Errores tipados: `COSTOS_NO_CUADRAN`, `DINERO_SIN_MONEDA_O_FECHA`,
+  `COHERENCIA_TEMPORAL` (RN-12: no fechar antes del montaje ni tras una baja).
+  - **Ficha de vida útil** (US-19, BT-27): al recambiar proyecta días en servicio, si **cumplió la
+    expectativa** de vida de flotación y su **desvío**, y el **costo por año de servicio** en la moneda
+    original y su **equivalente en USD** marcado como **derivado** con su fuente de cotización, que
+    nunca reemplaza al valor original (RN-07, ADR-06).
+  - Primer uso del value object **`Dinero`** persistido: se mapea como *complex type* (monto, moneda,
+    fecha), igual que `Valor<T>`. Nuevas entidades append-only `Intervencion` y `FichaVidaUtil`
+    (ADR-04) + migración `EsquemaIntervenciones`. Panel `RegistroDeIntervenciones.razor` con el
+    formulario de recambio, el indicador de cuadre en vivo y la ficha proyectada.
+  - 10 pruebas nuevas (dominio: cuadre, moneda obligatoria, proyección de ficha con USD derivado;
+    integración: recambio completo con cierre/apertura y baja/servicio, `COSTOS_NO_CUADRAN` sin
+    efectos, importe sin moneda/fecha, append-only). *La corrección de fecha con reatribución del
+    histórico (CU-08 FA-2) y el endpoint de intervenciones (BT-28, EP-07) quedan fuera del incremento.*
+
 - **Etapa 4 · Incremento B — Ejecución del apagado ordenado** (CU-05, US-14, US-15, BT-24): cierra el
   lazo **detección → decisión → ejecución → confirmación → registro** del apagado. El monitoreo ya
   derivaba el disparo (`DisparoApagado`, BT-20); ahora `ServicioMonitoreo` invoca al nuevo

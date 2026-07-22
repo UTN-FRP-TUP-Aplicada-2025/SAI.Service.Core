@@ -1,11 +1,162 @@
 @page "/registro-de-intervenciones"
 @attribute [Authorize]
+@using SAI.Service.Core.Application.Intervenciones
+@using SAI.Service.Core.Domain.Intervenciones
+@using Microsoft.Extensions.DependencyInjection
+@inject IServiceScopeFactory FabricaAlcances
 
 <PageTitle>Registro de intervenciones — SAI.Service.Core</PageTitle>
 
-<h1 class="mud-typography mud-typography-h4">Registro de intervenciones</h1>
+<h1 class="mud-typography mud-typography-h4 mb-4">Recambio de batería</h1>
 
-<MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Class="mt-4">
-    Superficie placeholder de Sprint 0. El registro de intervenciones, los costos con
-    cuadre y la ficha de vida util se implementan en EP-06/EP-07.
-</MudAlert>
+@if (_dispositivo is null)
+{
+    <MudAlert Severity="Severity.Info" Variant="Variant.Filled">
+        No hay un equipo en servicio. <MudLink Href="/alta-de-equipos" Color="Color.Inherit"><b>Dá de alta un equipo</b></MudLink>.
+    </MudAlert>
+}
+else
+{
+    <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined" Class="mb-4" Icon="@Icons.Material.Filled.Info">
+        Un recambio es <b>un solo acto</b>: cierra la vigencia de la batería actual, abre la de la nueva sin hueco, da de
+        baja la retirada y proyecta la ficha de vida útil. El total de costos debe cuadrar (RN-08) y todo importe lleva
+        moneda y fecha (RN-07).
+    </MudAlert>
+
+    <MudGrid>
+        <MudItem xs="12" md="6">
+            <MudPaper Elevation="1" Class="pa-4" Style="border-radius:10px;height:100%;">
+                <MudText Typo="Typo.subtitle1" Class="mb-3">Batería entrante y contexto</MudText>
+                <MudTextField @bind-Value="_dispositivoCodigo" Label="Dispositivo" ReadOnly="true" Margin="Margin.Dense" Class="mb-2" />
+                <MudTextField @bind-Value="_posicion" Label="Posición" Margin="Margin.Dense" Class="mb-2" />
+                <MudDatePicker @bind-Date="_fechaOcurrida" Label="Fecha del recambio" Margin="Margin.Dense" Class="mb-2" />
+                <MudTextField @bind-Value="_bateriaEntrante" Label="Código batería entrante" Margin="Margin.Dense" Class="mb-2" />
+                <MudTextField @bind-Value="_modeloEntrante" Label="Código modelo de batería (catálogo)" Margin="Margin.Dense" Class="mb-2" />
+                <MudTextField @bind-Value="_proveedor" Label="Proveedor" Margin="Margin.Dense" Class="mb-2" />
+                <MudTextField @bind-Value="_ejecutor" Label="Ejecutor" Margin="Margin.Dense" />
+            </MudPaper>
+        </MudItem>
+
+        <MudItem xs="12" md="6">
+            <MudPaper Elevation="1" Class="pa-4" Style="border-radius:10px;height:100%;">
+                <MudText Typo="Typo.subtitle1" Class="mb-3">Costos (RN-07 / RN-08)</MudText>
+                <div class="d-flex" style="gap:0.5rem;">
+                    <MudTextField @bind-Value="_moneda" Label="Moneda" Margin="Margin.Dense" Style="max-width:110px;" />
+                    <MudDatePicker @bind-Date="_fechaCosto" Label="Fecha del importe" Margin="Margin.Dense" />
+                </div>
+                <MudNumericField @bind-Value="_repuestos" Label="Repuestos" Margin="Margin.Dense" Class="mt-2" />
+                <MudNumericField @bind-Value="_manoDeObra" Label="Mano de obra" Margin="Margin.Dense" Class="mt-2" />
+                <MudNumericField @bind-Value="_total" Label="Total" Margin="Margin.Dense" Class="mt-2" />
+                <MudAlert Severity="@(Cuadra ? Severity.Success : Severity.Error)" Variant="Variant.Text" Dense="true" Class="mt-2">
+                    @(Cuadra ? "Cuadra: total = repuestos + mano de obra." : $"No cuadra: repuestos + mano de obra = {_repuestos + _manoDeObra}.")
+                </MudAlert>
+                <div class="d-flex mt-2" style="gap:0.5rem;">
+                    <MudNumericField @bind-Value="_tasaUsd" Label="Cotización a USD (1 unidad = x USD)" Margin="Margin.Dense" />
+                    <MudTextField @bind-Value="_fuenteCotizacion" Label="Fuente cotización" Margin="Margin.Dense" />
+                </div>
+            </MudPaper>
+        </MudItem>
+
+        <MudItem xs="12">
+            <MudPaper Elevation="1" Class="pa-4" Style="border-radius:10px;">
+                <MudText Typo="Typo.subtitle1" Class="mb-3">Hallazgos y disposición final</MudText>
+                <MudGrid>
+                    <MudItem xs="12" md="6"><MudTextField @bind-Value="_hallazgos" Label="Hallazgos y mediciones" Lines="2" Margin="Margin.Dense" /></MudItem>
+                    <MudItem xs="12" md="3"><MudTextField @bind-Value="_destino" Label="Destino de la batería retirada" Margin="Margin.Dense" /></MudItem>
+                    <MudItem xs="12" md="3"><MudTextField @bind-Value="_receptor" Label="Receptor" Margin="Margin.Dense" /></MudItem>
+                </MudGrid>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-3" Disabled="_ocupado" OnClick="Registrar">
+                    Registrar recambio
+                </MudButton>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+
+    @if (_mensaje is not null)
+    {
+        <MudAlert Severity="@_severidad" Variant="Variant.Filled" Class="mt-4">@_mensaje</MudAlert>
+    }
+
+    @if (_ficha is not null)
+    {
+        <MudPaper Elevation="2" Class="pa-4 mt-4" Style="border-radius:10px;">
+            <MudText Typo="Typo.h6" Class="mb-2">Ficha de vida útil</MudText>
+            <MudSimpleTable Dense="true" Bordered="true" Style="border-radius:10px;overflow:hidden;">
+                <tbody>
+                    <tr><td><b>Días en servicio</b></td><td>@_ficha.DiasEnServicio</td></tr>
+                    <tr><td><b>Vida esperada</b></td><td>@_ficha.VidaEsperadaDias días</td></tr>
+                    <tr><td><b>¿Cumplió expectativa?</b></td><td>@(_ficha.CumplioExpectativa ? "Sí" : "No") (desvío @_ficha.DesvioDias días)</td></tr>
+                    <tr><td><b>Costo por año de servicio</b></td><td>@_ficha.CostoPorAnioServicio.Monto @_ficha.CostoPorAnioServicio.Moneda</td></tr>
+                    <tr><td><b>Costo por año (USD, derivado)</b></td><td>@_ficha.CostoPorAnioServicioUsd.Monto USD <MudText Typo="Typo.caption" Class="mud-text-secondary">· cotización: @_ficha.FuenteCotizacion</MudText></td></tr>
+                </tbody>
+            </MudSimpleTable>
+        </MudPaper>
+    }
+}
+
+@code {
+    private string? _dispositivo;
+    private string _dispositivoCodigo = "";
+    private string _posicion = "principal";
+    private DateTime? _fechaOcurrida = DateTime.UtcNow;
+    private string _bateriaEntrante = "";
+    private string _modeloEntrante = "";
+    private string _proveedor = "";
+    private string _ejecutor = "";
+    private string _moneda = "ARS";
+    private DateTime? _fechaCosto = DateTime.UtcNow;
+    private decimal _repuestos;
+    private decimal _manoDeObra;
+    private decimal _total;
+    private decimal _tasaUsd = 0.001m;
+    private string _fuenteCotizacion = "BCRA";
+    private string _hallazgos = "";
+    private string _destino = "";
+    private string _receptor = "";
+
+    private bool _ocupado;
+    private string? _mensaje;
+    private Severity _severidad = Severity.Info;
+    private FichaVidaUtil? _ficha;
+
+    private bool Cuadra => _total == _repuestos + _manoDeObra;
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var alcance = FabricaAlcances.CreateScope();
+        var disp = await alcance.ServiceProvider.GetRequiredService<IRepositorioIntervenciones>().DispositivoEnServicioAsync(CancellationToken.None);
+        _dispositivo = disp?.Codigo;
+        _dispositivoCodigo = disp?.Codigo ?? "";
+    }
+
+    private async Task Registrar()
+    {
+        _ocupado = true;
+        _ficha = null;
+        try
+        {
+            var fechaOcurrida = _fechaOcurrida ?? DateTime.UtcNow;
+            var fechaCosto = DateOnly.FromDateTime(_fechaCosto ?? DateTime.UtcNow);
+            var importe = (decimal monto) => new ImporteEntrada(monto, _moneda, fechaCosto);
+            var solicitud = new SolicitudRecambio(
+                new DateTimeOffset(DateTime.SpecifyKind(fechaOcurrida, DateTimeKind.Utc)),
+                DateTimeOffset.UtcNow,
+                _dispositivoCodigo, _posicion,
+                _bateriaEntrante, _modeloEntrante, null, null,
+                _proveedor, _ejecutor,
+                importe(_repuestos), importe(_manoDeObra), importe(_total),
+                _hallazgos, _destino, _receptor,
+                _tasaUsd, _fuenteCotizacion);
+
+            using var alcance = FabricaAlcances.CreateScope();
+            var resultado = await alcance.ServiceProvider.GetRequiredService<ServicioRecambioBateria>().RegistrarAsync(solicitud, CancellationToken.None);
+            _mensaje = resultado.Mensaje;
+            _severidad = resultado.Codigo == CodigoRecambio.Registrado ? Severity.Success : Severity.Error;
+            _ficha = resultado.Ficha;
+        }
+        finally
+        {
+            _ocupado = false;
+        }
+    }
+}

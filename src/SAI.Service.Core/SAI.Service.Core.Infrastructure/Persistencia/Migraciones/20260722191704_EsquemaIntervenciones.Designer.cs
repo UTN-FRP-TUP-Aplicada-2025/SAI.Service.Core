@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SAI.Service.Core.Infrastructure.Persistencia;
 
@@ -11,9 +12,11 @@ using SAI.Service.Core.Infrastructure.Persistencia;
 namespace SAI.Service.Core.Infrastructure.Persistencia.Migraciones
 {
     [DbContext(typeof(SaiDbContext))]
-    partial class SaiDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260722191704_EsquemaIntervenciones")]
+    partial class EsquemaIntervenciones
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.0");

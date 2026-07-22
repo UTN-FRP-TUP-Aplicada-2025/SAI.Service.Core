@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using SAI.Service.Core.Application.Abstractions;
 using SAI.Service.Core.Application.Acciones;
 using SAI.Service.Core.Application.Equipos;
+using SAI.Service.Core.Application.Intervenciones;
 using SAI.Service.Core.Application.Monitoreo;
 using SAI.Service.Core.Domain.Verificaciones;
 using SAI.Service.Core.Infrastructure.Adaptadores;
@@ -88,6 +89,10 @@ public static class DependencyInjection
         // Ejecución del apagado ordenado (Etapa 4·B, CU-05): política de apagado y orquestador.
         services.AddSingleton(LeerOpcionesApagado(configuration));
         services.AddScoped<ServicioApagadoOrdenado>();
+
+        // Recambio de batería y ficha de vida útil (Etapa 4·C, CU-08).
+        services.AddScoped<IRepositorioIntervenciones, Persistencia.RepositorioIntervenciones>();
+        services.AddScoped<ServicioRecambioBateria>();
 
         services.AddHostedService<ServicioSondeo>();
 
