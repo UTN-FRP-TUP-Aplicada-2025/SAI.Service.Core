@@ -1,4 +1,5 @@
 using SAI.Service.Core.Application.Abstractions;
+using SAI.Service.Core.Application.Acciones;
 using SAI.Service.Core.Domain.Inventario;
 using SAI.Service.Core.Domain.Monitoreo;
 using SAI.Service.Core.Domain.Vinculos;
@@ -21,10 +22,14 @@ public enum ResultadoSondeo
 /// <summary>
 /// Orquesta una ronda de sondeo (US-08, CU-04): resuelve el dispositivo en servicio y su sesión
 /// activa (la abre si falta), lee el estado por el adaptador y persiste una <see cref="Muestra"/>
-/// con su calidad. La procedencia por variable la aporta el mapa de la sesión (US-10). No emite
-/// eventos ni evalúa reglas: eso es del Incremento B (US-09).
+/// con su calidad. La procedencia por variable la aporta el mapa de la sesión (US-10). Deriva los
+/// eventos de la ronda (US-09) y, si uno es de disparo del apagado (BT-20), ejecuta la acción de
+/// apagado ordenado (CU-05, US-14) con el bloqueo por verificación por delante.
 /// </summary>
-public sealed class ServicioMonitoreo(IRepositorioMonitoreo repositorio, IAdaptadorConexion adaptador)
+public sealed class ServicioMonitoreo(
+    IRepositorioMonitoreo repositorio,
+    IAdaptadorConexion adaptador,
+    ServicioApagadoOrdenado apagado)
 {
     /// <summary>Código de la fuente de datos NUT (herramienta de acceso).</summary>
     public const string CodigoFuenteNut = "fuente-nut";
@@ -66,6 +71,15 @@ public sealed class ServicioMonitoreo(IRepositorioMonitoreo repositorio, IAdapta
             if (eventos.Count > 0)
             {
                 await repositorio.GuardarEventosAsync(eventos, ct);
+
+                // Pipeline C (CU-05): un disparo del apagado dispara la acción ordenada. La modalidad
+                // efectiva y el bloqueo por verificación se resuelven dentro del servicio de apagado
+                // (RN-02); en solo aviso solo registra el aviso, no apaga nada.
+                var disparo = eventos.FirstOrDefault(e => e.Tipo == TipoEvento.DisparoApagado);
+                if (disparo is not null)
+                {
+                    await apagado.EjecutarDisparoAsync(disparo.Codigo, ct);
+                }
             }
         }
 

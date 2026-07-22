@@ -1,3 +1,4 @@
+using SAI.Service.Core.Domain.Acciones;
 using SAI.Service.Core.Domain.Inventario;
 using SAI.Service.Core.Domain.Monitoreo;
 using SAI.Service.Core.Domain.Vinculos;
@@ -61,4 +62,10 @@ public interface IRepositorioMonitoreo
 
     /// <summary>Guarda la prueba junto con su serie densa y la sesión densa (y su fuente, si es nueva), transaccional.</summary>
     Task GuardarPruebaConSerieAsync(PruebaBateria prueba, IReadOnlyList<Muestra> serie, SesionSondeo sesionDensa, FuenteDatos? nuevaFuente, CancellationToken ct);
+
+    /// <summary>Agrega una acción de apagado (append-only, ADR-04).</summary>
+    Task GuardarAccionAsync(Accion accion, CancellationToken ct);
+
+    /// <summary>Últimas <paramref name="cantidad"/> acciones del dispositivo, más reciente primero (panel).</summary>
+    Task<IReadOnlyList<Accion>> AccionesRecientesAsync(string dispositivoCodigo, int cantidad, CancellationToken ct);
 }

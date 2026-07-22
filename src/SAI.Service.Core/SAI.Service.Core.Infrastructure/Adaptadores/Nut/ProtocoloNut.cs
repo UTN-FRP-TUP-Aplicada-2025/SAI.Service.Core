@@ -17,6 +17,16 @@ public static class ProtocoloNut
     /// <summary>Verdadero si la línea es una respuesta de error del servidor (<c>ERR ...</c>).</summary>
     public static bool EsError(string linea) => linea.StartsWith("ERR ", StringComparison.Ordinal) || linea == "ERR";
 
+    /// <summary>Verdadero si la línea es la confirmación de una escritura (<c>OK</c>).</summary>
+    public static bool EsOk(string linea) => linea == "OK" || linea.StartsWith("OK ", StringComparison.Ordinal);
+
+    /// <summary>Escapa un valor para <c>SET VAR</c>/comando: entre comillas dobles, con <c>"</c> y <c>\</c> escapados.</summary>
+    public static string Entrecomillar(string valor)
+    {
+        ArgumentNullException.ThrowIfNull(valor);
+        return "\"" + valor.Replace("\\", "\\\\", StringComparison.Ordinal).Replace("\"", "\\\"", StringComparison.Ordinal) + "\"";
+    }
+
     /// <summary>
     /// Extrae el valor de una línea <c>VAR &lt;ups&gt; &lt;variable&gt; "&lt;valor&gt;"</c>. Devuelve
     /// <c>null</c> si la línea no corresponde a esa variable (o es un error / no soportada).

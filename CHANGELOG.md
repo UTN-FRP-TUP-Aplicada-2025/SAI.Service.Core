@@ -9,6 +9,29 @@ y el versionado sigue [Semantic Versioning](https://semver.org/lang/es/).
 
 ### Añadido
 
+- **Etapa 4 · Incremento B — Ejecución del apagado ordenado** (CU-05, US-14, US-15, BT-24): cierra el
+  lazo **detección → decisión → ejecución → confirmación → registro** del apagado. El monitoreo ya
+  derivaba el disparo (`DisparoApagado`, BT-20); ahora `ServicioMonitoreo` invoca al nuevo
+  `ServicioApagadoOrdenado`, que deriva la **modalidad efectiva** con el **bloqueo por verificación**
+  (RN-02, ADR-10) y, solo si habilita una acción, ordena el apagado con retorno **por efecto
+  observado** (ADR-11, RN-03): la acción se da por ejecutada solo si el equipo admitió la orden, nunca
+  por ausencia de excepción. Toda decisión —bloqueo, solo aviso, ejecutada o efecto no confirmado—
+  deja una `Accion` **append-only** (ADR-04) con la modalidad solicitada/efectiva y el tiempo
+  reservado (**≤ 540 s**, techo duro RN-04/I-10). Nueva modalidad `CicloForzado` (ADR-09): iniciada la
+  secuencia, el corte no se cancela aunque vuelva la red (**nunca** se emite `shutdown.stop`).
+  - **Write path NUT real** (US-14): sesión autenticada `USERNAME`/`PASSWORD`/`LOGIN` + `SET VAR`
+    (retardos `ups.delay.shutdown`/`ups.delay.start`) + `INSTCMD <ups> shutdown.return` (y
+    `test.battery.start.quick` para el autotest). Credenciales por `Sai:Nut:Usuario`/`Password`; sin
+    ellas el efecto no se confirma (queda en solo lectura). El adaptador **simulado** sigue siendo el
+    banco de pruebas: **el apagado real nunca se dispara contra un host durante el desarrollo**.
+  - Panel `PanelDeApagado.razor`: modalidad efectiva, estado de bloqueo, botón para **simular un
+    disparo** (contra el simulado) e historial de acciones. Migración `EsquemaAcciones`.
+  - 19 pruebas nuevas (dominio: `Accion` append-only y techo duro; write path por cliente NUT falso
+    incl. *nunca `shutdown.stop`*; integración con el simulado: bloqueo sin verificar, ejecución con
+    los cuatro verificados, solo aviso, append-only). *El disparo automático por tiempo en batería ya
+    estaba (Etapa 3); acá se ejecuta la acción. La sustitución del SAI y el recambio de batería llegan
+    en los Incrementos C y D.*
+
 - **Etapa 4 · Incremento A — Ventana de mantenimiento y bloqueo por verificación** (US-16, US-17,
   BT-23, BT-25, CU-10): el `PanelDeVerificaciones.razor` guía la **ventana de mantenimiento** por los
   cuatro supuestos y el `ServicioVerificacion` los verifica **por efecto observado** (ADR-11, RN-03),

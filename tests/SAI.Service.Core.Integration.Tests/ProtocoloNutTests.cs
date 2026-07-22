@@ -62,4 +62,21 @@ public class ProtocoloNutTests
         ProtocoloNut.LeerValorDeVar("VAR sai x \"a\\\"b\"", "sai", "x").Should().Be("a\"b");
         ProtocoloNut.LeerValorDeVar("VAR sai y \"c\\\\d\"", "sai", "y").Should().Be("c\\d");
     }
+
+    [Fact]
+    public void EsOkReconoceLaConfirmacionDeEscritura()
+    {
+        ProtocoloNut.EsOk("OK").Should().BeTrue();
+        ProtocoloNut.EsOk("OK Goodbye").Should().BeTrue();
+        ProtocoloNut.EsOk("ERR ACCESS-DENIED").Should().BeFalse();
+        ProtocoloNut.EsOk("OKAY").Should().BeFalse("solo 'OK' o 'OK ...' confirman");
+    }
+
+    [Fact]
+    public void EntrecomillarEscapaComillasYBarras()
+    {
+        // El valor de un SET VAR/comando va entrecomillado, con " y \ escapados (write path, US-14).
+        ProtocoloNut.Entrecomillar("180").Should().Be("\"180\"");
+        ProtocoloNut.Entrecomillar("a\"b\\c").Should().Be("\"a\\\"b\\\\c\"");
+    }
 }

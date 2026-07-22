@@ -104,13 +104,42 @@ public class AdaptadorConexionNutTests
     }
 
     [Fact]
-    public async Task ElApagadoRealNoSeAceptaEnEsteIncremento()
+    public async Task ElApagadoOrdenadoEmiteShutdownReturnConLosRetardosYNuncaCancela()
     {
-        var adaptador = new AdaptadorConexionNut(new ClienteNutFalso { Variables = VariablesReales() });
+        var cliente = new ClienteNutFalso { Variables = VariablesReales(), ConCredenciales = true };
+        var adaptador = new AdaptadorConexionNut(cliente);
 
         var resultado = await adaptador.OrdenarApagadoConRetornoAsync(TimeSpan.FromSeconds(30), CancellationToken.None);
 
-        resultado.Aceptada.Should().BeFalse("el apagado por NUT llega en la Etapa 4 (US-14)");
+        resultado.Aceptada.Should().BeTrue("el equipo admitió la orden (efecto observado, ADR-11)");
+        var comando = cliente.Comandos.Should().ContainSingle().Subject;
+        comando.Comando.Should().Be("shutdown.return");
+        comando.Ajustes.Should().Contain(("ups.delay.shutdown", "30")).And.Contain(("ups.delay.start", "180"));
+        cliente.Comandos.Should().NotContain(c => c.Comando.Contains("stop"), "el ciclo forzado no se cancela (ADR-09): nunca shutdown.stop");
+    }
+
+    [Fact]
+    public async Task ElApagadoSinCredencialesDeEscrituraNoSeConfirma()
+    {
+        var cliente = new ClienteNutFalso { Variables = VariablesReales(), ConCredenciales = false };
+        var adaptador = new AdaptadorConexionNut(cliente);
+
+        var resultado = await adaptador.OrdenarApagadoConRetornoAsync(TimeSpan.FromSeconds(30), CancellationToken.None);
+
+        resultado.Aceptada.Should().BeFalse("sin credenciales de escritura el efecto no se confirma (ADR-11)");
+        cliente.Comandos.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task ElTestDeBateriaEmiteElComandoRapido()
+    {
+        var cliente = new ClienteNutFalso { Variables = VariablesReales(), ConCredenciales = true };
+        var adaptador = new AdaptadorConexionNut(cliente);
+
+        var resultado = await adaptador.LanzarTestBateriaAsync(CancellationToken.None);
+
+        resultado.Aceptada.Should().BeTrue();
+        cliente.Comandos.Should().ContainSingle(c => c.Comando == "test.battery.start.quick");
     }
 
     private sealed class ClienteNutFalso : IClienteNut
@@ -125,6 +154,13 @@ public class AdaptadorConexionNutTests
 
         public bool Falla { get; init; }
 
+        public bool ConCredenciales { get; init; }
+
+        public bool TieneCredencialesEscritura => ConCredenciales;
+
+        // Comandos de escritura recibidos (para verificar el write path sin socket).
+        public List<(string Comando, IReadOnlyList<(string Variable, string Valor)> Ajustes)> Comandos { get; } = [];
+
         public Task<string> ObtenerVersionAsync(CancellationToken ct) =>
             Falla ? throw new NutException("falla simulada") : Task.FromResult("upsd de prueba");
 
@@ -133,5 +169,21 @@ public class AdaptadorConexionNutTests
 
         public Task<IReadOnlyDictionary<string, string>> LeerVariablesAsync(CancellationToken ct) =>
             Falla ? throw new NutException("falla simulada") : Task.FromResult(Variables);
+
+        public Task EnviarComandoInstantaneoAsync(string comando, IReadOnlyList<(string Variable, string Valor)> ajustesPrevios, CancellationToken ct)
+        {
+            if (Falla)
+            {
+                throw new NutException("falla simulada");
+            }
+
+            if (!ConCredenciales)
+            {
+                throw new NutException("sin credenciales de escritura (rechazo simulado)");
+            }
+
+            Comandos.Add((comando, ajustesPrevios));
+            return Task.CompletedTask;
+        }
     }
 }
