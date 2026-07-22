@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SAI.Service.Core.Infrastructure.Persistencia;
 
@@ -11,9 +12,11 @@ using SAI.Service.Core.Infrastructure.Persistencia;
 namespace SAI.Service.Core.Infrastructure.Persistencia.Migraciones
 {
     [DbContext(typeof(SaiDbContext))]
-    partial class SaiDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260722005939_EsquemaEventos")]
+    partial class EsquemaEventos
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.0");
@@ -251,8 +254,8 @@ namespace SAI.Service.Core.Infrastructure.Persistencia.Migraciones
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<long?>("FechaBaja")
-                        .HasColumnType("INTEGER");
+                    b.Property<DateTimeOffset?>("FechaBaja")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("MotivoBaja")
                         .HasColumnType("TEXT");
@@ -311,8 +314,8 @@ namespace SAI.Service.Core.Infrastructure.Persistencia.Migraciones
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<long>("VentanaInicio")
-                        .HasColumnType("INTEGER");
+                    b.Property<DateTimeOffset>("VentanaInicio")
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Codigo");
 
@@ -340,8 +343,8 @@ namespace SAI.Service.Core.Infrastructure.Persistencia.Migraciones
                     b.Property<double?>("IncertidumbreDuracionSeg")
                         .HasColumnType("REAL");
 
-                    b.Property<long>("Instante")
-                        .HasColumnType("INTEGER");
+                    b.Property<DateTimeOffset>("Instante")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("ReglaDerivacionCodigo")
                         .IsRequired()
@@ -393,8 +396,8 @@ namespace SAI.Service.Core.Infrastructure.Persistencia.Migraciones
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<long>("Instante")
-                        .HasColumnType("INTEGER");
+                    b.Property<DateTimeOffset>("Instante")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Lecturas")
                         .IsRequired()
@@ -433,8 +436,8 @@ namespace SAI.Service.Core.Infrastructure.Persistencia.Migraciones
                         .HasColumnType("TEXT")
                         .HasColumnName("Parametros");
 
-                    b.Property<long>("VigenteDesde")
-                        .HasColumnType("INTEGER");
+                    b.Property<DateTimeOffset>("VigenteDesde")
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Codigo", "Version");
 
@@ -476,12 +479,12 @@ namespace SAI.Service.Core.Infrastructure.Persistencia.Migraciones
                         {
                             b1.IsRequired();
 
-                            b1.Property<long>("Desde")
-                                .HasColumnType("INTEGER")
+                            b1.Property<DateTimeOffset>("Desde")
+                                .HasColumnType("TEXT")
                                 .HasColumnName("Desde");
 
-                            b1.Property<long?>("Hasta")
-                                .HasColumnType("INTEGER")
+                            b1.Property<DateTimeOffset?>("Hasta")
+                                .HasColumnType("TEXT")
                                 .HasColumnName("Hasta");
                         });
 
@@ -499,8 +502,8 @@ namespace SAI.Service.Core.Infrastructure.Persistencia.Migraciones
                     b.Property<string>("Codigo")
                         .HasColumnType("TEXT");
 
-                    b.Property<long>("ActualizadoEn")
-                        .HasColumnType("INTEGER");
+                    b.Property<DateTimeOffset>("ActualizadoEn")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Estado")
                         .IsRequired()
@@ -516,8 +519,8 @@ namespace SAI.Service.Core.Infrastructure.Persistencia.Migraciones
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<long?>("VigenciaHasta")
-                        .HasColumnType("INTEGER");
+                    b.Property<DateTimeOffset?>("VigenciaHasta")
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Codigo");
 
@@ -541,12 +544,12 @@ namespace SAI.Service.Core.Infrastructure.Persistencia.Migraciones
                         {
                             b1.IsRequired();
 
-                            b1.Property<long>("Desde")
-                                .HasColumnType("INTEGER")
+                            b1.Property<DateTimeOffset>("Desde")
+                                .HasColumnType("TEXT")
                                 .HasColumnName("Desde");
 
-                            b1.Property<long?>("Hasta")
-                                .HasColumnType("INTEGER")
+                            b1.Property<DateTimeOffset?>("Hasta")
+                                .HasColumnType("TEXT")
                                 .HasColumnName("Hasta");
                         });
 
@@ -585,12 +588,12 @@ namespace SAI.Service.Core.Infrastructure.Persistencia.Migraciones
                         {
                             b1.IsRequired();
 
-                            b1.Property<long>("Desde")
-                                .HasColumnType("INTEGER")
+                            b1.Property<DateTimeOffset>("Desde")
+                                .HasColumnType("TEXT")
                                 .HasColumnName("Desde");
 
-                            b1.Property<long?>("Hasta")
-                                .HasColumnType("INTEGER")
+                            b1.Property<DateTimeOffset?>("Hasta")
+                                .HasColumnType("TEXT")
                                 .HasColumnName("Hasta");
                         });
 
@@ -630,8 +633,8 @@ namespace SAI.Service.Core.Infrastructure.Persistencia.Migraciones
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("INTEGER");
 
-                    b.Property<long?>("LockoutEnd")
-                        .HasColumnType("INTEGER");
+                    b.Property<DateTimeOffset?>("LockoutEnd")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
@@ -724,8 +727,8 @@ namespace SAI.Service.Core.Infrastructure.Persistencia.Migraciones
                     b.Property<string>("Criticidad")
                         .HasColumnType("TEXT");
 
-                    b.Property<long?>("EnServicioDesde")
-                        .HasColumnType("INTEGER");
+                    b.Property<DateTimeOffset?>("EnServicioDesde")
+                        .HasColumnType("TEXT");
 
                     b.ToTable(t =>
                         {

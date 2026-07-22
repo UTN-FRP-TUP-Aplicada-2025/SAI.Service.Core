@@ -9,6 +9,20 @@ y el versionado sigue [Semantic Versioning](https://semver.org/lang/es/).
 
 ### Añadido
 
+- **Etapa 3 · Incremento B1 — Eventos y derivación** (BT-19, BT-20, US-09): la **derivación de
+  eventos por reglas versionadas** (RC-09) que corre tras cada muestra. Se extiende la lectura del
+  SAI con `ups.status` (en línea / en batería) y `battery.voltage` (medidos) en `EstadoSai`, las
+  `Variables` y ambos adaptadores. Dominio nuevo: `Evento` y `ReglaDerivacion` (append-only; la
+  versión es parte de la identidad, cada evento graba la regla y versión con que se derivó), `TipoEvento`
+  y `DerivadorEventos` (función pura sobre la ventana reciente): **CorteSuministro** (OL→OB),
+  **RetornoRed** (OB→OL), **Microcorte** (corte breve, con incertidumbre estructural CL-10),
+  **DesconexionUsb** (3 sondeos perdidos consecutivos, US-09), **TensionFueraDeRango** (fuera de
+  198–242 V sostenido 30 s) y **DisparoApagado** (BT-20: por tiempo en batería y `battery.voltage`,
+  **nunca** por el flag LB / `battery.charge`, ADR-12; en solo aviso no apaga). Mapeo EF de eventos y
+  reglas + migración `EsquemaEventos`; siembra de las cuatro reglas vigentes al arranque. Además, un
+  converter global de `DateTimeOffset` a `long` (SQLite no ordena `DateTimeOffset` como texto),
+  migración `FechasComoBinario`. 13 pruebas nuevas. *El panel en vivo llega en el Incremento B2.*
+
 - **Etapa 3 · Incremento A — Sondeo y persistencia de muestras** (BT-17, BT-18, US-08, US-10):
   el **planificador de sondeo** (`ServicioSondeo`, un `BackgroundService`) que a cadencia
   configurable (`Sai:Sondeo:IntervaloSeg`, 5 s por defecto) lee el estado del SAI por el adaptador y

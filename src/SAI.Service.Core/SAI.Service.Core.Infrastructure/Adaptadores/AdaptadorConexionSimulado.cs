@@ -39,6 +39,8 @@ public sealed class AdaptadorConexionSimulado : IAdaptadorConexion, IDescubridor
             TensionSalidaVoltios: 220.0,
             CargaSalidaPorcentaje: 35.0,
             CargaBateriaPorcentaje: 100.0,
+            EstadoUps: EstadoUps.EnLinea,
+            TensionBateriaVoltios: 13.2,
             MarcaTiempoUtc: Ahora));
 
     /// <inheritdoc />

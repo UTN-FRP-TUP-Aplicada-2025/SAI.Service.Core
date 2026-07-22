@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SAI.Service.Core.Domain.Catalogo;
 using SAI.Service.Core.Domain.Inventario;
 using SAI.Service.Core.Domain.Monitoreo;
@@ -58,6 +59,24 @@ public class SaiDbContext(DbContextOptions<SaiDbContext> options)
 
     /// <summary>Historia de monitoreo: agregados por ventana (append-only).</summary>
     public DbSet<Agregado> Agregados => Set<Agregado>();
+
+    /// <summary>Reglas de derivación de eventos versionadas (append-only, RC-09).</summary>
+    public DbSet<ReglaDerivacion> Reglas => Set<ReglaDerivacion>();
+
+    /// <summary>Eventos derivados del sondeo (append-only).</summary>
+    public DbSet<Evento> Eventos => Set<Evento>();
+
+    /// <inheritdoc />
+    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+    {
+        base.ConfigureConventions(configurationBuilder);
+
+        // SQLite no ordena ni compara DateTimeOffset almacenado como TEXT (falla el ORDER BY de las
+        // muestras/eventos por instante). Se guardan como long (DateTimeOffsetToBinaryConverter
+        // preserva el offset y el orden cronológico), habilitando ordenar por instante y comparar la
+        // vigencia de las reglas. Aplica a DateTimeOffset y DateTimeOffset?.
+        configurationBuilder.Properties<DateTimeOffset>().HaveConversion<DateTimeOffsetToBinaryConverter>();
+    }
 
     /// <inheritdoc />
     protected override void OnModelCreating(ModelBuilder builder)

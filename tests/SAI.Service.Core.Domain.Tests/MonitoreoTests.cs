@@ -23,6 +23,8 @@ public class MonitoreoTests
             [Variables.TensionSalida] = 228.7,
             [Variables.CargaSalida] = 13,
             [Variables.CargaBateria] = 100,
+            [Variables.EstadoUps] = Variables.CodigoEnLinea,
+            [Variables.TensionBateria] = 13.2,
         };
 
         var muestra = Muestra.Registrar("m1", "ups", "s1", Instante, alcanzable: true, lecturas, Esperadas);

@@ -89,6 +89,32 @@ public class MonitoreoIntegracionTests
         await acto.Should().ThrowAsync<EscrituraDestructivaProhibidaException>("las muestras son historia append-only (ADR-04)");
     }
 
+    [Fact]
+    public async Task LasReglasDeDerivacionSeSembranAlArranque()
+    {
+        using var fabrica = new FabricaSai();
+        using var scope = fabrica.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<SaiDbContext>();
+
+        (await db.Reglas.CountAsync()).Should().Be(4, "corte, tensión, desconexión y disparo (BT-19)");
+    }
+
+    [Fact]
+    public async Task ElSondeoConEstadoEstableNoGeneraEventos()
+    {
+        using var fabrica = new FabricaSai();
+        using var scope = fabrica.Services.CreateScope();
+        var sp = scope.ServiceProvider;
+        await sp.GetRequiredService<ServicioAltaEquipos>().RegistrarAsync(SolicitudValida(), CancellationToken.None);
+        var monitoreo = sp.GetRequiredService<ServicioMonitoreo>();
+
+        await monitoreo.SondearAsync(5, CancellationToken.None);
+        await monitoreo.SondearAsync(5, CancellationToken.None);
+
+        // El adaptador simulado siempre está en línea y en rango: no hay eventos.
+        (await sp.GetRequiredService<SaiDbContext>().Eventos.CountAsync()).Should().Be(0);
+    }
+
     private static SolicitudAltaEquipos SolicitudValida() => new(
         Instante,
         Fabricante: new DatosFabricante("fab", "INNO TECH"),

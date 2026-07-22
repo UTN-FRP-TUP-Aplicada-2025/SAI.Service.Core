@@ -21,7 +21,7 @@ public class AndamiajeApplicationTests
     [Fact]
     public void LosRecordsDeResultadoSonConstruibles()
     {
-        var estado = new EstadoSai(true, 220.0, 220.0, 35.0, 100.0, DateTimeOffset.UtcNow);
+        var estado = new EstadoSai(true, 220.0, 220.0, 35.0, 100.0, EstadoUps.EnLinea, 13.2, DateTimeOffset.UtcNow);
         estado.Alcanzable.Should().BeTrue();
     }
 }

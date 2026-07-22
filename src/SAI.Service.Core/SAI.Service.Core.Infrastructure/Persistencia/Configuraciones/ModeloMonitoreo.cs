@@ -24,6 +24,8 @@ internal static class ModeloMonitoreo
 
     public static void Configurar(ModelBuilder builder)
     {
+        ConfigurarEventos(builder);
+
         builder.Entity<FuenteDatos>(e =>
         {
             e.ToTable("FuenteDatos");
@@ -110,6 +112,57 @@ internal static class ModeloMonitoreo
             e.HasIndex(a => new { a.DispositivoCodigo, a.Variable, a.VentanaInicio }).IsUnique();
         });
     }
+
+    private static void ConfigurarEventos(ModelBuilder builder)
+    {
+        builder.Entity<ReglaDerivacion>(e =>
+        {
+            e.ToTable("ReglaDerivacion");
+            e.HasKey(r => new { r.Codigo, r.Version }); // la versión es parte de la identidad (RC-09)
+            e.Property(r => r.Codigo);
+            e.Property(r => r.Version);
+            e.Property(r => r.Descripcion);
+            e.Property(r => r.VigenteDesde).IsRequired();
+            e.Property(r => r.Parametros)
+                .HasColumnName("Parametros")
+                .HasConversion(ConversorParametros())
+                .Metadata.SetValueComparer(ComparadorParametros());
+        });
+
+        builder.Entity<Evento>(e =>
+        {
+            e.ToTable("Evento");
+            e.HasKey(v => v.Codigo);
+            e.Property(v => v.Codigo);
+            e.Property(v => v.DispositivoCodigo).IsRequired();
+            e.Property(v => v.Tipo).HasConversion<string>().IsRequired();
+            e.Property(v => v.Instante).IsRequired();
+            e.Property(v => v.DuracionSeg);
+            e.Property(v => v.IncertidumbreDuracionSeg);
+            e.Property(v => v.ReglaDerivacionCodigo).IsRequired();
+            e.Property(v => v.ReglaVersion).IsRequired();
+
+            e.HasOne<UnidadFisica>().WithMany().HasPrincipalKey(u => u.Codigo)
+                .HasForeignKey(v => v.DispositivoCodigo).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne<ReglaDerivacion>().WithMany()
+                .HasForeignKey(v => new { v.ReglaDerivacionCodigo, v.ReglaVersion })
+                .OnDelete(DeleteBehavior.Restrict);
+
+            e.HasIndex(v => new { v.DispositivoCodigo, v.Instante });
+            e.HasIndex(v => new { v.ReglaDerivacionCodigo, v.ReglaVersion });
+        });
+    }
+
+    private static ValueConverter<IReadOnlyDictionary<string, double>, string> ConversorParametros() =>
+        new(
+            d => JsonSerializer.Serialize(d, Json),
+            s => JsonSerializer.Deserialize<Dictionary<string, double>>(s, Json) ?? new Dictionary<string, double>());
+
+    private static ValueComparer<IReadOnlyDictionary<string, double>> ComparadorParametros() =>
+        new(
+            (a, b) => JsonSerializer.Serialize(a, Json) == JsonSerializer.Serialize(b, Json),
+            d => JsonSerializer.Serialize(d, Json).GetHashCode(StringComparison.Ordinal),
+            d => new Dictionary<string, double>(d, StringComparer.Ordinal));
 
     private static ValueConverter<IReadOnlyDictionary<string, double?>, string> ConversorLecturas() =>
         new(

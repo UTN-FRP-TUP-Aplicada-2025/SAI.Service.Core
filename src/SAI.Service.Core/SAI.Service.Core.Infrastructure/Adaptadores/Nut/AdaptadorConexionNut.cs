@@ -23,6 +23,7 @@ public sealed class AdaptadorConexionNut : IAdaptadorConexion, IDescubridorSai
     private const string VarTensionSalida = "output.voltage";   // Medido
     private const string VarCargaSalida = "ups.load";           // Medido
     private const string VarCargaBateria = "battery.charge";    // Estimado por driver, nunca medido
+    private const string VarTensionBateria = "battery.voltage"; // Medido
 
     private readonly IClienteNut _cliente;
 
@@ -50,12 +51,14 @@ public sealed class AdaptadorConexionNut : IAdaptadorConexion, IDescubridorSai
                 TensionSalidaVoltios: LeerNumero(variables, VarTensionSalida),
                 CargaSalidaPorcentaje: LeerNumero(variables, VarCargaSalida),
                 CargaBateriaPorcentaje: LeerNumero(variables, VarCargaBateria),
+                EstadoUps: InterpretarEstado(variables.GetValueOrDefault(VarEstado)),
+                TensionBateriaVoltios: LeerNumero(variables, VarTensionBateria),
                 MarcaTiempoUtc: ahora);
         }
         catch (NutException)
         {
             // Falla de transporte: no se observó el equipo (ADR-11).
-            return new EstadoSai(false, null, null, null, null, ahora);
+            return new EstadoSai(false, null, null, null, null, null, null, ahora);
         }
     }
 
@@ -157,6 +160,13 @@ public sealed class AdaptadorConexionNut : IAdaptadorConexion, IDescubridorSai
             Motivo: "El test de batería por NUT se habilita en una etapa posterior (requiere comando de "
                 + "escritura con credenciales de administrador). En este incremento el adaptador NUT es de solo lectura.",
             MarcaTiempoUtc: DateTimeOffset.UtcNow));
+
+    // ups.status puede traer varios flags (p. ej. "OL CHRG", "OB DISCHRG"). La presencia de "OB"
+    // indica que el equipo pasó a batería (DM-05).
+    private static EstadoUps? InterpretarEstado(string? status) =>
+        string.IsNullOrWhiteSpace(status)
+            ? null
+            : status.Contains("OB", StringComparison.Ordinal) ? EstadoUps.EnBateria : EstadoUps.EnLinea;
 
     private static double? LeerNumero(IReadOnlyDictionary<string, string> variables, string clave) =>
         variables.TryGetValue(clave, out var texto)

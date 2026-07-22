@@ -22,6 +22,18 @@ public static class Variables
     /// <summary>Carga de batería (%). Derivada por el driver, nunca medida (DM-03).</summary>
     public const string CargaBateria = "battery.charge";
 
+    /// <summary>Estado de alimentación (ups.status), codificado 0 = en línea / 1 = en batería (DM-05). Medido.</summary>
+    public const string EstadoUps = "ups.status";
+
+    /// <summary>Tensión de batería (V, battery.voltage). Medida (DM-02); base del disparo BT-20.</summary>
+    public const string TensionBateria = "battery.voltage";
+
+    /// <summary>Código de <see cref="EstadoUps"/> para "en línea" (OL) en las lecturas.</summary>
+    public const double CodigoEnLinea = 0;
+
+    /// <summary>Código de <see cref="EstadoUps"/> para "en batería" (OB) en las lecturas.</summary>
+    public const double CodigoEnBateria = 1;
+
     /// <summary>
     /// Procedencia canónica de cada variable sensada (US-10). Es el mapa que se guarda en la sesión
     /// de sondeo y que la API/panel expanden al servir cada valor.
@@ -33,5 +45,7 @@ public static class Variables
             [TensionSalida] = Origen.Medido,
             [CargaSalida] = Origen.Medido,
             [CargaBateria] = Origen.Derivado,
+            [EstadoUps] = Origen.Medido,
+            [TensionBateria] = Origen.Medido,
         };
 }

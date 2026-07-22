@@ -7,6 +7,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using MudBlazor.Services;
 using SAI.Service.Core.Api;
+using SAI.Service.Core.Domain.Monitoreo;
 using SAI.Service.Core.Infrastructure;
 using SAI.Service.Core.Infrastructure.Persistencia;
 using SAI.Service.Core.Web;
@@ -149,6 +150,22 @@ using (var scope = app.Services.CreateScope())
     if (!await roles.RoleExistsAsync(GeneradorTokens.RolAdministrador))
     {
         await roles.CreateAsync(new IdentityRole(GeneradorTokens.RolAdministrador));
+    }
+
+    // Semilla de las reglas de derivación de eventos vigentes (v1, BT-19) si no existen.
+    if (!await db.Reglas.AnyAsync())
+    {
+        var vigenteDesde = new DateTimeOffset(2020, 1, 1, 0, 0, 0, TimeSpan.Zero);
+        db.Reglas.AddRange(
+            new ReglaDerivacion(DerivadorEventos.ReglaCorte, 1, vigenteDesde,
+                new Dictionary<string, double> { ["microcorteMaxSeg"] = 60 }, "Corte, retorno y microcorte"),
+            new ReglaDerivacion(DerivadorEventos.ReglaTension, 1, vigenteDesde,
+                new Dictionary<string, double> { ["min"] = 198, ["max"] = 242, ["sostenidoSeg"] = 30 }, "Tensión de entrada fuera de rango sostenida"),
+            new ReglaDerivacion(DerivadorEventos.ReglaDesconexion, 1, vigenteDesde,
+                new Dictionary<string, double> { ["sondeosPerdidos"] = 3 }, "Pérdida de comunicación por sondeos perdidos"),
+            new ReglaDerivacion(DerivadorEventos.ReglaDisparo, 1, vigenteDesde,
+                new Dictionary<string, double> { ["umbralObSeg"] = 300, ["batVoltMin"] = 13.3, ["batVoltMax"] = 14.5 }, "Disparo del apagado por tiempo en batería y tensión (BT-20)"));
+        await db.SaveChangesAsync();
     }
 }
 

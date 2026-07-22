@@ -14,6 +14,8 @@ namespace SAI.Service.Core.Application.Abstractions;
 /// <param name="TensionSalidaVoltios">Tension de salida (output.voltage) en voltios, si esta disponible.</param>
 /// <param name="CargaSalidaPorcentaje">Carga de salida (ups.load) en porcentaje, si esta disponible.</param>
 /// <param name="CargaBateriaPorcentaje">Carga de bateria (battery.charge) en porcentaje; siempre derivada (RN-05).</param>
+/// <param name="EstadoUps">Estado de alimentacion (ups.status: en linea / en bateria), base de los eventos de corte.</param>
+/// <param name="TensionBateriaVoltios">Tension de bateria (battery.voltage) en voltios; medida. Base del disparo BT-20 (ADR-12).</param>
 /// <param name="MarcaTiempoUtc">Instante de la lectura en UTC.</param>
 public sealed record EstadoSai(
     bool Alcanzable,
@@ -21,4 +23,6 @@ public sealed record EstadoSai(
     double? TensionSalidaVoltios,
     double? CargaSalidaPorcentaje,
     double? CargaBateriaPorcentaje,
+    EstadoUps? EstadoUps,
+    double? TensionBateriaVoltios,
     DateTimeOffset MarcaTiempoUtc);
