@@ -7,54 +7,138 @@
 
 <PageTitle>Panel de verificaciones — SAI.Service.Core</PageTitle>
 
-<h1 class="mud-typography mud-typography-h4">Panel de verificaciones</h1>
+<h1 class="mud-typography mud-typography-h4 mb-4">Panel de verificaciones</h1>
 
 @if (_verificaciones is null)
 {
-    <MudProgressLinear Indeterminate="true" Color="Color.Primary" Class="mt-4" />
+    <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
 }
 else if (_verificaciones.Count == 0)
 {
-    <MudAlert Severity="Severity.Info" Variant="Variant.Filled" Class="mt-4">
-        Todavía no hay supuestos sembrados. <MudLink Href="/alta-de-equipos" Color="Color.Inherit"><b>Dá de alta un equipo</b></MudLink> para sembrarlos.
+    <MudAlert Severity="Severity.Info" Variant="Variant.Filled">
+        Todavía no hay supuestos sembrados. <MudLink Href="/alta-de-equipos" Color="Color.Inherit"><b>Dá de alta un equipo</b></MudLink>.
     </MudAlert>
 }
 else
 {
-    var verificados = _verificaciones.Count(v => v.Estado == EstadoVerificacion.Verificado);
-    <MudAlert Severity="@(verificados == _verificaciones.Count ? Severity.Success : Severity.Warning)"
-              Variant="Variant.Filled" Class="mt-4 mb-4">
-        <b>@verificados de @_verificaciones.Count</b> supuestos verificados.
-        @if (verificados < _verificaciones.Count)
+    var ahora = DateTimeOffset.UtcNow;
+    var verificados = EvaluadorModalidad.Verificados(_verificaciones, ahora);
+    var refutado = _verificaciones.Any(v => v.Estado == EstadoVerificacion.Refutado);
+    var desbloqueado = verificados >= EvaluadorModalidad.SupuestosRequeridos;
+
+    <MudAlert Severity="@(desbloqueado ? Severity.Success : Severity.Warning)" Variant="Variant.Filled" Class="mb-4" role="alert">
+        <b>@verificados de @EvaluadorModalidad.SupuestosRequeridos</b> supuestos verificados.
+        @if (desbloqueado)
         {
-            <span> El servicio permanece en solo aviso hasta verificar los cuatro.</span>
+            <span> <b>Desbloqueado</b>: se habilita el apagado ordenado (la modalidad de acción se aplica cuando la política lo solicite).</span>
+        }
+        else if (refutado)
+        {
+            <span> Hay un supuesto <b>refutado</b> (bloqueo permanente): el servicio permanece en solo aviso hasta resolverlo.</span>
+        }
+        else
+        {
+            <span> El servicio permanece en <b>solo aviso</b> hasta verificar los cuatro.</span>
         }
     </MudAlert>
 
-    <MudList T="Verificacion" Class="mud-paper mud-elevation-1" Style="border-radius:10px;">
-        @foreach (var verificacion in _verificaciones.OrderBy(v => v.Supuesto))
-        {
-            <MudListItem T="Verificacion" Icon="@IconoEstado(verificacion.Estado)" IconColor="@ColorEstado(verificacion.Estado)">
-                <MudText Typo="Typo.body1">@EtiquetaSupuesto(verificacion.Supuesto)</MudText>
-                <MudText Typo="Typo.body2" Class="mud-text-secondary">@EtiquetaEstado(verificacion.Estado)</MudText>
-            </MudListItem>
-        }
-    </MudList>
-}
+    <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined" Class="mb-4" Icon="@Icons.Material.Filled.Warning">
+        La ventana de mantenimiento incluye pruebas físicas (cortar la red, apagado con retorno), con presencia física.
+        El apagado real por NUT está diferido; acá se ejercita el camino contra el adaptador configurado.
+    </MudAlert>
 
-<MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Class="mt-4">
-    La ventana de mantenimiento que verifica los supuestos por evidencia observada y desbloquea el
-    apagado se implementa en la Etapa 4 (EP-06). Acá se muestra el estado sembrado en el alta.
-</MudAlert>
+    <MudGrid>
+        @foreach (var v in _verificaciones.OrderBy(x => x.Supuesto))
+        {
+            var estado = v.EstadoEfectivo(ahora);
+            <MudItem xs="12" md="6">
+                <MudPaper Elevation="1" Class="pa-4" Style="border-radius:10px;height:100%;">
+                    <div class="d-flex align-center mb-2">
+                        <MudIcon Icon="@IconoEstado(estado)" Color="@ColorEstado(estado)" Class="mr-2" />
+                        <MudText Typo="Typo.subtitle1">@EtiquetaSupuesto(v.Supuesto)</MudText>
+                        <MudSpacer />
+                        <MudChip T="string" Size="Size.Small" Color="@ColorEstado(estado)" Variant="Variant.Text">@EtiquetaEstado(estado)</MudChip>
+                    </div>
+                    @if (v.Evidencia is not null)
+                    {
+                        <MudText Typo="Typo.caption" Class="mud-text-secondary d-block mb-2">Evidencia: @v.Evidencia</MudText>
+                    }
+
+                    @if (estado != EstadoVerificacion.Refutado)
+                    {
+                        @switch (v.Supuesto)
+                        {
+                            case Supuesto.PresupuestoDeApagado:
+                                <div class="d-flex align-center" style="gap:0.5rem;">
+                                    <MudNumericField T="int" @bind-Value="_segundos" Label="Segundos" Min="1" Style="max-width:120px;" Margin="Margin.Dense" />
+                                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="_ocupado" OnClick="VerificarPresupuesto">Verificar</MudButton>
+                                </div>
+                                break;
+                            case Supuesto.SenalEnBateria:
+                                <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="_ocupado" OnClick="VerificarSenal">Verificar señal en batería</MudButton>
+                                break;
+                            case Supuesto.CorteConRetorno:
+                                <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="_ocupado" OnClick="VerificarCorte">Verificar corte con retorno</MudButton>
+                                break;
+                            case Supuesto.ReencendidoPorPlaca:
+                                <div class="d-flex align-center flex-wrap" style="gap:0.5rem;">
+                                    <MudButton Variant="Variant.Filled" Color="Color.Success" Disabled="_ocupado" OnClick="() => Reencendido(true)">Arrancó solo</MudButton>
+                                    <MudButton Variant="Variant.Outlined" Color="Color.Error" Disabled="_ocupado" OnClick="() => Reencendido(false)">No arrancó (refutar)</MudButton>
+                                </div>
+                                break;
+                        }
+                    }
+                </MudPaper>
+            </MudItem>
+        }
+    </MudGrid>
+
+    @if (_mensaje is not null)
+    {
+        <MudAlert Severity="@_severidad" Variant="Variant.Filled" Class="mt-4">@_mensaje</MudAlert>
+    }
+}
 
 @code {
     private IReadOnlyList<Verificacion>? _verificaciones;
+    private int _segundos = 120;
+    private bool _ocupado;
+    private string? _mensaje;
+    private Severity _severidad = Severity.Info;
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnInitializedAsync() => await Cargar();
+
+    private async Task Cargar()
     {
         using var alcance = FabricaAlcances.CreateScope();
-        var servicio = alcance.ServiceProvider.GetRequiredService<ServicioAltaEquipos>();
-        _verificaciones = await servicio.ListarVerificacionesAsync(CancellationToken.None);
+        _verificaciones = await alcance.ServiceProvider.GetRequiredService<ServicioVerificacion>().EstadoAsync(CancellationToken.None);
+    }
+
+    private Task VerificarPresupuesto() => Ejecutar(s => s.VerificarPresupuestoAsync(_segundos, CancellationToken.None));
+    private Task VerificarSenal() => Ejecutar(s => s.VerificarSenalBateriaAsync(CancellationToken.None));
+    private Task VerificarCorte() => Ejecutar(s => s.VerificarCorteConRetornoAsync(CancellationToken.None));
+    private Task Reencendido(bool arrancoSolo) => Ejecutar(s => s.RegistrarReencendidoAsync(arrancoSolo, CancellationToken.None));
+
+    private async Task Ejecutar(Func<ServicioVerificacion, Task<ResultadoVerificacion>> accion)
+    {
+        _ocupado = true;
+        try
+        {
+            using var alcance = FabricaAlcances.CreateScope();
+            var resultado = await accion(alcance.ServiceProvider.GetRequiredService<ServicioVerificacion>());
+            _mensaje = resultado.Mensaje;
+            _severidad = resultado.Codigo switch
+            {
+                CodigoResultadoVerificacion.Verificado => Severity.Success,
+                CodigoResultadoVerificacion.Refutado => Severity.Error,
+                _ => Severity.Warning,
+            };
+        }
+        finally
+        {
+            _ocupado = false;
+            await Cargar();
+        }
     }
 
     private static string EtiquetaSupuesto(Supuesto supuesto) => supuesto switch

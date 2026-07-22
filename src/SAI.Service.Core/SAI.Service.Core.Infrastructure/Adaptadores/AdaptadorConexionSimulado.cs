@@ -22,6 +22,13 @@ public sealed class AdaptadorConexionSimulado : IAdaptadorConexion, IDescubridor
     private const double CaidaMaximaDescarga = 0.7;
     private DateTimeOffset? _descargaInicio;
 
+    /// <summary>
+    /// Si es verdadero, el simulado reporta el equipo <b>en batería</b> (ups.status = OB, sin tensión
+    /// de entrada), para poder ejercitar el corte y la verificación de la señal en batería (US-16) sin
+    /// hardware. Se fija por configuración (<c>Sai:Simulado:EnBateria</c>) o desde las pruebas.
+    /// </summary>
+    public bool SimularEnBateria { get; set; }
+
     /// <inheritdoc />
     public Task<IReadOnlyList<DispositivoDescubierto>> DescubrirAsync(CancellationToken ct)
     {
@@ -52,11 +59,11 @@ public sealed class AdaptadorConexionSimulado : IAdaptadorConexion, IDescubridor
 
         return Task.FromResult(new EstadoSai(
             Alcanzable: true,
-            TensionEntradaVoltios: 220.0,
+            TensionEntradaVoltios: SimularEnBateria ? 0.0 : 220.0,
             TensionSalidaVoltios: 220.0,
             CargaSalidaPorcentaje: 35.0,
             CargaBateriaPorcentaje: 100.0,
-            EstadoUps: EstadoUps.EnLinea,
+            EstadoUps: SimularEnBateria ? EstadoUps.EnBateria : EstadoUps.EnLinea,
             TensionBateriaVoltios: Math.Round(tensionBateria, 2),
             MarcaTiempoUtc: ahora));
     }

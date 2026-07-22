@@ -9,6 +9,21 @@ y el versionado sigue [Semantic Versioning](https://semver.org/lang/es/).
 
 ### Añadido
 
+- **Etapa 4 · Incremento A — Ventana de mantenimiento y bloqueo por verificación** (US-16, US-17,
+  BT-23, BT-25, CU-10): el `PanelDeVerificaciones.razor` guía la **ventana de mantenimiento** por los
+  cuatro supuestos y el `ServicioVerificacion` los verifica **por efecto observado** (ADR-11, RN-03),
+  nunca por ausencia de excepción: el **presupuesto de apagado** cronometrado a mano, la **señal en
+  batería** leyendo `ups.status = OB` del adaptador, el **corte con retorno** ejecutando el apagado
+  con retorno y confirmando el efecto, y el **reencendido por placa** que —si el host no arranca
+  solo— se **refuta** (bloqueo permanente que no se reverifica). Cada supuesto lleva su **vigencia**
+  (`VigenciasSupuesto`: 180 días el presupuesto, 365 la señal y el reencendido, sin caducidad el corte
+  con retorno); una verificación vencida deja de contar (`EstadoEfectivo` → `Vencido`) y el
+  `EvaluadorModalidad` **degrada a solo aviso** salvo con los cuatro vigentes. El *write path* real
+  por NUT sigue diferido: el camino se ejercita contra el **adaptador simulado**, que ahora puede
+  reportar el equipo **en batería** (`Sai:Simulado:EnBateria`) para verificar la señal sin hardware.
+  9 pruebas nuevas (dominio + integración). *El apagado ordenado real (CicloForzado, BT-24/25) llega
+  en el Incremento B, validado solo con el simulado.*
+
 - **Etapa 3 · Incremento D — Históricos y gráficas** (US-11): el panel `HistoricosYGraficas.razor`
   grafica la evolución de las variables (tensión de entrada/salida, carga, tensión de batería) en un
   período con `MudChart`, con la lista de **eventos** del período y el **conteo de microcortes** (que
