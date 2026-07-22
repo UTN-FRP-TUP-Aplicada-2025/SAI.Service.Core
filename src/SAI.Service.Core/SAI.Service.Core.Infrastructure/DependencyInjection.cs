@@ -60,7 +60,10 @@ public static class DependencyInjection
         }
         else
         {
-            services.AddSingleton<AdaptadorConexionSimulado>();
+            services.AddSingleton(new AdaptadorConexionSimulado
+            {
+                SimularEnBateria = string.Equals(configuration["Sai:Simulado:EnBateria"], "true", StringComparison.OrdinalIgnoreCase),
+            });
             services.AddSingleton<IAdaptadorConexion>(sp => sp.GetRequiredService<AdaptadorConexionSimulado>());
             services.AddSingleton<IDescubridorSai>(sp => sp.GetRequiredService<AdaptadorConexionSimulado>());
         }
@@ -68,6 +71,7 @@ public static class DependencyInjection
         // Alta de equipos (CU-02): repositorio EF y el caso de uso. Scoped, sobre el DbContext.
         services.AddScoped<IRepositorioEquipos, Persistencia.RepositorioEquipos>();
         services.AddScoped<ServicioAltaEquipos>();
+        services.AddScoped<ServicioVerificacion>();
 
         // Monitoreo (Etapa 3): planificador de sondeo (hosted service) y persistencia de muestras
         // append-only. El repositorio y el orquestador son scoped (una ronda = un alcance de DI).

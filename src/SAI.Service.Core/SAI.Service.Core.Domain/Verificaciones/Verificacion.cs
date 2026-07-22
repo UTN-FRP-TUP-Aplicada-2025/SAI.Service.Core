@@ -66,4 +66,34 @@ public sealed class Verificacion
         VigenciaHasta = vigenciaHasta;
         ActualizadoEn = ahora;
     }
+
+    /// <summary>
+    /// Refuta el supuesto por evidencia en contra (US-16 FA-1: el host no arranca solo). Es un
+    /// <b>bloqueo permanente</b>: un supuesto refutado no vuelve a verificarse desde la ventana.
+    /// </summary>
+    public void Refutar(string metodo, string? evidencia, DateTimeOffset ahora)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(metodo);
+        Estado = EstadoVerificacion.Refutado;
+        Metodo = metodo;
+        Evidencia = evidencia;
+        VigenciaHasta = null;
+        ActualizadoEn = ahora;
+    }
+
+    /// <summary>
+    /// Verdadero si la verificación cuenta como vigente en <paramref name="ahora"/>: está verificada y
+    /// su vigencia no venció (o no caduca). Es lo que habilita el desbloqueo (RN-02).
+    /// </summary>
+    public bool CuentaComoVerificada(DateTimeOffset ahora) =>
+        Estado == EstadoVerificacion.Verificado && (VigenciaHasta is not { } hasta || hasta >= ahora);
+
+    /// <summary>
+    /// Estado efectivo en <paramref name="ahora"/>: una verificación verificada cuya vigencia ya venció
+    /// se ve como <see cref="EstadoVerificacion.Vencido"/> (vencimiento perezoso, US-17).
+    /// </summary>
+    public EstadoVerificacion EstadoEfectivo(DateTimeOffset ahora) =>
+        Estado == EstadoVerificacion.Verificado && VigenciaHasta is { } hasta && hasta < ahora
+            ? EstadoVerificacion.Vencido
+            : Estado;
 }

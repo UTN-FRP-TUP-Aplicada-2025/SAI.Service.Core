@@ -24,6 +24,12 @@ public interface IRepositorioEquipos
     /// <summary>Lista todas las verificaciones sembradas (para el estado de puesta en marcha).</summary>
     Task<IReadOnlyList<Verificacion>> ListarVerificacionesAsync(CancellationToken ct);
 
+    /// <summary>Verificación de un supuesto, o <c>null</c> si no existe (ventana de mantenimiento).</summary>
+    Task<Verificacion?> VerificacionDeSupuestoAsync(Supuesto supuesto, CancellationToken ct);
+
+    /// <summary>Persiste el cambio de estado de una verificación (update in-place; no es append-only).</summary>
+    Task ActualizarVerificacionAsync(Verificacion verificacion, CancellationToken ct);
+
     /// <summary>Verdadero si ya hay al menos una unidad física dada de alta.</summary>
     Task<bool> HayEquiposAsync(CancellationToken ct);
 }

@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using SAI.Service.Core.Application.Equipos;
+using SAI.Service.Core.Domain.Verificaciones;
 using SAI.Service.Core.Domain.Vinculos;
 
 namespace SAI.Service.Core.Infrastructure.Persistencia;
@@ -41,8 +42,20 @@ public sealed class RepositorioEquipos(SaiDbContext contexto) : IRepositorioEqui
     }
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<Domain.Verificaciones.Verificacion>> ListarVerificacionesAsync(CancellationToken ct) =>
+    public async Task<IReadOnlyList<Verificacion>> ListarVerificacionesAsync(CancellationToken ct) =>
         await contexto.Verificaciones.ToListAsync(ct);
+
+    /// <inheritdoc />
+    public Task<Verificacion?> VerificacionDeSupuestoAsync(Supuesto supuesto, CancellationToken ct) =>
+        contexto.Verificaciones.FirstOrDefaultAsync(v => v.Supuesto == supuesto, ct);
+
+    /// <inheritdoc />
+    public Task ActualizarVerificacionAsync(Verificacion verificacion, CancellationToken ct)
+    {
+        // La verificación se cargó y mutó en este mismo contexto (tracked): basta con guardar.
+        contexto.Verificaciones.Update(verificacion);
+        return contexto.SaveChangesAsync(ct);
+    }
 
     /// <inheritdoc />
     public Task<bool> HayEquiposAsync(CancellationToken ct) => contexto.Unidades.AnyAsync(ct);
