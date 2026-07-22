@@ -24,4 +24,13 @@ public interface IRepositorioMonitoreo
 
     /// <summary>Agrega una muestra (append-only).</summary>
     Task GuardarMuestraAsync(Muestra muestra, CancellationToken ct);
+
+    /// <summary>Últimas <paramref name="cantidad"/> muestras del dispositivo, más reciente primero.</summary>
+    Task<IReadOnlyList<Muestra>> MuestrasRecientesAsync(string dispositivoCodigo, int cantidad, CancellationToken ct);
+
+    /// <summary>Reglas de derivación vigentes en el instante (la mayor versión con vigencia previa), por código.</summary>
+    Task<IReadOnlyDictionary<string, ReglaDerivacion>> ReglasVigentesAsync(DateTimeOffset instante, CancellationToken ct);
+
+    /// <summary>Agrega los eventos derivados (append-only).</summary>
+    Task GuardarEventosAsync(IReadOnlyList<Evento> eventos, CancellationToken ct);
 }

@@ -44,4 +44,31 @@ public sealed class RepositorioMonitoreo(SaiDbContext contexto) : IRepositorioMo
         contexto.Muestras.Add(muestra);
         await contexto.SaveChangesAsync(ct);
     }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<Muestra>> MuestrasRecientesAsync(string dispositivoCodigo, int cantidad, CancellationToken ct) =>
+        await contexto.Muestras
+            .Where(m => m.DispositivoCodigo == dispositivoCodigo)
+            .OrderByDescending(m => m.Instante)
+            .Take(cantidad)
+            .ToListAsync(ct);
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyDictionary<string, ReglaDerivacion>> ReglasVigentesAsync(DateTimeOffset instante, CancellationToken ct)
+    {
+        var vigentes = await contexto.Reglas
+            .Where(r => r.VigenteDesde <= instante)
+            .ToListAsync(ct);
+
+        return vigentes
+            .GroupBy(r => r.Codigo)
+            .ToDictionary(g => g.Key, g => g.MaxBy(r => r.Version)!, StringComparer.Ordinal);
+    }
+
+    /// <inheritdoc />
+    public async Task GuardarEventosAsync(IReadOnlyList<Evento> eventos, CancellationToken ct)
+    {
+        contexto.Eventos.AddRange(eventos);
+        await contexto.SaveChangesAsync(ct);
+    }
 }

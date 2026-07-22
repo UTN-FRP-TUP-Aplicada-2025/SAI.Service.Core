@@ -50,6 +50,13 @@ public sealed class ServicioMonitoreo(IRepositorioMonitoreo repositorio, IAdapta
             [Variables.TensionSalida] = estado.TensionSalidaVoltios,
             [Variables.CargaSalida] = estado.CargaSalidaPorcentaje,
             [Variables.CargaBateria] = estado.CargaBateriaPorcentaje,
+            [Variables.EstadoUps] = estado.EstadoUps switch
+            {
+                Abstractions.EstadoUps.EnBateria => Variables.CodigoEnBateria,
+                Abstractions.EstadoUps.EnLinea => Variables.CodigoEnLinea,
+                _ => null,
+            },
+            [Variables.TensionBateria] = estado.TensionBateriaVoltios,
         };
 
         var muestra = Muestra.Registrar(
@@ -62,8 +69,24 @@ public sealed class ServicioMonitoreo(IRepositorioMonitoreo repositorio, IAdapta
             VariablesEsperadas);
 
         await repositorio.GuardarMuestraAsync(muestra, ct);
+
+        // Derivación de eventos (US-09, BT-19) sobre la ventana reciente, con las reglas vigentes.
+        var recientes = await repositorio.MuestrasRecientesAsync(dispositivo.Codigo, VentanaMuestras, ct);
+        var reglas = await repositorio.ReglasVigentesAsync(muestra.Instante, ct);
+        if (reglas.Count > 0)
+        {
+            var eventos = DerivadorEventos.Derivar(dispositivo.Codigo, recientes, reglas, () => $"evt-{Guid.NewGuid():N}");
+            if (eventos.Count > 0)
+            {
+                await repositorio.GuardarEventosAsync(eventos, ct);
+            }
+        }
+
         return muestra.Calidad == CalidadMuestra.Perdida ? ResultadoSondeo.Perdida : ResultadoSondeo.Registrada;
     }
+
+    // Ventana de muestras que evalúan las reglas (cubre el sostenido de tensión y el disparo BT-20).
+    private const int VentanaMuestras = 200;
 
     private async Task<SesionSondeo> AbrirSesionAsync(Dispositivo dispositivo, int intervaloSeg, CancellationToken ct)
     {
