@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SAI.Service.Core.Domain.Acciones;
 using SAI.Service.Core.Domain.Catalogo;
+using SAI.Service.Core.Domain.Intervenciones;
 using SAI.Service.Core.Domain.Inventario;
 using SAI.Service.Core.Domain.Monitoreo;
 using SAI.Service.Core.Domain.Verificaciones;
@@ -73,6 +74,12 @@ public class SaiDbContext(DbContextOptions<SaiDbContext> options)
     /// <summary>Historia de acciones de apagado (Etapa 4·B, CU-05, ADR-04).</summary>
     public DbSet<Accion> Acciones => Set<Accion>();
 
+    /// <summary>Historia de intervenciones de recambio de batería (Etapa 4·C, CU-08, ADR-04).</summary>
+    public DbSet<Intervencion> Intervenciones => Set<Intervencion>();
+
+    /// <summary>Fichas de vida útil proyectadas al recambiar (Etapa 4·C, US-19).</summary>
+    public DbSet<FichaVidaUtil> FichasVidaUtil => Set<FichaVidaUtil>();
+
     /// <inheritdoc />
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
@@ -96,5 +103,8 @@ public class SaiDbContext(DbContextOptions<SaiDbContext> options)
 
         // Historia de monitoreo: fuentes, sesiones, muestras y agregados (Etapa 3).
         ModeloMonitoreo.Configurar(builder);
+
+        // Historia de intervenciones: recambio de batería y ficha de vida útil (Etapa 4·C).
+        ModeloIntervenciones.Configurar(builder);
     }
 }
