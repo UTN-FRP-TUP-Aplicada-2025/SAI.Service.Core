@@ -101,7 +101,15 @@ else
                                 <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="_ocupado" OnClick="VerificarSenal">Confirmar señal (lee el equipo)</MudButton>
                                 break;
                             case Supuesto.CorteConRetorno:
-                                <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Warning" Disabled="_ocupado" OnClick="VerificarCorte">Ejecutar corte con retorno</MudButton>
+                                <MudAlert Severity="Severity.Error" Variant="Variant.Outlined" Dense="true" Class="mb-2">
+                                    <b>Corta la corriente real del host.</b> Hacelo solo con presencia física —o teniendo ya
+                                    confirmado el «reencendido por placa»—: si el host no vuelve a encender solo y estás
+                                    remoto, queda apagado y no lo podés levantar a distancia.
+                                </MudAlert>
+                                <MudCheckBox @bind-Value="_confirmaCorte" Color="Color.Error" Dense="true" Disabled="_ocupado"
+                                             Label="Confirmo presencia física o reencendido por placa ya verificado." />
+                                <MudButton Variant="Variant.Filled" Color="Color.Error" StartIcon="@Icons.Material.Filled.Warning"
+                                           Disabled="@(_ocupado || !_confirmaCorte)" OnClick="VerificarCorte">Ejecutar corte con retorno</MudButton>
                                 break;
                             case Supuesto.ReencendidoPorPlaca:
                                 <div class="d-flex align-center flex-wrap" style="gap:0.5rem;">
@@ -125,6 +133,7 @@ else
 @code {
     private IReadOnlyList<Verificacion>? _verificaciones;
     private int _segundos = 120;
+    private bool _confirmaCorte;
     private bool _ocupado;
     private string? _mensaje;
     private Severity _severidad = Severity.Info;
@@ -160,6 +169,7 @@ else
         finally
         {
             _ocupado = false;
+            _confirmaCorte = false;
             await Cargar();
         }
     }
@@ -177,7 +187,7 @@ else
     private static string ActorSupuesto(Supuesto supuesto) => supuesto switch
     {
         Supuesto.PresupuestoDeApagado => "el host (se apaga) · vos cronometrás",
-        Supuesto.SenalEnBateria => "el SAI (reporta su estado) · vos cortás la red",
+        Supuesto.SenalEnBateria => "el SAI (avisa) · vos cortás la red",
         Supuesto.CorteConRetorno => "el SAI (corta y repone su salida)",
         Supuesto.ReencendidoPorPlaca => "el host / BIOS (arranca solo) · vos observás",
         _ => string.Empty,
@@ -185,10 +195,10 @@ else
 
     private static string QueSePrueba(Supuesto supuesto) => supuesto switch
     {
-        Supuesto.PresupuestoDeApagado => "que el host baje todos sus servicios de forma ordenada, y cuánto tarda (dimensiona la ventana reservada, ≤540 s).",
-        Supuesto.SenalEnBateria => "que el SAI avise que pasó a batería (ups.status = OB): es el gatillo que dispara el apagado.",
-        Supuesto.CorteConRetorno => "que el SAI sepa cortar su salida y volver a darla (con retorno): es el mecanismo del apagado.",
-        Supuesto.ReencendidoPorPlaca => "que el host arranque solo al volver la corriente (autoencendido de BIOS). No se lee por software: se observa.",
+        Supuesto.PresupuestoDeApagado => "que el host baje todos sus servicios de forma ordenada, y cuánto tarda, para reservar bien la ventana de apagado.",
+        Supuesto.SenalEnBateria => "que, al quedarse sin energía de red, el SAI avise que está funcionando con su batería. Ese aviso es lo que dispara el apagado.",
+        Supuesto.CorteConRetorno => "que el SAI pueda cortar la corriente que alimenta al host y volver a dársela por sí solo. Es el mecanismo del apagado.",
+        Supuesto.ReencendidoPorPlaca => "que el host se encienda solo cuando le vuelve la corriente (por la configuración de la placa/BIOS). No se puede consultar por software: hay que verlo.",
         _ => string.Empty,
     };
 
@@ -196,37 +206,37 @@ else
     {
         Supuesto.PresupuestoDeApagado =>
         [
-            "Con el host bajo carga, iniciás su apagado ordenado (el SO baja los servicios).",
-            "Cronometrás cuánto tarda en quedar apagado del todo.",
-            "Cargás los segundos medidos.",
+            "Con el host trabajando, iniciás su apagado ordenado (el sistema operativo cierra todos los servicios).",
+            "Cronometrás cuánto tarda en quedar completamente apagado.",
+            "Cargás los segundos que midió.",
         ],
         Supuesto.SenalEnBateria =>
         [
-            "Cortás la energía de red.",
-            "El SAI pasa a batería y lo publica por NUT (ups.status = OB).",
-            "El sistema lee ese estado y confirma OB (no manda ningún comando).",
+            "Cortás la energía de red que entra al SAI.",
+            "El SAI queda alimentando con su batería y lo informa.",
+            "El sistema lee ese aviso y confirma el estado «en batería» (no manda ninguna orden al equipo).",
         ],
         Supuesto.CorteConRetorno =>
         [
-            "Se le manda shutdown.return al SAI.",
-            "El SAI corta su salida pasado el retardo (ups.delay.shutdown).",
-            "Al volver la red / pasado ups.delay.start, el SAI repone la salida.",
+            "Se le ordena al SAI apagar la toma que alimenta al host y volver a encenderla.",
+            "El SAI espera un tiempo configurado —para que el host termine de apagarse— y recién ahí corta la corriente.",
+            "El SAI vuelve a energizar el host cuando regresa la energía de red, o pasada una espera.",
         ],
         Supuesto.ReencendidoPorPlaca =>
         [
-            "Tras el corte con retorno, el SAI vuelve a dar corriente al host.",
-            "Mirás si el host bootea por su cuenta, sin tocar nada.",
-            "Registrás: arrancó solo, o no arrancó.",
+            "Después del corte con retorno, el SAI vuelve a dar corriente al host.",
+            "Mirás si el host arranca por su cuenta, sin que nadie toque el botón de encendido.",
+            "Registrás lo que pasó: arrancó solo, o no arrancó.",
         ],
         _ => [],
     };
 
     private static string QueEsperar(Supuesto supuesto) => supuesto switch
     {
-        Supuesto.PresupuestoDeApagado => "el host se apaga limpio; obtenés un tiempo (p. ej. 90 s) menor a la ventana reservada.",
-        Supuesto.SenalEnBateria => "el estado del equipo cambia a «en batería» (OB).",
-        Supuesto.CorteConRetorno => "el SAI corta la corriente y, después, la repone.",
-        Supuesto.ReencendidoPorPlaca => "el host enciende solo al volver la tensión, sin tocar el botón de power.",
+        Supuesto.PresupuestoDeApagado => "el host se apaga limpio; el tiempo medido tiene que ser holgadamente menor a la ventana reservada.",
+        Supuesto.SenalEnBateria => "el estado del equipo cambia a «en batería».",
+        Supuesto.CorteConRetorno => "el SAI corta la corriente del host y, después, se la devuelve solo.",
+        Supuesto.ReencendidoPorPlaca => "el host enciende solo al volver la corriente, sin que nadie apriete el botón de encendido.",
         _ => string.Empty,
     };
 
