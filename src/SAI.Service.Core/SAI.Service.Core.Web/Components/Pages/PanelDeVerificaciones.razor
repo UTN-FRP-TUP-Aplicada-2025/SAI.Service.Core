@@ -43,8 +43,9 @@ else
     </MudAlert>
 
     <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined" Class="mb-4" Icon="@Icons.Material.Filled.Warning">
-        La ventana de mantenimiento incluye pruebas físicas (cortar la red, apagado con retorno), con presencia física.
-        El apagado real por NUT está diferido; acá se ejercita el camino contra el adaptador configurado.
+        <b>Es un solo ejercicio físico, con presencia:</b> cortás la energía de red → el SAI avisa que pasó a batería (OB) →
+        el host se apaga limpio → el SAI corta su salida y, al volver la energía, la repone → el host arranca solo.
+        Cada tarjeta registra una parte de ese ejercicio; algunas se pueden re-verificar sueltas cuando vencen.
     </MudAlert>
 
     @if (_ocupado)
@@ -65,7 +66,15 @@ else
                         <MudSpacer />
                         <MudChip T="string" Size="Size.Small" Color="@ColorEstado(estado)" Variant="Variant.Text">@EtiquetaEstado(estado)</MudChip>
                     </div>
-                    <MudText Typo="Typo.caption" Class="mud-text-secondary d-block mb-2">@DescripcionSupuesto(v.Supuesto)</MudText>
+                    <MudText Typo="Typo.caption" Class="d-block"><b>Actúa:</b> @ActorSupuesto(v.Supuesto)</MudText>
+                    <MudText Typo="Typo.caption" Class="mud-text-secondary d-block"><b>Qué se prueba:</b> @QueSePrueba(v.Supuesto)</MudText>
+                    <ol class="mud-text-secondary" style="margin:0.25rem 0;padding-left:1.1rem;font-size:0.75rem;line-height:1.35;">
+                        @foreach (var paso in PasosSupuesto(v.Supuesto))
+                        {
+                            <li>@paso</li>
+                        }
+                    </ol>
+                    <MudText Typo="Typo.caption" Class="mud-text-secondary d-block mb-2"><b>Esperás ver:</b> @QueEsperar(v.Supuesto)</MudText>
                     @if (v.Evidencia is not null)
                     {
                         <MudText Typo="Typo.caption" Class="mud-text-secondary d-block mb-2"><b>Evidencia:</b> @v.Evidencia</MudText>
@@ -84,15 +93,15 @@ else
                         {
                             case Supuesto.PresupuestoDeApagado:
                                 <div class="d-flex align-center" style="gap:0.5rem;">
-                                    <MudNumericField T="int" @bind-Value="_segundos" Label="Segundos" Min="1" Style="max-width:120px;" Margin="Margin.Dense" Disabled="_ocupado" />
-                                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="_ocupado" OnClick="VerificarPresupuesto">Verificar</MudButton>
+                                    <MudNumericField T="int" @bind-Value="_segundos" Label="Segundos medidos" Min="1" Style="max-width:150px;" Margin="Margin.Dense" Disabled="_ocupado" />
+                                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="_ocupado" OnClick="VerificarPresupuesto">Registrar medición</MudButton>
                                 </div>
                                 break;
                             case Supuesto.SenalEnBateria:
-                                <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="_ocupado" OnClick="VerificarSenal">Verificar señal en batería</MudButton>
+                                <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="_ocupado" OnClick="VerificarSenal">Confirmar señal (lee el equipo)</MudButton>
                                 break;
                             case Supuesto.CorteConRetorno:
-                                <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="_ocupado" OnClick="VerificarCorte">Verificar corte con retorno</MudButton>
+                                <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Warning" Disabled="_ocupado" OnClick="VerificarCorte">Ejecutar corte con retorno</MudButton>
                                 break;
                             case Supuesto.ReencendidoPorPlaca:
                                 <div class="d-flex align-center flex-wrap" style="gap:0.5rem;">
@@ -157,24 +166,67 @@ else
 
     private static string EtiquetaSupuesto(Supuesto supuesto) => supuesto switch
     {
-        Supuesto.PresupuestoDeApagado => "Tiempo de apagado del host",
+        Supuesto.PresupuestoDeApagado => "Prueba de tiempo de apagado del host",
         Supuesto.SenalEnBateria => "Señal en batería",
         Supuesto.ReencendidoPorPlaca => "Reencendido por placa",
         Supuesto.CorteConRetorno => "Corte con retorno",
         _ => supuesto.ToString(),
     };
 
-    // Contexto breve de en qué consiste cada verificación (para el operador).
-    private static string DescripcionSupuesto(Supuesto supuesto) => supuesto switch
+    // Quién ejecuta la acción de cada verificación (host, SAI u observación del operador).
+    private static string ActorSupuesto(Supuesto supuesto) => supuesto switch
+    {
+        Supuesto.PresupuestoDeApagado => "el host (se apaga) · vos cronometrás",
+        Supuesto.SenalEnBateria => "el SAI (reporta su estado) · vos cortás la red",
+        Supuesto.CorteConRetorno => "el SAI (corta y repone su salida)",
+        Supuesto.ReencendidoPorPlaca => "el host / BIOS (arranca solo) · vos observás",
+        _ => string.Empty,
+    };
+
+    private static string QueSePrueba(Supuesto supuesto) => supuesto switch
+    {
+        Supuesto.PresupuestoDeApagado => "que el host baje todos sus servicios de forma ordenada, y cuánto tarda (dimensiona la ventana reservada, ≤540 s).",
+        Supuesto.SenalEnBateria => "que el SAI avise que pasó a batería (ups.status = OB): es el gatillo que dispara el apagado.",
+        Supuesto.CorteConRetorno => "que el SAI sepa cortar su salida y volver a darla (con retorno): es el mecanismo del apagado.",
+        Supuesto.ReencendidoPorPlaca => "que el host arranque solo al volver la corriente (autoencendido de BIOS). No se lee por software: se observa.",
+        _ => string.Empty,
+    };
+
+    private static string[] PasosSupuesto(Supuesto supuesto) => supuesto switch
     {
         Supuesto.PresupuestoDeApagado =>
-            "Cronometrá a mano cuánto tarda el host en apagarse de forma ordenada bajo carga (con los contenedores detenidos) y confirmá que entra dentro del tiempo reservado. Vigencia 180 días.",
+        [
+            "Con el host bajo carga, iniciás su apagado ordenado (el SO baja los servicios).",
+            "Cronometrás cuánto tarda en quedar apagado del todo.",
+            "Cargás los segundos medidos.",
+        ],
         Supuesto.SenalEnBateria =>
-            "Cortá la energía de red y confirmá que el equipo reporta que pasó a batería (ups.status = OB): es la señal que dispara el apagado. Vigencia 365 días.",
+        [
+            "Cortás la energía de red.",
+            "El SAI pasa a batería y lo publica por NUT (ups.status = OB).",
+            "El sistema lee ese estado y confirma OB (no manda ningún comando).",
+        ],
         Supuesto.CorteConRetorno =>
-            "Ejecutá un apagado con retorno y confirmá que el SAI corta la salida y la repone. Prueba el camino real de corte y reencendido del equipo. Sin caducidad.",
+        [
+            "Se le manda shutdown.return al SAI.",
+            "El SAI corta su salida pasado el retardo (ups.delay.shutdown).",
+            "Al volver la red / pasado ups.delay.start, el SAI repone la salida.",
+        ],
         Supuesto.ReencendidoPorPlaca =>
-            "Al volver la energía, confirmá que el host arranca solo (autoencendido de la placa/BIOS). Si no arranca, se refuta: es un bloqueo permanente. Vigencia 365 días.",
+        [
+            "Tras el corte con retorno, el SAI vuelve a dar corriente al host.",
+            "Mirás si el host bootea por su cuenta, sin tocar nada.",
+            "Registrás: arrancó solo, o no arrancó.",
+        ],
+        _ => [],
+    };
+
+    private static string QueEsperar(Supuesto supuesto) => supuesto switch
+    {
+        Supuesto.PresupuestoDeApagado => "el host se apaga limpio; obtenés un tiempo (p. ej. 90 s) menor a la ventana reservada.",
+        Supuesto.SenalEnBateria => "el estado del equipo cambia a «en batería» (OB).",
+        Supuesto.CorteConRetorno => "el SAI corta la corriente y, después, la repone.",
+        Supuesto.ReencendidoPorPlaca => "el host enciende solo al volver la tensión, sin tocar el botón de power.",
         _ => string.Empty,
     };
 
