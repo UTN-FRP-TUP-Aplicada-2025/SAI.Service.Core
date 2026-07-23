@@ -96,6 +96,9 @@ public static class DependencyInjection
 
         services.AddHostedService<ServicioSondeo>();
 
+        // Rearme de pruebas de verificación al arrancar tras un reinicio del host (Etapa 4·E, ADR-25).
+        services.AddHostedService<ServicioRearmePruebas>();
+
         return services;
     }
 

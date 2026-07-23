@@ -191,6 +191,7 @@ internal static class ModeloEquipos
             e.Property(v => v.Evidencia);
             e.Property(v => v.VigenciaHasta);
             e.Property(v => v.ActualizadoEn).IsRequired();
+            e.Property(v => v.PruebaEnCursoDesde);
         });
     }
 }

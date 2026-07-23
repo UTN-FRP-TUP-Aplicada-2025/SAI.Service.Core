@@ -28,6 +28,18 @@ public sealed class Verificacion
     /// <summary>Instante de la última actualización del estado.</summary>
     public DateTimeOffset ActualizadoEn { get; private set; }
 
+    /// <summary>
+    /// Instante en que se disparó una prueba física que exige un reinicio del host antes de repetirse
+    /// (Etapa 4·E), o nulo si no hay ninguna en curso. Mientras no sea nulo, la acción queda bloqueada en
+    /// el panel (<see cref="EsperandoReinicio"/>): es el freno para que no se re-dispare el apagado "a lo
+    /// loco". Es ortogonal al <see cref="Estado"/>: una verificación puede quedar verificada y aun así
+    /// esperar el reinicio para admitir una nueva prueba.
+    /// </summary>
+    public DateTimeOffset? PruebaEnCursoDesde { get; private set; }
+
+    /// <summary>Verdadero si hay una prueba disparada esperando el reinicio del host (Etapa 4·E).</summary>
+    public bool EsperandoReinicio => PruebaEnCursoDesde is not null;
+
     // Constructor privado para EF (materialización) y las fábricas.
     private Verificacion(string codigo, Supuesto supuesto, EstadoVerificacion estado, DateTimeOffset actualizadoEn)
     {
@@ -78,6 +90,41 @@ public sealed class Verificacion
         Metodo = metodo;
         Evidencia = evidencia;
         VigenciaHasta = null;
+        PruebaEnCursoDesde = null; // refutar es un bloqueo permanente: no queda ninguna prueba pendiente.
+        ActualizadoEn = ahora;
+    }
+
+    /// <summary>
+    /// Marca que se disparó una prueba física que exige un reinicio del host antes de repetirse (Etapa
+    /// 4·E): la acción queda bloqueada (<see cref="EsperandoReinicio"/>) hasta que el servicio vuelva a
+    /// arrancar tras el reinicio. Un supuesto <see cref="EstadoVerificacion.Refutado"/> es un bloqueo
+    /// permanente y no admite disparar una prueba.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">Si la verificación está refutada.</exception>
+    public void IniciarPrueba(DateTimeOffset ahora)
+    {
+        if (Estado == EstadoVerificacion.Refutado)
+        {
+            throw new InvalidOperationException("Un supuesto refutado es un bloqueo permanente: no admite disparar una prueba.");
+        }
+
+        PruebaEnCursoDesde = ahora;
+        ActualizadoEn = ahora;
+    }
+
+    /// <summary>
+    /// Rearma la verificación tras detectarse el reinicio del host (Etapa 4·E): limpia el marcador de
+    /// prueba en curso, de modo que la acción vuelve a habilitarse en el panel. Es idempotente: si no
+    /// había ninguna prueba en curso, no hace nada.
+    /// </summary>
+    public void RearmarPorReinicio(DateTimeOffset ahora)
+    {
+        if (PruebaEnCursoDesde is null)
+        {
+            return;
+        }
+
+        PruebaEnCursoDesde = null;
         ActualizadoEn = ahora;
     }
 

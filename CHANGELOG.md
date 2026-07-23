@@ -9,6 +9,28 @@ y el versionado sigue [Semantic Versioning](https://semver.org/lang/es/).
 
 ### Añadido
 
+- **Ventana de mantenimiento — disparo del apagado y rearme por reinicio** (US-16, CU-10, ADR-25):
+  en el panel de verificaciones, la **"Prueba de tiempo de apagado del host"** ahora tiene un botón
+  **"Ejecutar prueba de apagado"** que **dispara** el apagado ordenado del host (reutiliza el write path
+  `OrdenarApagadoConRetornoAsync` — el host baja limpio y reenciende al volver la energía; en desarrollo el
+  adaptador **simulado** lo acepta de forma inerte). Al dispararse, el botón y la caja de tiempo se
+  **bloquean** con la leyenda *"Se activará cuando reinicie el equipo para iniciar una nueva prueba"* — el
+  freno para no re-disparar el apagado. El **tiempo se carga a mano (CU-10)** y **nunca** se rotula como
+  "medido": por **ADR-25** (NUT en contenedor) el servicio corre en el contenedor que el propio apagado
+  detiene, así que no puede cronometrarlo desde adentro.
+  - Marcador persistido `PruebaEnCursoDesde` en `Verificacion` (ortogonal al estado: una verificación puede
+    quedar verificada y aun así esperar el reinicio), con `IniciarPrueba` / `RearmarPorReinicio`. Migración
+    `EsquemaPruebaApagado`.
+  - `ServicioRearmePruebas` (`IHostedService`): **detección del reinicio = arranque del servicio**. Bajo
+    ADR-25, un reinicio real del host reinicia el contenedor; que el servicio vuelva a la vida es la señal
+    honesta de que el host cicló, y al arrancar limpia los marcadores pendientes y rehabilita los botones.
+  - El botón **"Encendido por presencia de energía en la alimentación del host"** aplica el mismo freno: al
+    registrar que el host arrancó solo, queda esperando el reinicio antes de admitir una nueva observación.
+  - 9 pruebas nuevas (dominio: `IniciarPrueba`/`RearmarPorReinicio`, ortogonalidad con el estado, guard del
+    refutado; integración: disparo deja esperando el reinicio sin verificar, freno al re-disparo, rearme y
+    carga manual del tiempo, gate del reencendido). *La auto-medición del tiempo queda fuera de alcance por
+    ADR-25; el write path NUT real se valida contra un host físico en despliegue, no en desarrollo.*
+
 - **Etapa 4 · Incremento C — Recambio de batería y ficha de vida útil** (CU-08, US-18, US-19,
   BT-26, BT-27): el recambio de batería como **un solo acto** (`ServicioRecambioBateria`): valida el
   **cuadre de costos** (RN-08: total = repuestos + mano de obra, misma moneda) y que **todo importe

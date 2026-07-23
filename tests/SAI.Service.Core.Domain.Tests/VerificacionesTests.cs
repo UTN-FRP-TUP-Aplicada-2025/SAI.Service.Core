@@ -110,6 +110,63 @@ public class VerificacionesTests
         EvaluadorModalidad.Verificados(verificaciones, Ahora).Should().Be(3);
     }
 
+    [Fact]
+    public void IniciarPruebaDejaLaVerificacionEsperandoReinicio()
+    {
+        var verificacion = Verificacion.Sembrar("ver-1", Supuesto.PresupuestoDeApagado, Ahora);
+
+        verificacion.IniciarPrueba(Ahora);
+
+        verificacion.EsperandoReinicio.Should().BeTrue();
+        verificacion.PruebaEnCursoDesde.Should().Be(Ahora);
+    }
+
+    [Fact]
+    public void RearmarPorReinicioLimpiaElMarcador()
+    {
+        var verificacion = Verificacion.Sembrar("ver-1", Supuesto.PresupuestoDeApagado, Ahora);
+        verificacion.IniciarPrueba(Ahora);
+
+        verificacion.RearmarPorReinicio(Ahora.AddMinutes(5));
+
+        verificacion.EsperandoReinicio.Should().BeFalse();
+        verificacion.PruebaEnCursoDesde.Should().BeNull();
+    }
+
+    [Fact]
+    public void RearmarPorReinicioSinPruebaEnCursoEsIdempotente()
+    {
+        var verificacion = Verificacion.Sembrar("ver-1", Supuesto.PresupuestoDeApagado, Ahora);
+
+        var acto = () => verificacion.RearmarPorReinicio(Ahora);
+
+        acto.Should().NotThrow();
+        verificacion.EsperandoReinicio.Should().BeFalse();
+    }
+
+    [Fact]
+    public void IniciarPruebaEsOrtogonalAlEstadoVerificado()
+    {
+        var verificacion = Verificacion.Sembrar("ver-1", Supuesto.ReencendidoPorPlaca, Ahora);
+        verificacion.Verificar("ventana", "arrancó solo", Ahora.AddDays(365), Ahora);
+
+        verificacion.IniciarPrueba(Ahora);
+
+        verificacion.Estado.Should().Be(EstadoVerificacion.Verificado, "el marcador no altera el estado");
+        verificacion.EsperandoReinicio.Should().BeTrue();
+    }
+
+    [Fact]
+    public void UnRefutadoNoAdmiteDispararPrueba()
+    {
+        var verificacion = Verificacion.Sembrar("ver-1", Supuesto.ReencendidoPorPlaca, Ahora);
+        verificacion.Refutar("ventana", "el host no arrancó solo", Ahora);
+
+        var acto = () => verificacion.IniciarPrueba(Ahora);
+
+        acto.Should().Throw<InvalidOperationException>("un supuesto refutado es un bloqueo permanente");
+    }
+
     private static List<Verificacion> SembrarLasCuatro() =>
         Enum.GetValues<Supuesto>().Select(s => Verificacion.Sembrar($"ver-{s}", s, Ahora)).ToList();
 }
