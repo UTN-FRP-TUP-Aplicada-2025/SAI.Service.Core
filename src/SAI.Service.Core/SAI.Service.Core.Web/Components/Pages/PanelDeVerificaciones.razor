@@ -80,7 +80,13 @@ else
                         <MudText Typo="Typo.caption" Class="mud-text-secondary d-block mb-2"><b>Evidencia:</b> @v.Evidencia</MudText>
                     }
 
-                    @if (estado == EstadoVerificacion.Verificado)
+                    @if (v.EsperandoReinicio)
+                    {
+                        <MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Dense="true" Icon="@Icons.Material.Filled.RestartAlt" Class="mt-1">
+                            Se activará cuando reinicie el equipo para iniciar una nueva prueba.
+                        </MudAlert>
+                    }
+                    else if (estado == EstadoVerificacion.Verificado)
                     {
                         <MudText Typo="Typo.caption" Color="Color.Success" Class="d-block">
                             <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Size="Size.Small" Class="mr-1" Style="vertical-align:middle;" />
@@ -92,10 +98,12 @@ else
                         @switch (v.Supuesto)
                         {
                             case Supuesto.PresupuestoDeApagado:
-                                <div class="d-flex align-center" style="gap:0.5rem;">
+                                <div class="d-flex align-center mb-2" style="gap:0.5rem;">
                                     <MudNumericField T="int" @bind-Value="_segundos" Label="Segundos medidos" Min="1" Style="max-width:150px;" Margin="Margin.Dense" Disabled="_ocupado" />
                                     <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="_ocupado" OnClick="VerificarPresupuesto">Registrar medición</MudButton>
                                 </div>
+                                <MudButton Variant="Variant.Filled" Color="Color.Warning" StartIcon="@Icons.Material.Filled.PowerSettingsNew"
+                                           Disabled="_ocupado" OnClick="DispararPruebaPresupuesto">Ejecutar prueba de apagado</MudButton>
                                 break;
                             case Supuesto.SenalEnBateria:
                                 <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="_ocupado" OnClick="VerificarSenal">Confirmar señal (lee el equipo)</MudButton>
@@ -144,6 +152,7 @@ else
     }
 
     private Task VerificarPresupuesto() => Ejecutar(s => s.VerificarPresupuestoAsync(_segundos, CancellationToken.None));
+    private Task DispararPruebaPresupuesto() => Ejecutar(s => s.DispararPruebaPresupuestoAsync(CancellationToken.None));
     private Task VerificarSenal() => Ejecutar(s => s.VerificarSenalBateriaAsync(CancellationToken.None));
     private Task VerificarCorte() => Ejecutar(s => s.VerificarCorteConRetornoAsync(CancellationToken.None));
     private Task Reencendido(bool arrancoSolo) => Ejecutar(s => s.RegistrarReencendidoAsync(arrancoSolo, CancellationToken.None));
@@ -159,6 +168,7 @@ else
             _severidad = resultado.Codigo switch
             {
                 CodigoResultadoVerificacion.Verificado => Severity.Success,
+                CodigoResultadoVerificacion.PruebaDisparada => Severity.Info,
                 CodigoResultadoVerificacion.Refutado => Severity.Error,
                 _ => Severity.Warning,
             };

@@ -77,6 +77,77 @@ public class VerificacionIntegracionTests
             .Should().Be(EstadoVerificacion.Refutado);
     }
 
+    [Fact]
+    public async Task DispararLaPruebaDeApagadoDejaEsperandoReinicioSinVerificar()
+    {
+        using var fabrica = new FabricaSai();
+        using var scope = fabrica.Services.CreateScope();
+        var sp = scope.ServiceProvider;
+        await DarDeAlta(sp);
+        var servicio = sp.GetRequiredService<ServicioVerificacion>();
+
+        var resultado = await servicio.DispararPruebaPresupuestoAsync(CancellationToken.None);
+
+        resultado.Codigo.Should().Be(CodigoResultadoVerificacion.PruebaDisparada);
+        var presupuesto = (await servicio.EstadoAsync(CancellationToken.None))
+            .Single(v => v.Supuesto == Supuesto.PresupuestoDeApagado);
+        presupuesto.EsperandoReinicio.Should().BeTrue();
+        presupuesto.Estado.Should().Be(EstadoVerificacion.NuncaVerificado, "disparar no verifica: el tiempo se carga a mano (ADR-25)");
+    }
+
+    [Fact]
+    public async Task NoSePuedeReDispararMientrasEsperaElReinicio()
+    {
+        using var fabrica = new FabricaSai();
+        using var scope = fabrica.Services.CreateScope();
+        var sp = scope.ServiceProvider;
+        await DarDeAlta(sp);
+        var servicio = sp.GetRequiredService<ServicioVerificacion>();
+        await servicio.DispararPruebaPresupuestoAsync(CancellationToken.None);
+
+        var reintento = await servicio.DispararPruebaPresupuestoAsync(CancellationToken.None);
+
+        reintento.Codigo.Should().Be(CodigoResultadoVerificacion.PruebaDisparada);
+        reintento.Mensaje.Should().Contain("reinicie", "el freno impide re-disparar el apagado");
+    }
+
+    [Fact]
+    public async Task RearmarLuegoDelReinicioRehabilitaYPermiteCargarElTiempoAMano()
+    {
+        using var fabrica = new FabricaSai();
+        using var scope = fabrica.Services.CreateScope();
+        var sp = scope.ServiceProvider;
+        await DarDeAlta(sp);
+        var servicio = sp.GetRequiredService<ServicioVerificacion>();
+        await servicio.DispararPruebaPresupuestoAsync(CancellationToken.None);
+
+        await servicio.RearmarPruebasPendientesAsync(CancellationToken.None);
+
+        (await servicio.EstadoAsync(CancellationToken.None))
+            .Single(v => v.Supuesto == Supuesto.PresupuestoDeApagado)
+            .EsperandoReinicio.Should().BeFalse("el arranque tras el reinicio rearma la prueba");
+        (await servicio.VerificarPresupuestoAsync(120, CancellationToken.None)).Codigo
+            .Should().Be(CodigoResultadoVerificacion.Verificado, "tras el reinicio se puede cargar el tiempo a mano");
+    }
+
+    [Fact]
+    public async Task RegistrarElReencendidoQueArrancoSoloDejaEsperandoReinicio()
+    {
+        using var fabrica = new FabricaSai();
+        using var scope = fabrica.Services.CreateScope();
+        var sp = scope.ServiceProvider;
+        await DarDeAlta(sp);
+        var servicio = sp.GetRequiredService<ServicioVerificacion>();
+
+        (await servicio.RegistrarReencendidoAsync(arrancoSolo: true, CancellationToken.None)).Codigo
+            .Should().Be(CodigoResultadoVerificacion.Verificado);
+
+        var reencendido = (await servicio.EstadoAsync(CancellationToken.None))
+            .Single(v => v.Supuesto == Supuesto.ReencendidoPorPlaca);
+        reencendido.Estado.Should().Be(EstadoVerificacion.Verificado);
+        reencendido.EsperandoReinicio.Should().BeTrue("mismo freno que el presupuesto: gate hasta el reinicio");
+    }
+
     private static async Task DarDeAlta(IServiceProvider sp) =>
         await sp.GetRequiredService<ServicioAltaEquipos>().RegistrarAsync(SolicitudValida(), CancellationToken.None);
 
