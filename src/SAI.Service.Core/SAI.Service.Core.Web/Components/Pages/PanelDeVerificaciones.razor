@@ -1,9 +1,15 @@
 @page "/panel-de-verificaciones"
 @attribute [Authorize]
-@using SAI.Service.Core.Application.Equipos
-@using SAI.Service.Core.Domain.Verificaciones
+@using SAI.Service.Core.Application.Acciones
 @using Microsoft.Extensions.DependencyInjection
 @inject IServiceScopeFactory FabricaAlcances
+@inject IDialogService Dialogos
+@inject OpcionesVerificacion OpcionesVerif
+@inject OpcionesApagado OpcionesApag
+
+@* Orquestador del panel (rediseño UX): carga las verificaciones, arma la vista con el constructor
+   (toda la lógica de estado vive ahí, no en el markup) y compone los componentes de presentación.
+   Las acciones destructivas pasan siempre por el diálogo de confirmación (P-5). *@
 
 <PageTitle>Panel de verificaciones — SAI.Service.Core</PageTitle>
 
@@ -16,119 +22,30 @@
 else if (_verificaciones.Count == 0)
 {
     <MudAlert Severity="Severity.Info" Variant="Variant.Filled">
-        Todavía no hay supuestos sembrados. <MudLink Href="/alta-de-equipos" Color="Color.Inherit"><b>Dá de alta un equipo</b></MudLink>.
+        Todavía no hay pruebas sembradas. <MudLink Href="/alta-de-equipos" Color="Color.Inherit"><b>Dá de alta un equipo</b></MudLink>.
     </MudAlert>
 }
 else
 {
-    var ahora = DateTimeOffset.UtcNow;
-    var verificados = EvaluadorModalidad.Verificados(_verificaciones, ahora);
-    var refutado = _verificaciones.Any(v => v.Estado == EstadoVerificacion.Refutado);
-    var desbloqueado = verificados >= EvaluadorModalidad.SupuestosRequeridos;
-
-    <MudAlert Severity="@(desbloqueado ? Severity.Success : Severity.Warning)" Variant="Variant.Filled" Class="mb-4" role="alert">
-        <b>@verificados de @EvaluadorModalidad.SupuestosRequeridos</b> supuestos verificados.
-        @if (desbloqueado)
-        {
-            <span> <b>Desbloqueado</b>: se habilita el apagado ordenado (la modalidad de acción se aplica cuando la política lo solicite).</span>
-        }
-        else if (refutado)
-        {
-            <span> Hay un supuesto <b>refutado</b> (bloqueo permanente): el servicio permanece en solo aviso hasta resolverlo.</span>
-        }
-        else
-        {
-            <span> El servicio permanece en <b>solo aviso</b> hasta verificar los cuatro.</span>
-        }
-    </MudAlert>
-
-    <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined" Class="mb-4" Icon="@Icons.Material.Filled.Warning">
-        <b>Es un solo ejercicio físico, con presencia:</b> cortás la energía de red → el SAI avisa que pasó a batería (OB) →
-        el host se apaga limpio → el SAI corta su salida y, al volver la energía, la repone → el host arranca solo.
-        Cada tarjeta registra una parte de ese ejercicio; algunas se pueden re-verificar sueltas cuando vencen.
-    </MudAlert>
+    <EncabezadoEstadoServicio Modo="_modo" />
+    <TiraSecuencia />
 
     @if (_ocupado)
     {
         <MudProgressLinear Indeterminate="true" Color="Color.Primary" Class="mb-2" />
-        <MudText Typo="Typo.caption" Class="mud-text-secondary d-block mb-2">Ejecutando la verificación…</MudText>
+        <MudText Typo="Typo.caption" Class="mud-text-secondary d-block mb-2">Ejecutando la prueba…</MudText>
     }
 
-    <MudGrid>
-        @foreach (var v in _verificaciones.OrderBy(x => x.Supuesto))
-        {
-            var estado = v.EstadoEfectivo(ahora);
-            <MudItem xs="12" md="6">
-                <MudPaper Elevation="1" Class="pa-4" Style="border-radius:10px;height:100%;">
-                    <div class="d-flex align-center mb-1">
-                        <MudIcon Icon="@IconoEstado(estado)" Color="@ColorEstado(estado)" Class="mr-2" />
-                        <MudText Typo="Typo.subtitle1">@EtiquetaSupuesto(v.Supuesto)</MudText>
-                        <MudSpacer />
-                        <MudChip T="string" Size="Size.Small" Color="@ColorEstado(estado)" Variant="Variant.Text">@EtiquetaEstado(estado)</MudChip>
-                    </div>
-                    <MudText Typo="Typo.caption" Class="d-block"><b>Actúa:</b> @ActorSupuesto(v.Supuesto)</MudText>
-                    <MudText Typo="Typo.caption" Class="mud-text-secondary d-block"><b>Qué se prueba:</b> @QueSePrueba(v.Supuesto)</MudText>
-                    <ol class="mud-text-secondary" style="margin:0.25rem 0;padding-left:1.1rem;font-size:0.75rem;line-height:1.35;">
-                        @foreach (var paso in PasosSupuesto(v.Supuesto))
-                        {
-                            <li>@paso</li>
-                        }
-                    </ol>
-                    <MudText Typo="Typo.caption" Class="mud-text-secondary d-block mb-2"><b>Esperás ver:</b> @QueEsperar(v.Supuesto)</MudText>
-                    @if (v.Evidencia is not null)
-                    {
-                        <MudText Typo="Typo.caption" Class="mud-text-secondary d-block mb-2"><b>Evidencia:</b> @v.Evidencia</MudText>
-                    }
-
-                    @if (v.EsperandoReinicio)
-                    {
-                        <MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Dense="true" Icon="@Icons.Material.Filled.RestartAlt" Class="mt-1">
-                            Se activará cuando reinicie el equipo para iniciar una nueva prueba.
-                        </MudAlert>
-                    }
-                    else if (estado == EstadoVerificacion.Verificado)
-                    {
-                        <MudText Typo="Typo.caption" Color="Color.Success" Class="d-block">
-                            <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Size="Size.Small" Class="mr-1" Style="vertical-align:middle;" />
-                            Verificado @(v.VigenciaHasta is { } h ? $"· vigente hasta {h.UtcDateTime:yyyy-MM-dd}" : "· sin caducidad")
-                        </MudText>
-                    }
-                    else if (estado == EstadoVerificacion.NuncaVerificado || estado == EstadoVerificacion.Vencido)
-                    {
-                        @switch (v.Supuesto)
-                        {
-                            case Supuesto.PresupuestoDeApagado:
-                                <div class="d-flex align-center mb-2" style="gap:0.5rem;">
-                                    <MudNumericField T="int" @bind-Value="_segundos" Label="Segundos medidos" Min="1" Style="max-width:150px;" Margin="Margin.Dense" Disabled="_ocupado" />
-                                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="_ocupado" OnClick="VerificarPresupuesto">Registrar medición</MudButton>
-                                </div>
-                                <MudButton Variant="Variant.Filled" Color="Color.Warning" StartIcon="@Icons.Material.Filled.PowerSettingsNew"
-                                           Disabled="_ocupado" OnClick="DispararPruebaPresupuesto">Ejecutar prueba de apagado</MudButton>
-                                break;
-                            case Supuesto.SenalEnBateria:
-                                <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="_ocupado" OnClick="VerificarSenal">Confirmar señal (lee el equipo)</MudButton>
-                                break;
-                            case Supuesto.CorteConRetorno:
-                                <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined" Dense="true" Class="mb-2">
-                                    Este procedimiento corta la corriente real del host. No garantiza que el SAI reactive su
-                                    salida ni que el host vuelva a encender. Si eso ocurre, revisá en la BIOS del host la opción
-                                    de encendido automático por detección de energía en su fuente.
-                                </MudAlert>
-                                <MudButton Variant="Variant.Filled" Color="Color.Warning" StartIcon="@Icons.Material.Filled.Warning"
-                                           Disabled="_ocupado" OnClick="VerificarCorte">Ejecutar corte con retorno</MudButton>
-                                break;
-                            case Supuesto.ReencendidoPorPlaca:
-                                <div class="d-flex align-center flex-wrap" style="gap:0.5rem;">
-                                    <MudButton Variant="Variant.Filled" Color="Color.Success" Disabled="_ocupado" OnClick="() => Reencendido(true)">Arrancó solo</MudButton>
-                                    <MudButton Variant="Variant.Outlined" Color="Color.Error" Disabled="_ocupado" OnClick="() => Reencendido(false)">No arrancó (refutar)</MudButton>
-                                </div>
-                                break;
-                        }
-                    }
-                </MudPaper>
-            </MudItem>
-        }
-    </MudGrid>
+    @foreach (var vista in _tarjetas)
+    {
+        <TarjetaVerificacion Vista="vista"
+                             Ocupado="_ocupado"
+                             OnConfirmarSenal="ConfirmarSenal"
+                             OnRegistrarMedicion="RegistrarMedicion"
+                             OnDispararApagado="DispararApagado"
+                             OnEjecutarCorte="EjecutarCorte"
+                             OnReencendido="Reencendido" />
+    }
 
     @if (_mensaje is not null)
     {
@@ -138,7 +55,8 @@ else
 
 @code {
     private IReadOnlyList<Verificacion>? _verificaciones;
-    private int _segundos = 120;
+    private IReadOnlyList<VistaVerificacion> _tarjetas = [];
+    private ModoServicioVista _modo = new(ModoServicio.SoloAviso, 0, EvaluadorModalidad.SupuestosRequeridos, false);
     private bool _ocupado;
     private string? _mensaje;
     private Severity _severidad = Severity.Info;
@@ -148,14 +66,92 @@ else
     private async Task Cargar()
     {
         using var alcance = FabricaAlcances.CreateScope();
-        _verificaciones = await alcance.ServiceProvider.GetRequiredService<ServicioVerificacion>().EstadoAsync(CancellationToken.None);
+        _verificaciones = await alcance.ServiceProvider.GetRequiredService<ServicioVerificacion>()
+            .EstadoAsync(CancellationToken.None);
+
+        var constructor = new ConstructorVistaPanel(OpcionesVerif, OpcionesApag);
+        (_modo, _tarjetas) = constructor.Construir(_verificaciones, DateTimeOffset.UtcNow);
     }
 
-    private Task VerificarPresupuesto() => Ejecutar(s => s.VerificarPresupuestoAsync(_segundos, CancellationToken.None));
-    private Task DispararPruebaPresupuesto() => Ejecutar(s => s.DispararPruebaPresupuestoAsync(CancellationToken.None));
-    private Task VerificarSenal() => Ejecutar(s => s.VerificarSenalBateriaAsync(CancellationToken.None));
-    private Task VerificarCorte() => Ejecutar(s => s.VerificarCorteConRetornoAsync(CancellationToken.None));
-    private Task Reencendido(bool arrancoSolo) => Ejecutar(s => s.RegistrarReencendidoAsync(arrancoSolo, CancellationToken.None));
+    // --- Acciones sin riesgo ---
+    private Task ConfirmarSenal() => Ejecutar(s => s.VerificarSenalBateriaAsync(CancellationToken.None));
+
+    private Task RegistrarMedicion(int segundos) =>
+        Ejecutar(s => s.VerificarPresupuestoAsync(segundos, CancellationToken.None));
+
+    private Task Reencendido(bool arrancoSolo) =>
+        Ejecutar(s => s.RegistrarReencendidoAsync(arrancoSolo, CancellationToken.None));
+
+    // --- Acciones destructivas: confirmación deliberada antes de ejecutar (P-5) ---
+    private async Task DispararApagado()
+    {
+        var confirmado = await ConfirmarRiesgo(
+            titulo: "Ejecutar prueba de apagado",
+            consecuencia: "Esto inicia el apagado ordenado del host: el equipo se va a apagar.",
+            precondiciones:
+            [
+                "Estás en sitio y podés encender el host si no arranca solo.",
+                "Nadie está trabajando sobre el host en este momento.",
+            ],
+            textoConfirmar: "Ejecutar apagado");
+
+        if (confirmado)
+        {
+            await Ejecutar(s => s.DispararPruebaPresupuestoAsync(CancellationToken.None));
+        }
+    }
+
+    private async Task EjecutarCorte()
+    {
+        var confirmado = await ConfirmarRiesgo(
+            titulo: "Ejecutar corte con retorno",
+            consecuencia: "Esto corta la corriente que alimenta al host.",
+            precondiciones:
+            [
+                "Verificaste el arranque automático en la BIOS del host.",
+                "Estás en sitio: si el host no vuelve a encender, hay que hacerlo a mano.",
+                "No hay garantía de que el SAI reponga su salida.",
+            ],
+            textoConfirmar: "Ejecutar corte");
+
+        if (confirmado)
+        {
+            await Ejecutar(s => s.VerificarCorteConRetornoAsync(CancellationToken.None));
+        }
+    }
+
+    private async Task<bool> ConfirmarRiesgo(string titulo, string consecuencia, string[] precondiciones, string textoConfirmar)
+    {
+        var parametros = new DialogParameters<DialogoConfirmacionRiesgo>
+        {
+            { x => x.Titulo, titulo },
+            { x => x.Consecuencia, consecuencia },
+            { x => x.Precondiciones, precondiciones },
+            { x => x.NombreEquipo, NombreEquipo },
+            { x => x.TextoConfirmar, textoConfirmar },
+        };
+        var opciones = new DialogOptions { CloseOnEscapeKey = true, BackdropClick = false, MaxWidth = MaxWidth.Small, FullWidth = true };
+
+        var dialogo = await Dialogos.ShowAsync<DialogoConfirmacionRiesgo>(titulo, parametros, opciones);
+        var resultado = await dialogo.Result;
+        return resultado is { Canceled: false, Data: bool ok } && ok;
+    }
+
+    // El nombre a tipear en la confirmación sale del código de la verificación ("ver-{dispositivo}-{supuesto}").
+    private string NombreEquipo
+    {
+        get
+        {
+            var codigo = _verificaciones?.FirstOrDefault()?.Codigo;
+            if (string.IsNullOrWhiteSpace(codigo))
+            {
+                return "equipo";
+            }
+
+            var partes = codigo.Split('-');
+            return partes.Length >= 2 ? partes[1] : codigo;
+        }
+    }
 
     private async Task Ejecutar(Func<ServicioVerificacion, Task<ResultadoVerificacion>> accion)
     {
@@ -179,94 +175,4 @@ else
             await Cargar();
         }
     }
-
-    private static string EtiquetaSupuesto(Supuesto supuesto) => supuesto switch
-    {
-        Supuesto.PresupuestoDeApagado => "Prueba de tiempo de apagado del host",
-        Supuesto.SenalEnBateria => "Señal en batería",
-        Supuesto.ReencendidoPorPlaca => "Encendido por presencia de energía en la alimentación del host",
-        Supuesto.CorteConRetorno => "Corte con retorno",
-        _ => supuesto.ToString(),
-    };
-
-    // Quién ejecuta la acción de cada verificación (host, SAI u observación del operador).
-    private static string ActorSupuesto(Supuesto supuesto) => supuesto switch
-    {
-        Supuesto.PresupuestoDeApagado => "el host (se apaga) · vos cronometrás",
-        Supuesto.SenalEnBateria => "el SAI (avisa) · vos cortás la red",
-        Supuesto.CorteConRetorno => "el SAI (corta y reactiva su salida)",
-        Supuesto.ReencendidoPorPlaca => "el host / BIOS (arranca solo) · vos observás",
-        _ => string.Empty,
-    };
-
-    private static string QueSePrueba(Supuesto supuesto) => supuesto switch
-    {
-        Supuesto.PresupuestoDeApagado => "que el host baje todos sus servicios de forma ordenada, y cuánto tarda, para reservar bien la ventana de apagado.",
-        Supuesto.SenalEnBateria => "que, al quedarse sin energía de red, el SAI avise que está funcionando con su batería. Ese aviso es lo que dispara el apagado.",
-        Supuesto.CorteConRetorno => "que el SAI pueda cortar la corriente que alimenta al host y volver a dársela por sí solo. Es el mecanismo del apagado.",
-        Supuesto.ReencendidoPorPlaca => "que el host se encienda solo cuando le vuelve la corriente (por la configuración de la placa/BIOS). No se puede consultar por software: hay que verlo.",
-        _ => string.Empty,
-    };
-
-    private static string[] PasosSupuesto(Supuesto supuesto) => supuesto switch
-    {
-        Supuesto.PresupuestoDeApagado =>
-        [
-            "Con el host trabajando, esta prueba inicia su apagado ordenado (el sistema operativo cierra todos los servicios).",
-            "Cronometrás cuánto tarda en quedar completamente apagado.",
-            "Cargás los segundos que midió.",
-        ],
-        Supuesto.SenalEnBateria =>
-        [
-            "Cortás la energía de red que entra al SAI.",
-            "El SAI queda alimentando con su batería y lo informa.",
-            "El sistema lee ese aviso y confirma el estado «en batería» (no manda ninguna orden al equipo).",
-        ],
-        Supuesto.CorteConRetorno =>
-        [
-            "Se le ordena al SAI apagar la salida que alimenta al host y volver a activarla.",
-            "El SAI espera un tiempo configurado —para que el host termine de apagarse— y recién ahí corta la corriente de la salida.",
-            "Cuando regresa la energía de red, el SAI se activa (tras una breve espera de estabilización) y vuelve a alimentar la salida del host.",
-        ],
-        Supuesto.ReencendidoPorPlaca =>
-        [
-            "Después del corte con retorno, el SAI vuelve a alimentar la salida del host.",
-            "Observás si el host arranca por su cuenta, sin que nadie toque el botón de encendido.",
-            "Registrás lo que pasó: arrancó solo, o no arrancó.",
-        ],
-        _ => [],
-    };
-
-    private static string QueEsperar(Supuesto supuesto) => supuesto switch
-    {
-        Supuesto.PresupuestoDeApagado => "el host se apaga limpio; el tiempo medido tiene que ser holgadamente menor a la ventana reservada.",
-        Supuesto.SenalEnBateria => "el estado del equipo cambia a «en batería».",
-        Supuesto.CorteConRetorno => "el SAI corta la corriente del host y, al volver la energía de red, la reactiva.",
-        Supuesto.ReencendidoPorPlaca => "el host enciende solo al volver la corriente, sin que nadie apriete el botón de encendido.",
-        _ => string.Empty,
-    };
-
-    private static string EtiquetaEstado(EstadoVerificacion estado) => estado switch
-    {
-        EstadoVerificacion.NuncaVerificado => "Nunca verificado",
-        EstadoVerificacion.Verificado => "Verificado",
-        EstadoVerificacion.Vencido => "Vencido",
-        EstadoVerificacion.Refutado => "Refutado (bloqueo permanente)",
-        _ => estado.ToString(),
-    };
-
-    private static string IconoEstado(EstadoVerificacion estado) => estado switch
-    {
-        EstadoVerificacion.Verificado => Icons.Material.Filled.CheckCircle,
-        EstadoVerificacion.Vencido => Icons.Material.Filled.Schedule,
-        EstadoVerificacion.Refutado => Icons.Material.Filled.Block,
-        _ => Icons.Material.Filled.HourglassEmpty,
-    };
-
-    private static Color ColorEstado(EstadoVerificacion estado) => estado switch
-    {
-        EstadoVerificacion.Verificado => Color.Success,
-        EstadoVerificacion.Refutado => Color.Error,
-        _ => Color.Warning,
-    };
 }

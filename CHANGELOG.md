@@ -303,6 +303,41 @@ y el versionado sigue [Semantic Versioning](https://semver.org/lang/es/).
 
 ### Cambiado
 
+- **Rediseño UX/UI del Panel de verificaciones — Fases 1 y 2** (SPEC *Rediseño UX/UI del Panel de
+  verificaciones*, US-16, CU-10): el panel pasa de una grilla 2×2 con dos banners ámbar a una **columna
+  única con las cuatro pruebas numeradas en su secuencia física real** (señal en batería → apagado
+  ordenado → corte con retorno → arranque automático), de modo que el orden en pantalla coincide con el
+  orden en que ocurren (P-2, H-1).
+  - **Encabezado de estado del servicio** (P-1, H-2): reemplaza el primer banner por un bloque con chip de
+    modo, contador «N de 4 pruebas verificadas», barra de 4 segmentos y la **consecuencia en lenguaje
+    llano** («El sistema todavía no apaga el host automáticamente…»), en vez de la jerga «solo aviso».
+    El segundo banner pasa a una **tira de secuencia** neutra (P-3).
+  - **Divulgación progresiva** (P-4, H-3, H-9): una prueba vigente o **por vencer** se muestra colapsada en
+    una fila (evidencia resumida + vencimiento relativo) con «Ver procedimiento» y «Re-verificar»; las
+    pendientes, vencidas o refutadas van expandidas. Toda tarjeta ofrece al menos una acción.
+  - **Jerarquía de acciones por riesgo** (P-5, H-4): las acciones de solo lectura pasan a secundarias y
+    **las dos acciones que disparan un apagado** —«Ejecutar corte con retorno» y «Ejecutar prueba de
+    apagado»— son las únicas en rojo y exigen confirmación deliberada en un modal reusable
+    (`DialogoConfirmacionRiesgo`: enuncia la consecuencia, lista precondiciones y pide tipear el nombre del
+    equipo). Ninguna acción destructiva se ejecuta con un solo clic.
+  - **Nuevo estado efectivo `PorVencer`** (H-6, SPEC 4.1): computado (nunca persistido) a partir de la
+    vigencia y del umbral configurable `Sai:Verificacion:DiasPreavisoVencimiento` (30 días por defecto);
+    sigue contando como vigente (RN-02). Se **conserva `Refutado`**, que la SPEC omitía: es un bloqueo
+    permanente real del dominio.
+  - **Evidencia comparada** (H-7): la prueba de apagado guarda además el valor numérico medido
+    (`MedicionSegundos`, migración `EsquemaMedicionApagado`) y se muestra como *«20 s medidos vs. 120 s
+    reservados»* contra `Sai:Apagado:TiempoReservadoSeg`, en vez de un valor suelto.
+  - **Fechas legibles** (5.3): fecha localizada + tiempo relativo («vigente hasta el 18 ene 2027 (faltan 6
+    meses)»); el ISO queda solo en el tooltip. **Chips de contexto** por tarjeta (P-6): quién actúa, qué
+    hace el operador, «Presencial» y «Corta corriente real». **Microcopy** (sección 6): «supuestos» →
+    «pruebas», títulos cortos con subtítulo, badge «Pendiente».
+  - La lógica de estado sale del markup a un **view model** (`ConstructorVistaPanel`, SPEC 4.1/4.3/4.4) y la
+    página se descompone en componentes (`EncabezadoEstadoServicio`, `TiraSecuencia`, `ChipEstado`,
+    `TarjetaVerificacion`, `DialogoConfirmacionRiesgo`). 16 pruebas nuevas.
+  - *Fuera de alcance:* el **asistente de ejercicio guiado** (P-7) se planifica aparte; el theme global y el
+    sidebar no se tocan (afectan a todos los módulos y contradicen la maqueta aprobada), por lo que la regla
+    de color de 5.1 se aplica **dentro del panel**; el selector multi-equipo sigue fuera de alcance.
+
 - **Unificación de terminología** (retroalimentación de la Fase B2, propagada a toda la
   cadena: intake, 00, 01, 02, 03 y maqueta):
   - Dominio: **«parque» → «equipos»** (el término se juzgó jerga; «Dispositivo» e

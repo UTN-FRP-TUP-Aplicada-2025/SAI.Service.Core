@@ -1,0 +1,55 @@
+@* P-5 · Diálogo de confirmación de acción destructiva, reutilizable (corte con retorno y disparo del
+   apagado). Enuncia la consecuencia sin eufemismos, lista precondiciones, y exige una acción deliberada
+   (tipear el nombre del equipo). Foco inicial en Cancelar; Esc cierra sin ejecutar. *@
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6" Color="Color.Error">
+            <MudIcon Icon="@Icons.Material.Filled.Warning" Class="mr-2" Style="vertical-align:middle;" />@Titulo
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudText Typo="Typo.body1" Class="mb-3"><strong>@Consecuencia</strong></MudText>
+        @if (Precondiciones.Count > 0)
+        {
+            <MudText Typo="Typo.body2" Class="mud-text-secondary">Antes de continuar, verificá:</MudText>
+            <ul class="mud-text-secondary" style="margin:0.25rem 0 0.75rem;padding-left:1.2rem;font-size:0.875rem;">
+                @foreach (var p in Precondiciones)
+                {
+                    <li>@p</li>
+                }
+            </ul>
+        }
+        <MudTextField @bind-Value="_confirmacion" Label="@($"Escribí «{NombreEquipo}» para confirmar")"
+                      Variant="Variant.Outlined" Margin="Margin.Dense" Immediate="true" Class="mt-2" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancelar" Variant="Variant.Filled" Color="Color.Default">Cancelar</MudButton>
+        <MudButton OnClick="Confirmar" Variant="Variant.Filled" Color="Color.Error" Disabled="@(!Confirmado)">@TextoConfirmar</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter, EditorRequired] public string Titulo { get; set; } = string.Empty;
+    [Parameter, EditorRequired] public string Consecuencia { get; set; } = string.Empty;
+    [Parameter] public IReadOnlyList<string> Precondiciones { get; set; } = [];
+    [Parameter, EditorRequired] public string NombreEquipo { get; set; } = string.Empty;
+    [Parameter] public string TextoConfirmar { get; set; } = "Ejecutar";
+
+    private string _confirmacion = string.Empty;
+
+    private bool Confirmado =>
+        string.Equals(_confirmacion.Trim(), NombreEquipo, StringComparison.OrdinalIgnoreCase);
+
+    private void Cancelar() => MudDialog.Cancel();
+
+    private void Confirmar()
+    {
+        if (Confirmado)
+        {
+            MudDialog.Close(DialogResult.Ok(true));
+        }
+    }
+}

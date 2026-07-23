@@ -21,4 +21,11 @@ public enum EstadoVerificacion
 
     /// <summary>Refutado por evidencia en contra: bloqueo permanente.</summary>
     Refutado = 4,
+
+    /// <summary>
+    /// Verificado pero próximo a vencer (dentro del umbral de preaviso). Es un estado <b>efectivo</b>
+    /// (computado, nunca persistido — el estado real subyacente sigue siendo <see cref="Verificado"/>):
+    /// sigue contando como vigente (RN-02) pero genera trabajo de renovación.
+    /// </summary>
+    PorVencer = 5,
 }

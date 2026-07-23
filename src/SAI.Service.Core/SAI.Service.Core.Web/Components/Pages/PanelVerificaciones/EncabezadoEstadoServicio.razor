@@ -1,0 +1,49 @@
+@* P-1 · Encabezado de estado del servicio. Bloque de encabezado (NO alerta): chip de modo, contador,
+   barra de 4 segmentos y la consecuencia en lenguaje llano. Sin acción primaria (P-7 diferido). *@
+
+<MudPaper Elevation="0" Outlined="true" Class="pa-4 mb-4" role="region" aria-label="Estado del servicio">
+    <MudText Typo="Typo.caption" Class="mud-text-secondary d-block mb-1">Estado del servicio</MudText>
+    <div class="d-flex align-center flex-wrap mb-2" style="gap:10px;">
+        <MudChip T="string" Size="Size.Small" Color="@ColorModo" Variant="Variant.Filled" Icon="@IconoModo">@EtiquetaModo</MudChip>
+        <MudText Typo="Typo.body2" Class="mud-text-secondary">@Modo.Verificados de @Modo.Total pruebas verificadas</MudText>
+    </div>
+    <MudText Typo="Typo.body1">@((MarkupString)Consecuencia)</MudText>
+    <div style="display:flex;gap:4px;margin-top:16px;" role="img" aria-label="@(Modo.Verificados) de @(Modo.Total) pruebas verificadas">
+        @for (var i = 0; i < Modo.Total; i++)
+        {
+            var relleno = i < Modo.Verificados;
+            <span style="flex:1;height:5px;border-radius:3px;background:@(relleno ? "var(--mud-palette-success)" : "var(--mud-palette-lines-default)");"></span>
+        }
+    </div>
+</MudPaper>
+
+@code {
+    [Parameter, EditorRequired] public ModoServicioVista Modo { get; set; } = default!;
+
+    private int Faltan => Math.Max(0, Modo.Total - Modo.Verificados);
+
+    private string EtiquetaModo => Modo.Modo == ModoServicio.ApagadoAutomatico ? "Apagado automático" : "Solo aviso";
+    private Color ColorModo => Modo.Modo == ModoServicio.ApagadoAutomatico ? Color.Success : Color.Warning;
+    private string IconoModo => Modo.Modo == ModoServicio.ApagadoAutomatico
+        ? Icons.Material.Filled.PowerSettingsNew
+        : Icons.Material.Filled.NotificationsActive;
+
+    private string Consecuencia
+    {
+        get
+        {
+            if (Modo.Modo == ModoServicio.ApagadoAutomatico)
+            {
+                return "El sistema <strong>apaga el host automáticamente</strong> ante un corte de energía.";
+            }
+
+            var faltan = Faltan == 1
+                ? "Falta 1 prueba para habilitar el apagado ante corte de energía."
+                : $"Faltan {Faltan} pruebas para habilitar el apagado ante corte de energía.";
+            var refutado = Modo.HayRefutado
+                ? " Hay una prueba <strong>refutada</strong> (bloqueo permanente): resolvela para poder habilitarlo."
+                : string.Empty;
+            return $"El sistema todavía <strong>no apaga el host automáticamente</strong>. {faltan}{refutado}";
+        }
+    }
+}

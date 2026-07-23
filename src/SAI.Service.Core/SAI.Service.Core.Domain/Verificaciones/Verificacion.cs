@@ -40,6 +40,13 @@ public sealed class Verificacion
     /// <summary>Verdadero si hay una prueba disparada esperando el reinicio del host (Etapa 4·E).</summary>
     public bool EsperandoReinicio => PruebaEnCursoDesde is not null;
 
+    /// <summary>
+    /// Segundos medidos en la prueba de tiempo de apagado del host, o nulo si no aplica / aún sin medir.
+    /// Es el valor numérico de la evidencia (además de la cadena textual), para poder compararlo contra la
+    /// ventana reservada en la vista (H-7). Solo lo usa el supuesto de presupuesto de apagado.
+    /// </summary>
+    public int? MedicionSegundos { get; private set; }
+
     // Constructor privado para EF (materialización) y las fábricas.
     private Verificacion(string codigo, Supuesto supuesto, EstadoVerificacion estado, DateTimeOffset actualizadoEn)
     {
@@ -63,8 +70,9 @@ public sealed class Verificacion
     /// Marca el supuesto como verificado por evidencia observada (US-16, US-17). Un supuesto
     /// <see cref="EstadoVerificacion.Refutado"/> es un bloqueo permanente y no puede reverificarse.
     /// </summary>
+    /// <param name="medicionSegundos">Valor numérico medido (solo el presupuesto de apagado), o nulo.</param>
     /// <exception cref="InvalidOperationException">Si la verificación está refutada.</exception>
-    public void Verificar(string metodo, string? evidencia, DateTimeOffset? vigenciaHasta, DateTimeOffset ahora)
+    public void Verificar(string metodo, string? evidencia, DateTimeOffset? vigenciaHasta, DateTimeOffset ahora, int? medicionSegundos = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(metodo);
         if (Estado == EstadoVerificacion.Refutado)
@@ -76,6 +84,7 @@ public sealed class Verificacion
         Metodo = metodo;
         Evidencia = evidencia;
         VigenciaHasta = vigenciaHasta;
+        MedicionSegundos = medicionSegundos;
         ActualizadoEn = ahora;
     }
 
@@ -137,10 +146,31 @@ public sealed class Verificacion
 
     /// <summary>
     /// Estado efectivo en <paramref name="ahora"/>: una verificación verificada cuya vigencia ya venció
-    /// se ve como <see cref="EstadoVerificacion.Vencido"/> (vencimiento perezoso, US-17).
+    /// se ve como <see cref="EstadoVerificacion.Vencido"/> (vencimiento perezoso, US-17). Sin umbral de
+    /// preaviso no se computa <see cref="EstadoVerificacion.PorVencer"/>.
     /// </summary>
-    public EstadoVerificacion EstadoEfectivo(DateTimeOffset ahora) =>
-        Estado == EstadoVerificacion.Verificado && VigenciaHasta is { } hasta && hasta < ahora
-            ? EstadoVerificacion.Vencido
-            : Estado;
+    public EstadoVerificacion EstadoEfectivo(DateTimeOffset ahora) => EstadoEfectivo(ahora, 0);
+
+    /// <summary>
+    /// Estado efectivo en <paramref name="ahora"/> con umbral de preaviso: una verificación verificada
+    /// cuya vigencia ya venció se ve como <see cref="EstadoVerificacion.Vencido"/>; si vence dentro de
+    /// <paramref name="diasPreaviso"/> días, como <see cref="EstadoVerificacion.PorVencer"/> (H-6). El
+    /// estado real subyacente no cambia (es un cómputo, US-17).
+    /// </summary>
+    public EstadoVerificacion EstadoEfectivo(DateTimeOffset ahora, int diasPreaviso)
+    {
+        if (Estado != EstadoVerificacion.Verificado || VigenciaHasta is not { } hasta)
+        {
+            return Estado;
+        }
+
+        if (hasta < ahora)
+        {
+            return EstadoVerificacion.Vencido;
+        }
+
+        return hasta <= ahora.AddDays(Math.Max(0, diasPreaviso))
+            ? EstadoVerificacion.PorVencer
+            : EstadoVerificacion.Verificado;
+    }
 }

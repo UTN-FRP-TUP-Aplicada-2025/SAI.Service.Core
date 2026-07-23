@@ -167,6 +167,53 @@ public class VerificacionesTests
         acto.Should().Throw<InvalidOperationException>("un supuesto refutado es un bloqueo permanente");
     }
 
+    [Fact]
+    public void EstadoEfectivoDevuelvePorVencerDentroDelUmbralDePreaviso()
+    {
+        var verificacion = Verificacion.Sembrar("ver-1", Supuesto.SenalEnBateria, Ahora);
+        verificacion.Verificar("ventana", "ok", vigenciaHasta: Ahora.AddDays(10), Ahora);
+
+        verificacion.EstadoEfectivo(Ahora, diasPreaviso: 30).Should().Be(EstadoVerificacion.PorVencer);
+    }
+
+    [Fact]
+    public void EstadoEfectivoSigueVerificadoFueraDelUmbralDePreaviso()
+    {
+        var verificacion = Verificacion.Sembrar("ver-1", Supuesto.SenalEnBateria, Ahora);
+        verificacion.Verificar("ventana", "ok", vigenciaHasta: Ahora.AddDays(200), Ahora);
+
+        verificacion.EstadoEfectivo(Ahora, diasPreaviso: 30).Should().Be(EstadoVerificacion.Verificado);
+    }
+
+    [Fact]
+    public void UnaVerificacionPorVencerSigueContandoComoVigente()
+    {
+        var verificacion = Verificacion.Sembrar("ver-1", Supuesto.SenalEnBateria, Ahora);
+        verificacion.Verificar("ventana", "ok", vigenciaHasta: Ahora.AddDays(5), Ahora);
+
+        verificacion.EstadoEfectivo(Ahora, diasPreaviso: 30).Should().Be(EstadoVerificacion.PorVencer);
+        verificacion.CuentaComoVerificada(Ahora).Should().BeTrue("por vencer todavía habilita el apagado (RN-02)");
+    }
+
+    [Fact]
+    public void UnaVencidaSigueVenciendoAunqueHayaPreaviso()
+    {
+        var verificacion = Verificacion.Sembrar("ver-1", Supuesto.SenalEnBateria, Ahora);
+        verificacion.Verificar("ventana", "ok", vigenciaHasta: Ahora.AddDays(-1), Ahora.AddDays(-10));
+
+        verificacion.EstadoEfectivo(Ahora, diasPreaviso: 30).Should().Be(EstadoVerificacion.Vencido);
+    }
+
+    [Fact]
+    public void VerificarGuardaLaMedicionNumerica()
+    {
+        var verificacion = Verificacion.Sembrar("ver-1", Supuesto.PresupuestoDeApagado, Ahora);
+
+        verificacion.Verificar("ventana", "cronometrado a mano", Ahora.AddDays(180), Ahora, medicionSegundos: 42);
+
+        verificacion.MedicionSegundos.Should().Be(42);
+    }
+
     private static List<Verificacion> SembrarLasCuatro() =>
         Enum.GetValues<Supuesto>().Select(s => Verificacion.Sembrar($"ver-{s}", s, Ahora)).ToList();
 }
