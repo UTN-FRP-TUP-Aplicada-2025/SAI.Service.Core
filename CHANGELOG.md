@@ -322,6 +322,13 @@ y el versionado sigue [Semantic Versioning](https://semver.org/lang/es/).
   - El **orden físico de las pruebas pasa al dominio** (`SecuenciaFisica`), que antes vivía duplicado en la
     vista: lo usan tanto el panel como la derivación del paso. 16 pruebas nuevas.
 
+- **Indicador de estado del SAI en vivo en el Panel de verificaciones** (mejora UX): el panel muestra,
+  refrescándose con el sondeo (cada 5 s), si el equipo está **en línea** o **en batería ahora** —con la
+  tensión de entrada y la carga—, leyendo el estado **tipado** del adaptador (sin interpretar `ups.status`
+  en la vista). Cierra el hueco de que, al cortar la red, el operador no tenía ninguna señal de que el
+  sistema estuviera viendo el corte: confirmar la señal deja de ser a ciegas. No cambia la verificación,
+  que sigue siendo un acto deliberado. `DescriptorEnVivo` (mapeo estado→cartel) con 4 pruebas.
+
 - **Rediseño UX/UI del Panel de verificaciones — Fases 1 y 2** (SPEC *Rediseño UX/UI del Panel de
   verificaciones*, US-16, CU-10): el panel pasa de una grilla 2×2 con dos banners ámbar a una **columna
   única con las cuatro pruebas numeradas en su secuencia física real** (señal en batería → apagado

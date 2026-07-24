@@ -1,8 +1,11 @@
 @page "/panel-de-verificaciones"
 @attribute [Authorize]
+@using SAI.Service.Core.Application.Abstractions
 @using SAI.Service.Core.Application.Acciones
 @using Microsoft.Extensions.DependencyInjection
+@implements IAsyncDisposable
 @inject IServiceScopeFactory FabricaAlcances
+@inject IAdaptadorConexion Adaptador
 @inject IDialogService Dialogos
 @inject OpcionesVerificacion OpcionesVerif
 @inject OpcionesApagado OpcionesApag
@@ -31,6 +34,8 @@ else
                               MostrarIniciarEjercicio="@(!_ejercicio.HayEjercicio && _ejercicio.PasoActual is not null)"
                               Ocupado="_ocupado"
                               OnIniciarEjercicio="IniciarEjercicio" />
+
+    <IndicadorEnVivo Estado="_estadoSai" />
 
     @if (_ejercicio.HayEjercicio)
     {
@@ -69,11 +74,69 @@ else
     private IReadOnlyList<VistaVerificacion> _tarjetas = [];
     private ModoServicioVista _modo = new(ModoServicio.SoloAviso, 0, EvaluadorModalidad.SupuestosRequeridos, false);
     private EstadoEjercicio _ejercicio = new(null, null, 0, SecuenciaFisica.Orden.Count);
+    private EstadoSai? _estadoSai;
+    private readonly CancellationTokenSource _cts = new();
+    // Refresco del estado en vivo, alineado con el intervalo de sondeo (5 s).
+    private static readonly TimeSpan IntervaloEnVivo = TimeSpan.FromSeconds(5);
     private bool _ocupado;
     private string? _mensaje;
     private Severity _severidad = Severity.Info;
 
     protected override async Task OnInitializedAsync() => await Cargar();
+
+    // El sondeo en vivo arranca recién en el circuito interactivo (no en el prerender estático).
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        await LeerEnVivo();
+        await InvokeAsync(StateHasChanged);
+        _ = SondearEnVivoAsync();
+    }
+
+    private async Task SondearEnVivoAsync()
+    {
+        using var temporizador = new PeriodicTimer(IntervaloEnVivo);
+        try
+        {
+            while (await temporizador.WaitForNextTickAsync(_cts.Token))
+            {
+                await LeerEnVivo();
+                await InvokeAsync(StateHasChanged);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // El panel se cerró: fin del sondeo.
+        }
+    }
+
+    // Lee el estado del equipo para la retroalimentación en vivo. Una lectura fallida no rompe el panel:
+    // se refleja como «sin lectura del equipo».
+    private async Task LeerEnVivo()
+    {
+        try
+        {
+            _estadoSai = await Adaptador.LeerEstadoAsync(_cts.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch
+        {
+            _estadoSai = null;
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await _cts.CancelAsync();
+        _cts.Dispose();
+    }
 
     private async Task Cargar()
     {
