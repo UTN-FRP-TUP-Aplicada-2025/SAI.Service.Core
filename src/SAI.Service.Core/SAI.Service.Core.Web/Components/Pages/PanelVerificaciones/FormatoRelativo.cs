@@ -3,16 +3,23 @@ using System.Globalization;
 namespace SAI.Service.Core.Web.Components.Pages.PanelVerificaciones;
 
 /// <summary>
-/// Formato de fechas y tiempos del panel (SPEC 5.3, H-6): fecha absoluta localizada + tiempo relativo
+/// Formato de fechas y tiempos del panel (SPEC 5.3, H-6): fecha absoluta legible + tiempo relativo
 /// entre paréntesis. Nunca ISO crudo en la UI (el ISO queda para el <c>title</c>). Relativa granular:
 /// días si falta poco, meses o años si falta más.
+/// <para>
+/// Los meses se escriben a mano y <b>no</b> se usa ninguna cultura nombrada: la solución compila con
+/// <c>InvariantGlobalization=true</c> (Directory.Build.props), donde pedir "es-AR" lanza
+/// <see cref="CultureNotFoundException"/>. La interfaz es solo en español (i18n fuera de alcance).
+/// </para>
 /// </summary>
 public static class FormatoRelativo
 {
-    private static readonly CultureInfo EsAr = CultureInfo.GetCultureInfo("es-AR");
+    private static readonly string[] MesesAbreviados =
+        ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
 
-    /// <summary>Fecha absoluta localizada, p. ej. «18 ene 2027».</summary>
-    public static string FechaCorta(DateTimeOffset fecha) => fecha.ToString("d MMM yyyy", EsAr);
+    /// <summary>Fecha absoluta legible en español, p. ej. «18 ene 2027».</summary>
+    public static string FechaCorta(DateTimeOffset fecha) =>
+        string.Create(CultureInfo.InvariantCulture, $"{fecha.Day} {MesesAbreviados[fecha.Month - 1]} {fecha.Year}");
 
     /// <summary>Fecha ISO (UTC) para tooltips/copia; nunca visible en el cuerpo.</summary>
     public static string Iso(DateTimeOffset fecha) => fecha.UtcDateTime.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
