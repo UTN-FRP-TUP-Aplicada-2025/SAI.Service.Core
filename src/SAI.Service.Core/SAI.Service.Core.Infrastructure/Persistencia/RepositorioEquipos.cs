@@ -59,4 +59,26 @@ public sealed class RepositorioEquipos(SaiDbContext contexto) : IRepositorioEqui
 
     /// <inheritdoc />
     public Task<bool> HayEquiposAsync(CancellationToken ct) => contexto.Unidades.AnyAsync(ct);
+
+    /// <inheritdoc />
+    public Task<SesionEjercicio?> SesionEjercicioEnCursoAsync(CancellationToken ct) =>
+        contexto.SesionesEjercicio
+            .Where(s => s.Estado == EstadoSesionEjercicio.EnCurso)
+            .OrderByDescending(s => s.IniciadaEn)
+            .FirstOrDefaultAsync(ct);
+
+    /// <inheritdoc />
+    public Task AgregarSesionEjercicioAsync(SesionEjercicio sesion, CancellationToken ct)
+    {
+        contexto.SesionesEjercicio.Add(sesion);
+        return contexto.SaveChangesAsync(ct);
+    }
+
+    /// <inheritdoc />
+    public Task ActualizarSesionEjercicioAsync(SesionEjercicio sesion, CancellationToken ct)
+    {
+        // La sesión se cargó y mutó en este mismo contexto (tracked): basta con guardar.
+        contexto.SesionesEjercicio.Update(sesion);
+        return contexto.SaveChangesAsync(ct);
+    }
 }

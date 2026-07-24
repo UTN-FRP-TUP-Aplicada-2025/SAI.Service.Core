@@ -27,7 +27,16 @@ else if (_verificaciones.Count == 0)
 }
 else
 {
-    <EncabezadoEstadoServicio Modo="_modo" />
+    <EncabezadoEstadoServicio Modo="_modo"
+                              MostrarIniciarEjercicio="@(!_ejercicio.HayEjercicio && _ejercicio.PasoActual is not null)"
+                              Ocupado="_ocupado"
+                              OnIniciarEjercicio="IniciarEjercicio" />
+
+    @if (_ejercicio.HayEjercicio)
+    {
+        <BannerEjercicio Estado="_ejercicio" Ocupado="_ocupado" OnSalir="SalirDelEjercicio" />
+    }
+
     <TiraSecuencia />
 
     @if (_ocupado)
@@ -40,6 +49,8 @@ else
     {
         <TarjetaVerificacion Vista="vista"
                              Ocupado="_ocupado"
+                             Resaltada="@(_ejercicio.HayEjercicio && vista.Supuesto == _ejercicio.PasoActual)"
+                             Atenuada="@(_ejercicio.HayEjercicio && vista.Supuesto != _ejercicio.PasoActual)"
                              OnConfirmarSenal="ConfirmarSenal"
                              OnRegistrarMedicion="RegistrarMedicion"
                              OnDispararApagado="DispararApagado"
@@ -57,6 +68,7 @@ else
     private IReadOnlyList<Verificacion>? _verificaciones;
     private IReadOnlyList<VistaVerificacion> _tarjetas = [];
     private ModoServicioVista _modo = new(ModoServicio.SoloAviso, 0, EvaluadorModalidad.SupuestosRequeridos, false);
+    private EstadoEjercicio _ejercicio = new(null, null, 0, SecuenciaFisica.Orden.Count);
     private bool _ocupado;
     private string? _mensaje;
     private Severity _severidad = Severity.Info;
@@ -68,9 +80,28 @@ else
         using var alcance = FabricaAlcances.CreateScope();
         _verificaciones = await alcance.ServiceProvider.GetRequiredService<ServicioVerificacion>()
             .EstadoAsync(CancellationToken.None);
+        _ejercicio = await alcance.ServiceProvider.GetRequiredService<ServicioEjercicioGuiado>()
+            .EstadoAsync(CancellationToken.None);
 
         var constructor = new ConstructorVistaPanel(OpcionesVerif, OpcionesApag);
         (_modo, _tarjetas) = constructor.Construir(_verificaciones, DateTimeOffset.UtcNow);
+    }
+
+    // --- Ejercicio guiado (P-7): acompaña, no verifica ---
+    private async Task IniciarEjercicio()
+    {
+        using var alcance = FabricaAlcances.CreateScope();
+        await alcance.ServiceProvider.GetRequiredService<ServicioEjercicioGuiado>()
+            .IniciarAsync(CancellationToken.None);
+        await Cargar();
+    }
+
+    private async Task SalirDelEjercicio()
+    {
+        using var alcance = FabricaAlcances.CreateScope();
+        await alcance.ServiceProvider.GetRequiredService<ServicioEjercicioGuiado>()
+            .AbandonarAsync(CancellationToken.None);
+        await Cargar();
     }
 
     // --- Acciones sin riesgo ---

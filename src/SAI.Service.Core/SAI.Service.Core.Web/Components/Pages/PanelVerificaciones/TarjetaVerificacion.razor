@@ -159,6 +159,12 @@
     [Parameter, EditorRequired] public VistaVerificacion Vista { get; set; } = default!;
     [Parameter] public bool Ocupado { get; set; }
 
+    /// <summary>Paso actual del ejercicio guiado: se destaca (P-7).</summary>
+    [Parameter] public bool Resaltada { get; set; }
+
+    /// <summary>Hay un ejercicio en curso y esta no es la prueba del paso actual: se atenúa (P-7).</summary>
+    [Parameter] public bool Atenuada { get; set; }
+
     [Parameter] public EventCallback OnConfirmarSenal { get; set; }
     [Parameter] public EventCallback<int> OnRegistrarMedicion { get; set; }
     [Parameter] public EventCallback OnDispararApagado { get; set; }
@@ -178,11 +184,18 @@
 
     private string ClaseTarjeta => Colapsada ? "pa-3 mb-3" : "pa-4 mb-3";
 
-    // La tarjeta que corta corriente real se distingue con borde de riesgo (P-5).
-    private string EstiloTarjeta =>
-        Vista.CortaCorrienteReal && !Colapsada
-            ? "border-radius:10px;border-color:var(--mud-palette-error);"
-            : "border-radius:10px;";
+    // Borde: riesgo (P-5) si corta corriente real; acento si es el paso actual del ejercicio (P-7).
+    private string EstiloTarjeta
+    {
+        get
+        {
+            var borde = Vista.CortaCorrienteReal && !Colapsada
+                ? "border-color:var(--mud-palette-error);"
+                : Resaltada ? "border-color:var(--mud-palette-secondary);border-width:2px;" : string.Empty;
+            var opacidad = Atenuada ? "opacity:.55;" : string.Empty;
+            return $"border-radius:10px;{borde}{opacidad}";
+        }
+    }
 
     private string TonoCss => Vista.Estado switch
     {

@@ -303,6 +303,25 @@ y el versionado sigue [Semantic Versioning](https://semver.org/lang/es/).
 
 ### Cambiado
 
+- **Ejercicio guiado de la ventana de mantenimiento** (P-7, US-16, CU-10): el panel gana un **modo de
+  acompañamiento** que recorre las cuatro pruebas como el **único ejercicio físico encadenado** que en
+  realidad son, en vez de cuatro verificaciones sueltas. No es un asistente aparte: es el mismo panel en
+  **modo foco** —se destaca la prueba del paso actual y se atenúan las demás— con un banner que indica en
+  qué paso va y desde cuándo, y una salida (`Salir del ejercicio`) que no pierde nada.
+  - **La sesión no guarda el progreso.** `SesionEjercicio` registra solo *intención* («se está haciendo el
+    ejercicio completo») y *momento*; **el paso se deriva** de las verificaciones con
+    `SecuenciaFisica.PrimeroPendiente`, que siguen siendo la única verdad de qué está verificado. Así no
+    puede desincronizarse, y salir del ejercicio nunca pierde lo ya verificado.
+  - **No cambia el proceso de verificación**: cada paso se confirma con los métodos que ya existían en
+    `ServicioVerificacion`. `ServicioEjercicioGuiado` solo acompaña (iniciar, estado, abandonar) y cierra
+    la sesión **sola** cuando los cuatro supuestos quedan vigentes.
+  - La sesión se **persiste** (migración `EsquemaSesionEjercicio`), no vive en el circuito Blazor: el
+    ejercicio sobrevive al **reinicio del host** —que es parte normal del ejercicio— y se puede consultar
+    desde cualquier navegador. Antes de los pasos que apagan el host, el banner avisa que se va a perder la
+    pantalla y qué conviene observar.
+  - El **orden físico de las pruebas pasa al dominio** (`SecuenciaFisica`), que antes vivía duplicado en la
+    vista: lo usan tanto el panel como la derivación del paso. 16 pruebas nuevas.
+
 - **Rediseño UX/UI del Panel de verificaciones — Fases 1 y 2** (SPEC *Rediseño UX/UI del Panel de
   verificaciones*, US-16, CU-10): el panel pasa de una grilla 2×2 con dos banners ámbar a una **columna
   única con las cuatro pruebas numeradas en su secuencia física real** (señal en batería → apagado

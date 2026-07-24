@@ -75,6 +75,7 @@ public static class DependencyInjection
         services.AddScoped<IRepositorioEquipos, Persistencia.RepositorioEquipos>();
         services.AddScoped<ServicioAltaEquipos>();
         services.AddScoped<ServicioVerificacion>();
+        services.AddScoped<ServicioEjercicioGuiado>();
         services.AddSingleton(LeerOpcionesVerificacion(configuration));
 
         // Monitoreo (Etapa 3): planificador de sondeo (hosted service) y persistencia de muestras

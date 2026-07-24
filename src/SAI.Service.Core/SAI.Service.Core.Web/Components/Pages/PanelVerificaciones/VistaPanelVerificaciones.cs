@@ -57,14 +57,8 @@ public sealed record VistaVerificacion(
 /// </summary>
 public sealed class ConstructorVistaPanel(OpcionesVerificacion opcionesVerificacion, OpcionesApagado opcionesApagado)
 {
-    // Orden físico fijo (P-2): no depende del estado.
-    private static readonly IReadOnlyList<Supuesto> OrdenFisico =
-    [
-        Supuesto.SenalEnBateria,
-        Supuesto.PresupuestoDeApagado,
-        Supuesto.CorteConRetorno,
-        Supuesto.ReencendidoPorPlaca,
-    ];
+    // Orden físico fijo (P-2): lo define el dominio (SecuenciaFisica), no la vista.
+    private static IReadOnlyList<Supuesto> OrdenFisico => SecuenciaFisica.Orden;
 
     /// <summary>Arma el encabezado y las tarjetas ordenadas para un instante dado.</summary>
     public (ModoServicioVista Modo, IReadOnlyList<VistaVerificacion> Tarjetas) Construir(

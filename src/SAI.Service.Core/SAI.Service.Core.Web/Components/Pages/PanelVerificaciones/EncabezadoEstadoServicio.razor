@@ -2,12 +2,23 @@
    barra de 4 segmentos y la consecuencia en lenguaje llano. Sin acción primaria (P-7 diferido). *@
 
 <MudPaper Elevation="0" Outlined="true" Class="pa-4 mb-4" role="region" aria-label="Estado del servicio">
-    <MudText Typo="Typo.caption" Class="mud-text-secondary d-block mb-1">Estado del servicio</MudText>
-    <div class="d-flex align-center flex-wrap mb-2" style="gap:10px;">
-        <MudChip T="string" Size="Size.Small" Color="@ColorModo" Variant="Variant.Filled" Icon="@IconoModo">@EtiquetaModo</MudChip>
-        <MudText Typo="Typo.body2" Class="mud-text-secondary">@Modo.Verificados de @Modo.Total pruebas verificadas</MudText>
+    <div class="d-flex align-start flex-wrap" style="gap:16px;">
+        <div class="flex-grow-1" style="min-width:0;">
+            <MudText Typo="Typo.caption" Class="mud-text-secondary d-block mb-1">Estado del servicio</MudText>
+            <div class="d-flex align-center flex-wrap mb-2" style="gap:10px;">
+                <MudChip T="string" Size="Size.Small" Color="@ColorModo" Variant="Variant.Filled" Icon="@IconoModo">@EtiquetaModo</MudChip>
+                <MudText Typo="Typo.body2" Class="mud-text-secondary">@Modo.Verificados de @Modo.Total pruebas verificadas</MudText>
+            </div>
+            <MudText Typo="Typo.body1">@((MarkupString)Consecuencia)</MudText>
+        </div>
+        @if (MostrarIniciarEjercicio)
+        {
+            <MudButton Variant="Variant.Filled" Color="Color.Secondary" Disabled="Ocupado"
+                       StartIcon="@Icons.Material.Filled.PlayArrow" OnClick="OnIniciarEjercicio">
+                Iniciar ejercicio guiado
+            </MudButton>
+        }
     </div>
-    <MudText Typo="Typo.body1">@((MarkupString)Consecuencia)</MudText>
     <div style="display:flex;gap:4px;margin-top:16px;" role="img" aria-label="@(Modo.Verificados) de @(Modo.Total) pruebas verificadas">
         @for (var i = 0; i < Modo.Total; i++)
         {
@@ -19,6 +30,11 @@
 
 @code {
     [Parameter, EditorRequired] public ModoServicioVista Modo { get; set; } = default!;
+
+    /// <summary>Muestra la única acción primaria del panel (P-1/P-7): arrancar el ejercicio guiado.</summary>
+    [Parameter] public bool MostrarIniciarEjercicio { get; set; }
+    [Parameter] public bool Ocupado { get; set; }
+    [Parameter] public EventCallback OnIniciarEjercicio { get; set; }
 
     private int Faltan => Math.Max(0, Modo.Total - Modo.Verificados);
 
