@@ -5,7 +5,7 @@
 **Equipo:** un único desarrollador (equipo_n = 1)
 **Auditor:** Auditor independiente SDD
 **Fecha:** 2026-07-21
-**Reglas de referencia:** 06-Rules-Backlog-Tecnico v1.2 (§6, 11 ítems) y 07-Rules-Plan-Sprint v1.2 (§6, modo 1 dev)
+**Reglas de referencia:** Rules-Backlog-Tecnico v1.2 (§6, 11 ítems) y Rules-Plan-Sprint v1.2 (§6, modo 1 dev)
 **Alcance de la revisión:** Product-Backlog, Backlog-Tecnico, Definition-Of-Ready, README de 06, 26 historias de usuario individuales (US-01..US-26), Mini-Plan y README de 07. Trazabilidad contrastada contra 00 (Roadmap), 01 (NB-01..NB-08), 02 (CU-01..CU-12, RN) y 05 (ADR-01..ADR-22).
 
 ---
@@ -116,7 +116,7 @@ El Mini-Plan declara el sprint goal de cada etapa como una sola frase orientada 
 
 ### P1-01 — Stack y protocolos concretos del dominio fuente en la categoría 06
 
-- **Nivel:** P1 (bloquea). Incumple 06-Rules §6 ítem 11 y marca como No Conforme la celda D8 de la matriz; no rompe trazabilidad.
+- **Nivel:** P1 (bloquea). Incumple Rules-Backlog-Tecnico §6 ítem 11 y marca como No Conforme la celda D8 de la matriz; no rompe trazabilidad.
 - **Archivos y secciones:**
   - `06-Backlog-Tecnico/Backlog-Tecnico-v1.0.md` §1 y §2: BT-01 «ubicación de NUT (contenedor vs host)»; BT-04 «implementación por NUT»; BT-15 «Implementación NUT del adaptador (cliente TCP de upsd/upsc)» y «dialoga con el SAI vía NUT como cliente TCP»; BT-10 «hash PBKDF2 y sesión por cookie»; BT-13 «regla udev» / «`ID_PATH`»; BT-25 «cruce con wtmp»; BT-28 «problem+json»; nota §2 «adaptador directo sin NUT».
   - `06-Backlog-Tecnico/Product-Backlog-v1.0.md` §3: título de US-25 «…no cubiertos por NUT».

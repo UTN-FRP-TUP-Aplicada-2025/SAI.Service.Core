@@ -5,7 +5,7 @@
 | Fase auditada | A (categorías 00-Contexto y 01-Necesidades-Negocio) |
 | Solución | SAI.Service.Core — proyecto único `Sai-Service-Core`, `web-monolith`, caso degenerado (layout aplanado) |
 | Alcance | Los 5 documentos de `SDD/Docs/00-Contexto/` (incluido README y la omisión de Acuerdo-Equipo) y los 10 de `SDD/Docs/01-Necesidades-Negocio/` (índice, README y 8 NB) |
-| Reglas aplicadas | `00-Rules-Contexto.md` v1.3 §6 (11 ítems); `01-Rules-Necesidades-Negocio.md` v1.2 §6 (14 ítems); D1-D8; nombres canónicos §3.5 del Master-Prompt |
+| Reglas aplicadas | `Rules-Contexto.md` v1.3 §6 (11 ítems); `Rules-Necesidades-Negocio.md` v1.2 §6 (14 ítems); D1-D8; nombres canónicos §3.5 del Master-Prompt |
 | Fuente de verdad | `SOLUTION-INTAKE-Sai-Service-Core-v1.0.md`, `SOLUTION-MANIFEST-Sai-Service-Core-v1.0.md` |
 | Auditor | Auditor independiente SDD |
 | Fecha | 2026-07-20 |
@@ -37,7 +37,7 @@ Convención: OK = conforme · — = no aplica · ! = hallazgo (ver §6).
 | 01/README.md | OK | OK | OK | — | — | OK | OK | OK |
 | NB-01 … NB-08 (8 archivos) | OK | OK | OK | OK | OK | OK (upstream+downstream en cada cabecera) | OK | OK |
 
-D1-D8 sin infracciones. El scan de emojis solo devolvió el carácter flecha `→` (U+2192) en Roadmap e índice, uso tipográfico legítimo (idéntico al del propio intake y master-prompt), no emoji. Las negritas presentes son etiquetas de cabecera del template §4.1 de 00-Rules, no decorativas. Todos los archivos son UTF-8 sin CRLF.
+D1-D8 sin infracciones. El scan de emojis solo devolvió el carácter flecha `→` (U+2192) en Roadmap e índice, uso tipográfico legítimo (idéntico al del propio intake y master-prompt), no emoji. Las negritas presentes son etiquetas de cabecera del template §4.1 de Rules-Contexto, no decorativas. Todos los archivos son UTF-8 sin CRLF.
 
 ---
 
@@ -53,7 +53,7 @@ D1-D8 sin infracciones. El scan de emojis solo devolvió el carácter flecha `�
 | Compatibilidad-Plataformas | OK | §1-§6 completas (resumen, matriz, restricciones justificadas, alternativas, estado, trazabilidad) | Completo |
 | README 00 | OK (recomendado) | Enumera los 4 docs, orden de lectura, omisión de Acuerdo-Equipo justificada, stakeholders, trazabilidad | Completo |
 
-Acuerdo-Equipo-v1.0.md se omite correctamente (proyecto de 1 desarrollador) con nota explícita en el README citando §2.2 de 00-Rules. Compatibilidad es "recomendado" para web-monolith y está presente, declarando todas las plataformas de §17 P.9 del intake.
+Acuerdo-Equipo-v1.0.md se omite correctamente (proyecto de 1 desarrollador) con nota explícita en el README citando §2.2 de Rules-Contexto. Compatibilidad es "recomendado" para web-monolith y está presente, declarando todas las plataformas de §17 P.9 del intake.
 
 ### 3.2 Categoría 01 (índice + NB, §4.2 diez secciones)
 
@@ -92,9 +92,9 @@ Todos los filenames NB cumplen el regex `^NB-\d{2}-([A-Z][A-Za-z0-9]*)(-[A-Z][A-
 
 ## 5. Detalle por criterio §6 de las reglas
 
-00-Rules §6 (11 ítems): visión sin stack OK; alcance con 16 capacidades y 8 exclusiones justificadas OK (≥5 y ≥3); roadmap con checklists `- [ ]` en §5 OK (≥3 hitos); 5 objetivos SMART OK (≥3); stakeholders con propietario/implementador/beneficiario nominales OK; glosario con 10 términos del dominio OK (≥5 para proyecto individual); compatibilidad declara las plataformas de §17 P.9 OK; acuerdo-equipo omitido con nota OK; trazabilidad upstream/downstream declarada OK; nombres con guion medio OK; sin emojis/negrita decorativa/stack hardcodeado en negocio OK.
+Rules-Contexto §6 (11 ítems): visión sin stack OK; alcance con 16 capacidades y 8 exclusiones justificadas OK (≥5 y ≥3); roadmap con checklists `- [ ]` en §5 OK (≥3 hitos); 5 objetivos SMART OK (≥3); stakeholders con propietario/implementador/beneficiario nominales OK; glosario con 10 términos del dominio OK (≥5 para proyecto individual); compatibilidad declara las plataformas de §17 P.9 OK; acuerdo-equipo omitido con nota OK; trazabilidad upstream/downstream declarada OK; nombres con guion medio OK; sin emojis/negrita decorativa/stack hardcodeado en negocio OK.
 
-01-Rules §6 (14 ítems): índice maestro presente OK; ≥3 NB (8) OK; 10 secciones en orden OK; ≥4 criterios SMART por NB OK; MoSCoW en §9 con justificación OK; upstream explícito OK; §7 con estado `a generar` OK; ≥3 stakeholders nominales OK (ver P3-03 para el matiz de NB-08); regex de filename OK; enlaces del índice resuelven OK; ≤3 dependencias y sin ciclos OK; README presente (>5 NB) OK; estado en enum cerrado OK; sin emojis/negrita/vocab D7 OK.
+Rules-Necesidades-Negocio §6 (14 ítems): índice maestro presente OK; ≥3 NB (8) OK; 10 secciones en orden OK; ≥4 criterios SMART por NB OK; MoSCoW en §9 con justificación OK; upstream explícito OK; §7 con estado `a generar` OK; ≥3 stakeholders nominales OK (ver P3-03 para el matiz de NB-08); regex de filename OK; enlaces del índice resuelven OK; ≤3 dependencias y sin ciclos OK; README presente (>5 NB) OK; estado en enum cerrado OK; sin emojis/negrita/vocab D7 OK.
 
 ---
 
@@ -141,7 +141,7 @@ Todos los filenames NB cumplen el regex `^NB-\d{2}-([A-Z][A-Za-z0-9]*)(-[A-Z][A-
 - Nivel: P3.
 - Archivo/sección: `NB-08-Ingesta-Automatizada-De-Intervenciones-v1.0.md` §6.
 - Evidencia: las tres filas son propietario, implementador y "Integrador / consumidor" (sistema externo). La categoría beneficiario no tiene fila explícita (el administrador, beneficiario de fondo del histórico alimentado, figura solo como propietario/implementador). El resto de las NB sí explicitan una fila beneficiario.
-- Recomendación: agregar/renombrar una fila para dejar explícita la categoría beneficiario, por consistencia con el criterio §6 de 01-Rules.
+- Recomendación: agregar/renombrar una fila para dejar explícita la categoría beneficiario, por consistencia con el criterio §6 de Rules-Necesidades-Negocio.
 
 ---
 

@@ -10,7 +10,7 @@
 
 ## 1. Contexto
 
-El framework SDD contempla una categoría 10-Developer-Guide con documentos de onboarding, conceptos, referencia y troubleshooting orientados a un desarrollador consumidor. Para el tipo `web-monolith`, la tabla de adaptabilidad del orquestador y las reglas de la categoría (`10-Rules-Developer-Guide.md` §2.2) declaran esta categoría como **opcional**, con el criterio explícito «sólo README del repositorio» y «resumido en el README». Este proyecto refuerza ese criterio: es un servicio monolítico con un único desarrollador que es a la vez propietario, implementador y operador (intake §2), no expone un SDK ni una superficie pública consumida por integradores externos, y su bandera `tiene_portal_developers` es `false`. La única superficie hacia un tercero es la API REST de ingesta, cuyo contrato ya está documentado en `Contratos-REST-v1.0.md` (ADR-17) y en 08.
+El framework SDD contempla una categoría 10-Developer-Guide con documentos de onboarding, conceptos, referencia y troubleshooting orientados a un desarrollador consumidor. Para el tipo `web-monolith`, la tabla de adaptabilidad del orquestador y las reglas de la categoría (`Rules-Developer-Guide.md` §2.2) declaran esta categoría como **opcional**, con el criterio explícito «sólo README del repositorio» y «resumido en el README». Este proyecto refuerza ese criterio: es un servicio monolítico con un único desarrollador que es a la vez propietario, implementador y operador (intake §2), no expone un SDK ni una superficie pública consumida por integradores externos, y su bandera `tiene_portal_developers` es `false`. La única superficie hacia un tercero es la API REST de ingesta, cuyo contrato ya está documentado en `Contratos-REST-v1.0.md` (ADR-17) y en 08.
 
 ## 2. Decisión
 
@@ -50,7 +50,7 @@ La Fase H (consolidación) incluye en `SDD/Docs/README.md` una sección de onboa
 
 ## 9. Referencias
 
-- `10-Rules-Developer-Guide.md` §2.2 (web-monolith: opcional, «sólo README del repositorio»).
+- `Rules-Developer-Guide.md` §2.2 (web-monolith: opcional, «sólo README del repositorio»).
 - Tabla de adaptabilidad por tipo del master-prompt (§14): web-monolith, 10 «Opcional, suele colapsar en README».
 - Flag `tiene_portal_developers` = false (§4 del master-prompt).
 - ADR-17 (contrato REST de ingesta, única superficie hacia terceros); glosarios de 02 y 03; operación en 09.

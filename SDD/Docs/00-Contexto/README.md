@@ -17,7 +17,7 @@ Orden de lectura sugerido: visión, alcance, roadmap y compatibilidad. La visió
 
 ## Documento omitido
 
-`Acuerdo-Equipo-v1.0.md` se omite por aplicación de la regla §2.2 de `00-Rules-Contexto.md`: se genera solo para equipos de más de dos personas y se omite en proyectos de un único desarrollador. Este es un proyecto interno de una sola persona que concentra los roles de propietario, implementador y beneficiario, por lo que no hay convenciones de equipo, ceremonias ni coordinación entre personas que documentar. Las convenciones técnicas de trabajo (control de versiones, estrategia de ramas, commits) se documentan en las categorías técnicas correspondientes (05 y 09), no aquí.
+`Acuerdo-Equipo-v1.0.md` se omite por aplicación de la regla §2.2 de `Rules-Contexto.md`: se genera solo para equipos de más de dos personas y se omite en proyectos de un único desarrollador. Este es un proyecto interno de una sola persona que concentra los roles de propietario, implementador y beneficiario, por lo que no hay convenciones de equipo, ceremonias ni coordinación entre personas que documentar. Las convenciones técnicas de trabajo (control de versiones, estrategia de ramas, commits) se documentan en las categorías técnicas correspondientes (05 y 09), no aquí.
 
 ## Stakeholders del proyecto
 

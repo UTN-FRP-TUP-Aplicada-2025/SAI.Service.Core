@@ -4,13 +4,13 @@
 **Alcance:** SDD/Docs/05-Arquitectura-Tecnica/ de SAI.Service.Core. Proyecto `web-monolith`, caso degenerado de un único proyecto (layout aplanado, sin `Solucion/`).
 **Auditor:** Auditor independiente SDD (Arquitecto de Soluciones + QA Senior; no participó de la generación)
 **Fecha:** 2026-07-20
-**Reglas aplicadas:** 05-Rules-Arquitectura-Tecnica.md v1.2 (§4.2, §4.3, §4.4, §4.5, §6); matriz D1-D8; trazabilidad §3.4.
+**Reglas aplicadas:** Rules-Arquitectura-Tecnica.md v1.2 (§4.2, §4.3, §4.4, §4.5, §6); matriz D1-D8; trazabilidad §3.4.
 
 ---
 
 ## 1. Resumen ejecutivo
 
-Los entregables de la categoría 05 están **completos, bien estructurados y trazables**. Se produjeron los siete artefactos maestros (documento de arquitectura, índice de decisiones, modelo lógico, flujo de ejecución, contrato REST, extensibilidad, README) y las 22 ADR individuales exigidas, todas con las diez secciones obligatorias, estado declarado y motivación upstream. La estructura obligatoria del §6 de 05-Rules se cumple sin excepción. No se detectaron rupturas de trazabilidad, documentos obligatorios omitidos, ADR consolidadas, ADR sin estado, ADR huérfanas ni tablas lógicas sin origen conceptual. Se verificó que `Solucion/` no existe (omisión correcta del caso degenerado).
+Los entregables de la categoría 05 están **completos, bien estructurados y trazables**. Se produjeron los siete artefactos maestros (documento de arquitectura, índice de decisiones, modelo lógico, flujo de ejecución, contrato REST, extensibilidad, README) y las 22 ADR individuales exigidas, todas con las diez secciones obligatorias, estado declarado y motivación upstream. La estructura obligatoria del §6 de Rules-Arquitectura-Tecnica se cumple sin excepción. No se detectaron rupturas de trazabilidad, documentos obligatorios omitidos, ADR consolidadas, ADR sin estado, ADR huérfanas ni tablas lógicas sin origen conceptual. Se verificó que `Solucion/` no existe (omisión correcta del caso degenerado).
 
 Los únicos hallazgos son **inconsistencias de metadatos (nivel P2)** entre artefactos de la misma sección: discrepancia de `Autor` (el índice y las 22 ADR firman «Arquitecto de Software Senior (AG-05)»; los cinco documentos maestros restantes firman «Orquestador SDD (AG-05)») y discrepancia de `Estado` (cuatro maestros en «Vigente», el modelo lógico en «Borrador», el índice en «Aceptado»). No son bloqueantes: no afectan contenido, trazabilidad ni estructura.
 
@@ -49,7 +49,7 @@ Notas de evidencia:
 
 ---
 
-## 3. Matriz de estructura obligatoria (§6 de 05-Rules)
+## 3. Matriz de estructura obligatoria (§6 de Rules-Arquitectura-Tecnica)
 
 | Ítem del §6 | Estado | Evidencia |
 | --- | --- | --- |

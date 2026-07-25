@@ -25,12 +25,12 @@ El Ejemplo 02 depende del catálogo base sembrado por el Ejemplo 01, por lo que 
 ## Cómo agregar un sample nuevo
 
 1. Elegir el nombre por nivel o por capacidad (nunca por dominio), en `Título-Con-Guiones`, con sufijo `-v<X.Y>.md`.
-2. Copiar la estructura de las nueve secciones obligatorias del §4.2 de las reglas constructivas (`11-Rules-Examples.md`).
+2. Copiar la estructura de las nueve secciones obligatorias del §4.2 de las reglas constructivas (`Rules-Examples.md`).
 3. Crear la carpeta ejecutable correspondiente en `/samples/XX-<capacidad>/` con su `README.md` propio.
 4. Declarar la trazabilidad a CU/ADR/RN y a los escenarios `§20` del intake.
 5. Agregar la fila a la tabla maestra de arriba con su nivel, tiempo de setup, CU ilustrados y ubicación.
 
-El detalle normativo está en el §6 (criterios de aceptación) de `SDD/Devs/Rules/11-Rules-Examples.md`.
+El detalle normativo está en el §6 (criterios de aceptación) de `SDD/Devs/Rules/Rules-Examples.md`.
 
 ## Vínculo con el resto de la documentación
 
@@ -44,7 +44,7 @@ El detalle normativo está en el §6 (criterios de aceptación) de `SDD/Devs/Rul
 |---|---|
 | web-monolith (base §2.3) | `01-datos-seed/`, `02-tema-custom/` (este último solo si hay punto de extensión visual) |
 | web-monolith (este proyecto) | `01-datos-seed/`, `02-api-ingesta/` |
-| (resto) | Ver §2.3 de `11-Rules-Examples.md`. |
+| (resto) | Ver §2.3 de `Rules-Examples.md`. |
 
 **Desviación justificada respecto a la base §2.3.** El segundo sample de la plantilla `web-monolith` es `02-tema-custom/`, que **no aplica**: Sai-Service-Core no tiene punto de extensión visual (el panel Blazor con MudBlazor no es personalizable por terceros). En su lugar, el segundo sample es `02-api-ingesta/`, que ejercita la única superficie formal consumida por un tercero (la API de ingesta declarada en §18 del intake). El nombre es por capacidad (`api-ingesta`), no por el dominio del consumidor.
 

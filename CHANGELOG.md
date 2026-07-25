@@ -303,6 +303,13 @@ y el versionado sigue [Semantic Versioning](https://semver.org/lang/es/).
 
 ### Cambiado
 
+- **Documentación SDD — nomenclatura de las reglas del framework**: las citas a las reglas constructivas
+  de `IA.SDD` se actualizan al nombre nuevo, que perdió el prefijo numérico de categoría
+  (`08-Rules-Calidad-Y-Pruebas.md` → `Rules-Calidad-Y-Pruebas.md`, y así con las doce). Alcanza a los 18
+  markdown de `SDD/Docs/` que las citaban, incluidas las formas abreviadas por número (`05-Rules` →
+  `Rules-Arquitectura-Tecnica`). Solo cambian las referencias: ningún criterio, veredicto de audit ni
+  decisión se modifica. La numeración de las categorías del framework y de las carpetas de `SDD/Docs/`
+  se mantiene sin cambios.
 - **Ejercicio guiado de la ventana de mantenimiento** (P-7, US-16, CU-10): el panel gana un **modo de
   acompañamiento** que recorre las cuatro pruebas como el **único ejercicio físico encadenado** que en
   realidad son, en vez de cuatro verificaciones sueltas. No es un asistente aparte: es el mismo panel en

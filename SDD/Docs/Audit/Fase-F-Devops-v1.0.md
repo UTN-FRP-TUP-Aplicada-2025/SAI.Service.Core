@@ -10,7 +10,7 @@
 
 ## 1. Resumen ejecutivo
 
-Se auditaron los cinco documentos obligatorios de la categoría 09 más su README, los dos ADR nuevos de la Fase F (ADR-23 y ADR-24) y el índice de decisiones actualizado, contra los criterios §6 de `09-Rules-Devops.md` (nivel proyecto), el §4.3 de `05-Rules` (secciones del ADR), el §2.2 de `10-Rules` (admisibilidad de la omisión) y las directrices de estilo D1–D8.
+Se auditaron los cinco documentos obligatorios de la categoría 09 más su README, los dos ADR nuevos de la Fase F (ADR-23 y ADR-24) y el índice de decisiones actualizado, contra los criterios §6 de `Rules-Devops.md` (nivel proyecto), el §4.3 de `Rules-Arquitectura-Tecnica` (secciones del ADR), el §2.2 de `Rules-Developer-Guide` (admisibilidad de la omisión) y las directrices de estilo D1–D8.
 
 Todos los entregables obligatorios están presentes y bien formados. El pipeline ejecuta la DoD de 08 y los quality gates como gates, sin redefinirlos. Los 22 NFR con dato numérico tienen gate; los 3 PENDIENTE (N-03, N-20, N-25) se declaran como tales con vía de cierre, no se inventan. La desviación de ambientes DEV/PROD está justificada y registrada como ADR-24 (Aceptado), no como propuesta. La omisión de la categoría 10 está registrada como ADR-23 (Aceptado) con consolidación en el README raíz de la Fase H. El índice lista 24 ADR contiguos (ADR-01..24), 20 Aceptado y 4 Propuesto, sin huecos ni duplicados. No se detectó pipeline ni carpeta de nivel solución (correcto para el caso degenerado). No hay violaciones D1–D8.
 
@@ -46,7 +46,7 @@ Se registra un único hallazgo de nivel medio (P2): dos referencias textuales a 
 
 ---
 
-## 3. Matriz de estructura (criterios §6 de 09-Rules, nivel proyecto)
+## 3. Matriz de estructura (criterios §6 de Rules-Devops, nivel proyecto)
 
 | Criterio §6 | Estado | Evidencia |
 | --- | --- | --- |
@@ -77,15 +77,15 @@ Cumple. `Pipeline-CI-CD §8` traza los 25 NFR: los 22 con dato numérico tienen 
 
 ### 4.3 Ambientes ↔ ADR-24
 
-Cumple. `Entornos-Deploy §1.1` declara la desviación DEV/PROD (sin QA/STAGING) respecto del piso §2.2 de 09-Rules, con justificación de dominio del intake §17.P.8, y la registra como ADR-24 (Aceptado), con enlace relativo correcto al archivo. Las referencias en 09 apuntan a ADR-24 (4 ocurrencias en Pipeline/Entornos/README); no hay referencia a un número inexistente. ADR-24 está en estado Aceptado, no Propuesto.
+Cumple. `Entornos-Deploy §1.1` declara la desviación DEV/PROD (sin QA/STAGING) respecto del piso §2.2 de Rules-Devops, con justificación de dominio del intake §17.P.8, y la registra como ADR-24 (Aceptado), con enlace relativo correcto al archivo. Las referencias en 09 apuntan a ADR-24 (4 ocurrencias en Pipeline/Entornos/README); no hay referencia a un número inexistente. ADR-24 está en estado Aceptado, no Propuesto.
 
 ### 4.4 Omisión de 10 ↔ ADR-23
 
-Cumple con salvedad (ver hallazgo H-1). ADR-23 (Aceptado) registra la omisión de la categoría 10-Developer-Guide, admisible por `10-Rules §2.2` (web-monolith: Opcional, «Sólo README del repositorio»), con motivo (un solo desarrollador, `tiene_portal_developers=false`, sin superficie pública) y consolidación del onboarding en el README raíz de la Fase H (§2, §7). No existe la carpeta `SDD/Docs/10-Developer-Guide/`. Salvedad: dos documentos de 09 aún citan «la developer guide de 10» como si existiera (H-1).
+Cumple con salvedad (ver hallazgo H-1). ADR-23 (Aceptado) registra la omisión de la categoría 10-Developer-Guide, admisible por `Rules-Developer-Guide §2.2` (web-monolith: Opcional, «Sólo README del repositorio»), con motivo (un solo desarrollador, `tiene_portal_developers=false`, sin superficie pública) y consolidación del onboarding en el README raíz de la Fase H (§2, §7). No existe la carpeta `SDD/Docs/10-Developer-Guide/`. Salvedad: dos documentos de 09 aún citan «la developer guide de 10» como si existiera (H-1).
 
 ### 4.5 Índice de ADR consistente
 
-Cumple. `Decisiones-Arquitectura-v1.0.md` (v1.2) lista 24 ADR con numeración contigua ADR-01..24, sin huecos ni duplicados. Conteo por estado: 20 Aceptado (ADR-01..18, ADR-23, ADR-24) y 4 Propuesto (ADR-19..22), consistente con el encabezado, la sección de notas y el control de cambios. ADR-23 (categoría Estilo) y ADR-24 (categoría Despliegue) figuran en el índice con estado Aceptado y fecha 2026-07-21, y en la tabla de trazabilidad de origen (Fase F). Ambas categorías son válidas según el enumerado de `05-Rules §4.3`.
+Cumple. `Decisiones-Arquitectura-v1.0.md` (v1.2) lista 24 ADR con numeración contigua ADR-01..24, sin huecos ni duplicados. Conteo por estado: 20 Aceptado (ADR-01..18, ADR-23, ADR-24) y 4 Propuesto (ADR-19..22), consistente con el encabezado, la sección de notas y el control de cambios. ADR-23 (categoría Estilo) y ADR-24 (categoría Despliegue) figuran en el índice con estado Aceptado y fecha 2026-07-21, y en la tabla de trazabilidad de origen (Fase F). Ambas categorías son válidas según el enumerado de `Rules-Arquitectura-Tecnica §4.3`.
 
 ### 4.6 Coherencia con el intake (§17 P.7/P.8/P.9)
 
@@ -93,7 +93,7 @@ Cumple. Versionado P.7: SemVer 2.0.0, Conventional Commits 1.0.0, MinVer, trunk-
 
 ---
 
-## 5. Validación de los ADR nuevos (§4.3 de 05-Rules)
+## 5. Validación de los ADR nuevos (§4.3 de Rules-Arquitectura-Tecnica)
 
 | Sección obligatoria §4.3 | ADR-23 | ADR-24 |
 | --- | --- | --- |
@@ -137,7 +137,7 @@ Ambos ADR tienen las 10 secciones, estado Aceptado con fecha y categoría válid
 - **Pipeline ejecuta la DoD de 08 sin redefinir:** confirmado. 10 stages ↔ 10 gates de Estrategia-Calidad §3 ↔ DoD; los criterios de éxito referencian, no reformulan.
 - **Cada NFR numérico con gate:** confirmado. 22/22 con gate; N-03/N-20/N-25 PENDIENTE declarados, no inventados.
 - **Ambientes DEV/PROD con ADR-24:** confirmado. Desviación justificada (intake §17.P.8) y registrada como ADR-24 Aceptado; referencias en 09 apuntan a ADR-24.
-- **Omisión de 10 con ADR-23:** confirmado. Omisión admisible (10-Rules §2.2), motivo registrado, consolidación en README raíz de Fase H; carpeta 10 inexistente. Salvedad menor H-1.
+- **Omisión de 10 con ADR-23:** confirmado. Omisión admisible (Rules-Developer-Guide §2.2), motivo registrado, consolidación en README raíz de Fase H; carpeta 10 inexistente. Salvedad menor H-1.
 - **Índice de 24 ADR consistente y contiguo:** confirmado. ADR-01..24 sin huecos ni duplicados; 20 Aceptado, 4 Propuesto; conteo coherente en encabezado, notas y control de cambios.
 
 ---

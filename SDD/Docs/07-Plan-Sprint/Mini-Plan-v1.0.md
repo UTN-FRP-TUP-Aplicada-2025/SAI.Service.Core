@@ -9,7 +9,7 @@
 **Trazabilidad upstream:** 00 Roadmap-Producto (F0-F5); 06 Product-Backlog (EP-01..EP-07, US-01..US-26) y Backlog-Tecnico (BT-01..BT-30); 02 CU-01..CU-12; 05 ADR-01..ADR-22; Intake §15 (delivery por etapas) y §11 (riesgos)
 **Trazabilidad downstream:** 08-Calidad-Y-Pruebas (Definition of Done canónica, pendiente de generación)
 
-Este es un proyecto de **un solo desarrollador**. Por la regla §2.2 de 07-Rules-Plan-Sprint (modo 1 dev), la categoría 07 se reduce a este Mini-Plan, que **sustituye** a los planes de iteración por sprint, a las plantillas de review y retrospectiva y al tracking de velocidad. No existen `Plan-Iteracion-Sprint-XX-v1.0.md`, ni `Template-Sprint-Review-v1.0.md`, ni `Template-Sprint-Retrospectiva-v1.0.md`, ni `Velocidad-Equipo-v1.0.md`. Este documento condensa los objetivos de cada etapa, la lista de ítems comprometidos por sus identificadores de 06 y la bitácora de avance.
+Este es un proyecto de **un solo desarrollador**. Por la regla §2.2 de Rules-Plan-Sprint (modo 1 dev), la categoría 07 se reduce a este Mini-Plan, que **sustituye** a los planes de iteración por sprint, a las plantillas de review y retrospectiva y al tracking de velocidad. No existen `Plan-Iteracion-Sprint-XX-v1.0.md`, ni `Template-Sprint-Review-v1.0.md`, ni `Template-Sprint-Retrospectiva-v1.0.md`, ni `Velocidad-Equipo-v1.0.md`. Este documento condensa los objetivos de cada etapa, la lista de ítems comprometidos por sus identificadores de 06 y la bitácora de avance.
 
 ---
 
