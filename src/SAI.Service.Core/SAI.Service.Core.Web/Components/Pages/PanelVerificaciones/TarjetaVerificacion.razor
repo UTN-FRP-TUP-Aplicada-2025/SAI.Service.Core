@@ -1,0 +1,236 @@
+@* P-2/P-4/P-5/P-6 · Tarjeta de una prueba. Vigente o por vencer se muestra colapsada en una fila
+   (divulgación progresiva); pendiente, vencida o refutada, expandida con el procedimiento completo.
+   Toda tarjeta ofrece al menos una acción (H-9). El gating por reinicio (Etapa 4·E) reemplaza el área
+   de acción por su leyenda. *@
+
+<MudPaper Elevation="0" Outlined="true" Class="@ClaseTarjeta" Style="@EstiloTarjeta">
+
+    @* --- Cabecera común: número/estado, título, subtítulo, chip de estado --- *@
+    <div class="d-flex align-center" style="gap:12px;">
+        <div style="@EstiloNumero" aria-hidden="true">
+            @if (EsVigente)
+            {
+                <MudIcon Icon="@Icons.Material.Filled.Check" Size="Size.Small" />
+            }
+            else
+            {
+                @Vista.Numero
+            }
+        </div>
+        <div class="flex-grow-1" style="min-width:0;">
+            <MudText Typo="Typo.subtitle1">@(Colapsada ? $"{Vista.Numero} · {Vista.Titulo}" : Vista.Titulo)</MudText>
+            <MudText Typo="Typo.caption" Class="mud-text-secondary d-block" title="@IsoVencimiento">@SubtituloMostrado</MudText>
+        </div>
+        @if (Vista.CortaCorrienteReal && !Colapsada)
+        {
+            <MudChip T="string" Size="Size.Small" Color="Color.Error" Variant="Variant.Text"
+                     Icon="@Icons.Material.Filled.FlashOff">Corta corriente real</MudChip>
+        }
+        <ChipEstado Estado="Vista.Estado" />
+        @if (Colapsada)
+        {
+            <MudButton Variant="Variant.Text" Color="Color.Default" Size="Size.Small"
+                       aria-expanded="false" OnClick="Alternar">Ver procedimiento</MudButton>
+            <MudButton Variant="Variant.Text" Color="Color.Secondary" Size="Size.Small"
+                       Disabled="Ocupado" OnClick="Alternar">Re-verificar</MudButton>
+        }
+        else if (Vista.Colapsada)
+        {
+            <MudButton Variant="Variant.Text" Color="Color.Default" Size="Size.Small"
+                       aria-expanded="true" OnClick="Alternar">Ocultar procedimiento</MudButton>
+        }
+    </div>
+
+    @if (!Colapsada)
+    {
+        @* --- Chips de contexto (P-6) --- *@
+        <div class="d-flex flex-wrap mt-3 mb-2" style="gap:6px;">
+            <MudChip T="string" Size="Size.Small" Variant="Variant.Text" Color="Color.Default"
+                     Icon="@Icons.Material.Filled.Dns">@Vista.Actor</MudChip>
+            @if (Vista.AccionOperador is { } accion)
+            {
+                <MudChip T="string" Size="Size.Small" Variant="Variant.Text" Color="Color.Default"
+                         Icon="@Icons.Material.Filled.Person">@accion</MudChip>
+            }
+            @if (Vista.RequierePresencia)
+            {
+                <MudChip T="string" Size="Size.Small" Variant="Variant.Text" Color="Color.Default"
+                         Icon="@Icons.Material.Filled.Place">Presencial</MudChip>
+            }
+        </div>
+
+        @* --- Campos: qué se prueba, pasos, esperás ver, evidencia --- *@
+        <MudText Typo="Typo.body2" Class="mb-1">
+            <span class="mud-text-secondary">Qué se prueba —</span> @Vista.QueSePrueba
+        </MudText>
+        <ol style="margin:0.5rem 0;padding-left:1.2rem;font-size:0.9375rem;line-height:1.6;">
+            @foreach (var paso in Vista.Pasos)
+            {
+                <li>@paso</li>
+            }
+        </ol>
+        <MudText Typo="Typo.body2" Class="mb-1">
+            <span class="mud-text-secondary">Esperás ver —</span> @Vista.EsperasVer
+        </MudText>
+        @if (TieneEvidencia)
+        {
+            <MudText Typo="Typo.body2" Class="mb-1">
+                <span class="mud-text-secondary">Evidencia —</span> @Evidencia
+            </MudText>
+        }
+        @if (Vista.FechaVencimiento is not null || Vista.Estado == EstadoVerificacion.Verificado)
+        {
+            <MudText Typo="Typo.caption" Class="mud-text-secondary d-block mb-2" title="@IsoVencimiento">
+                @FormatoRelativo.Vencimiento(Vista.FechaVencimiento, Vista.DiasRestantes)
+            </MudText>
+        }
+
+        @* --- Aviso de riesgo (solo la acción que corta corriente real) --- *@
+        @if (Vista.CortaCorrienteReal)
+        {
+            <MudAlert Severity="Severity.Error" Variant="Variant.Outlined" Dense="true" Class="my-3">
+                No hay garantía de que el SAI reponga su salida ni de que el host vuelva a encender.
+                Verificá antes el arranque automático en la BIOS del host.
+            </MudAlert>
+        }
+
+        @* --- Área de acción --- *@
+        <div class="mt-3">
+            @if (Vista.EsperandoReinicio)
+            {
+                <MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Dense="true"
+                          Icon="@Icons.Material.Filled.RestartAlt">
+                    Se activará cuando reinicie el equipo para iniciar una nueva prueba.
+                </MudAlert>
+            }
+            else if (Vista.Estado == EstadoVerificacion.Refutado)
+            {
+                <MudText Typo="Typo.body2" Color="Color.Error">
+                    Bloqueo permanente: este supuesto no puede reverificarse desde el panel.
+                </MudText>
+            }
+            else
+            {
+                @switch (Vista.Supuesto)
+                {
+                    case Supuesto.SenalEnBateria:
+                        <MudButton Variant="Variant.Outlined" Color="Color.Secondary" Disabled="Ocupado"
+                                   StartIcon="@Icons.Material.Filled.Visibility" OnClick="OnConfirmarSenal">
+                            Confirmar señal (solo lectura)
+                        </MudButton>
+                        break;
+
+                    case Supuesto.PresupuestoDeApagado:
+                        <div class="d-flex align-center flex-wrap mb-2" style="gap:8px;">
+                            <MudNumericField T="int" @bind-Value="_segundos" Label="Segundos medidos" Min="1"
+                                             Style="max-width:150px;" Margin="Margin.Dense" Disabled="Ocupado" />
+                            <MudButton Variant="Variant.Outlined" Color="Color.Secondary" Disabled="Ocupado"
+                                       OnClick="RegistrarMedicion">Registrar medición</MudButton>
+                        </div>
+                        <MudButton Variant="Variant.Filled" Color="Color.Error" Disabled="Ocupado"
+                                   StartIcon="@Icons.Material.Filled.PowerSettingsNew" OnClick="OnDispararApagado">
+                            Ejecutar prueba de apagado
+                        </MudButton>
+                        break;
+
+                    case Supuesto.CorteConRetorno:
+                        <MudButton Variant="Variant.Filled" Color="Color.Error" Disabled="Ocupado"
+                                   StartIcon="@Icons.Material.Filled.FlashOff" OnClick="OnEjecutarCorte">
+                            Ejecutar corte con retorno
+                        </MudButton>
+                        break;
+
+                    case Supuesto.ReencendidoPorPlaca:
+                        <div class="d-flex align-center flex-wrap" style="gap:8px;">
+                            <MudButton Variant="Variant.Outlined" Color="Color.Secondary" Disabled="Ocupado"
+                                       OnClick="@(() => OnReencendido.InvokeAsync(true))">Arrancó solo</MudButton>
+                            <MudButton Variant="Variant.Text" Color="Color.Error" Disabled="Ocupado"
+                                       OnClick="@(() => OnReencendido.InvokeAsync(false))">No arrancó (refutar)</MudButton>
+                        </div>
+                        break;
+                }
+            }
+        </div>
+    }
+</MudPaper>
+
+@code {
+    [Parameter, EditorRequired] public VistaVerificacion Vista { get; set; } = default!;
+    [Parameter] public bool Ocupado { get; set; }
+
+    /// <summary>Paso actual del ejercicio guiado: se destaca (P-7).</summary>
+    [Parameter] public bool Resaltada { get; set; }
+
+    /// <summary>Hay un ejercicio en curso y esta no es la prueba del paso actual: se atenúa (P-7).</summary>
+    [Parameter] public bool Atenuada { get; set; }
+
+    [Parameter] public EventCallback OnConfirmarSenal { get; set; }
+    [Parameter] public EventCallback<int> OnRegistrarMedicion { get; set; }
+    [Parameter] public EventCallback OnDispararApagado { get; set; }
+    [Parameter] public EventCallback OnEjecutarCorte { get; set; }
+    [Parameter] public EventCallback<bool> OnReencendido { get; set; }
+
+    private bool _expandido;
+    private int _segundos = 120;
+
+    // Colapsada = vigente/por vencer y el usuario no la expandió (P-4).
+    private bool Colapsada => Vista.Colapsada && !_expandido;
+    private bool EsVigente => Vista.Estado is EstadoVerificacion.Verificado or EstadoVerificacion.PorVencer;
+
+    private void Alternar() => _expandido = !_expandido;
+
+    private Task RegistrarMedicion() => OnRegistrarMedicion.InvokeAsync(_segundos);
+
+    private string ClaseTarjeta => Colapsada ? "pa-3 mb-3" : "pa-4 mb-3";
+
+    // Borde: riesgo (P-5) si corta corriente real; acento si es el paso actual del ejercicio (P-7).
+    private string EstiloTarjeta
+    {
+        get
+        {
+            var borde = Vista.CortaCorrienteReal && !Colapsada
+                ? "border-color:var(--mud-palette-error);"
+                : Resaltada ? "border-color:var(--mud-palette-secondary);border-width:2px;" : string.Empty;
+            var opacidad = Atenuada ? "opacity:.55;" : string.Empty;
+            return $"border-radius:10px;{borde}{opacidad}";
+        }
+    }
+
+    private string TonoCss => Vista.Estado switch
+    {
+        EstadoVerificacion.Verificado => "success",
+        EstadoVerificacion.NuncaVerificado or EstadoVerificacion.PorVencer => "warning",
+        _ => "error",
+    };
+
+    private string EstiloNumero =>
+        $"width:28px;height:28px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;"
+        + $"font-size:0.8125rem;font-weight:600;border:1.5px solid var(--mud-palette-{TonoCss});color:var(--mud-palette-{TonoCss});";
+
+    private string SubtituloMostrado => Colapsada ? ResumenColapsado : (Vista.Subtitulo ?? string.Empty);
+
+    private bool TieneEvidencia => Vista.MedidoSeg is not null || !string.IsNullOrWhiteSpace(Vista.EvidenciaTexto);
+
+    // Evidencia comparada para el apagado (H-7); textual para el resto.
+    private string Evidencia =>
+        Vista.MedidoSeg is { } medido && Vista.ReservadoSeg is { } reservado
+            ? $"{medido} s medidos vs. {reservado} s reservados"
+            : Vista.EvidenciaTexto ?? string.Empty;
+
+    private string ResumenColapsado
+    {
+        get
+        {
+            var partes = new List<string>();
+            if (TieneEvidencia)
+            {
+                partes.Add(Evidencia);
+            }
+
+            partes.Add(FormatoRelativo.Vencimiento(Vista.FechaVencimiento, Vista.DiasRestantes));
+            return string.Join(" · ", partes);
+        }
+    }
+
+    private string? IsoVencimiento => Vista.FechaVencimiento is { } f ? FormatoRelativo.Iso(f) : null;
+}

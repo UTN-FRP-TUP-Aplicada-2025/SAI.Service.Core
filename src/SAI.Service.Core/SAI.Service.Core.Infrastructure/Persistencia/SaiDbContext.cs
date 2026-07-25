@@ -50,6 +50,9 @@ public class SaiDbContext(DbContextOptions<SaiDbContext> options)
     /// <summary>Verificaciones de los cuatro supuestos de seguridad operativa (ADR-10).</summary>
     public DbSet<Verificacion> Verificaciones => Set<Verificacion>();
 
+    /// <summary>Sesiones de ejercicio guiado de la ventana de mantenimiento (P-7).</summary>
+    public DbSet<SesionEjercicio> SesionesEjercicio => Set<SesionEjercicio>();
+
     /// <summary>Historia de monitoreo: fuentes de datos (Etapa 3).</summary>
     public DbSet<FuenteDatos> FuentesDatos => Set<FuenteDatos>();
 

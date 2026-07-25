@@ -1,9 +1,18 @@
 @page "/panel-de-verificaciones"
 @attribute [Authorize]
-@using SAI.Service.Core.Application.Equipos
-@using SAI.Service.Core.Domain.Verificaciones
+@using SAI.Service.Core.Application.Abstractions
+@using SAI.Service.Core.Application.Acciones
 @using Microsoft.Extensions.DependencyInjection
+@implements IAsyncDisposable
 @inject IServiceScopeFactory FabricaAlcances
+@inject IAdaptadorConexion Adaptador
+@inject IDialogService Dialogos
+@inject OpcionesVerificacion OpcionesVerif
+@inject OpcionesApagado OpcionesApag
+
+@* Orquestador del panel (rediseño UX): carga las verificaciones, arma la vista con el constructor
+   (toda la lógica de estado vive ahí, no en el markup) y compone los componentes de presentación.
+   Las acciones destructivas pasan siempre por el diálogo de confirmación (P-5). *@
 
 <PageTitle>Panel de verificaciones — SAI.Service.Core</PageTitle>
 
@@ -16,82 +25,43 @@
 else if (_verificaciones.Count == 0)
 {
     <MudAlert Severity="Severity.Info" Variant="Variant.Filled">
-        Todavía no hay supuestos sembrados. <MudLink Href="/alta-de-equipos" Color="Color.Inherit"><b>Dá de alta un equipo</b></MudLink>.
+        Todavía no hay pruebas sembradas. <MudLink Href="/alta-de-equipos" Color="Color.Inherit"><b>Dá de alta un equipo</b></MudLink>.
     </MudAlert>
 }
 else
 {
-    var ahora = DateTimeOffset.UtcNow;
-    var verificados = EvaluadorModalidad.Verificados(_verificaciones, ahora);
-    var refutado = _verificaciones.Any(v => v.Estado == EstadoVerificacion.Refutado);
-    var desbloqueado = verificados >= EvaluadorModalidad.SupuestosRequeridos;
+    <EncabezadoEstadoServicio Modo="_modo"
+                              MostrarIniciarEjercicio="@(!_ejercicio.HayEjercicio && _ejercicio.PasoActual is not null)"
+                              Ocupado="_ocupado"
+                              OnIniciarEjercicio="IniciarEjercicio" />
 
-    <MudAlert Severity="@(desbloqueado ? Severity.Success : Severity.Warning)" Variant="Variant.Filled" Class="mb-4" role="alert">
-        <b>@verificados de @EvaluadorModalidad.SupuestosRequeridos</b> supuestos verificados.
-        @if (desbloqueado)
-        {
-            <span> <b>Desbloqueado</b>: se habilita el apagado ordenado (la modalidad de acción se aplica cuando la política lo solicite).</span>
-        }
-        else if (refutado)
-        {
-            <span> Hay un supuesto <b>refutado</b> (bloqueo permanente): el servicio permanece en solo aviso hasta resolverlo.</span>
-        }
-        else
-        {
-            <span> El servicio permanece en <b>solo aviso</b> hasta verificar los cuatro.</span>
-        }
-    </MudAlert>
+    <IndicadorEnVivo Estado="_estadoSai" />
 
-    <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined" Class="mb-4" Icon="@Icons.Material.Filled.Warning">
-        La ventana de mantenimiento incluye pruebas físicas (cortar la red, apagado con retorno), con presencia física.
-        El apagado real por NUT está diferido; acá se ejercita el camino contra el adaptador configurado.
-    </MudAlert>
+    @if (_ejercicio.HayEjercicio)
+    {
+        <BannerEjercicio Estado="_ejercicio" Ocupado="_ocupado" OnSalir="SalirDelEjercicio" />
+    }
 
-    <MudGrid>
-        @foreach (var v in _verificaciones.OrderBy(x => x.Supuesto))
-        {
-            var estado = v.EstadoEfectivo(ahora);
-            <MudItem xs="12" md="6">
-                <MudPaper Elevation="1" Class="pa-4" Style="border-radius:10px;height:100%;">
-                    <div class="d-flex align-center mb-2">
-                        <MudIcon Icon="@IconoEstado(estado)" Color="@ColorEstado(estado)" Class="mr-2" />
-                        <MudText Typo="Typo.subtitle1">@EtiquetaSupuesto(v.Supuesto)</MudText>
-                        <MudSpacer />
-                        <MudChip T="string" Size="Size.Small" Color="@ColorEstado(estado)" Variant="Variant.Text">@EtiquetaEstado(estado)</MudChip>
-                    </div>
-                    @if (v.Evidencia is not null)
-                    {
-                        <MudText Typo="Typo.caption" Class="mud-text-secondary d-block mb-2">Evidencia: @v.Evidencia</MudText>
-                    }
+    <TiraSecuencia />
 
-                    @if (estado != EstadoVerificacion.Refutado)
-                    {
-                        @switch (v.Supuesto)
-                        {
-                            case Supuesto.PresupuestoDeApagado:
-                                <div class="d-flex align-center" style="gap:0.5rem;">
-                                    <MudNumericField T="int" @bind-Value="_segundos" Label="Segundos" Min="1" Style="max-width:120px;" Margin="Margin.Dense" />
-                                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="_ocupado" OnClick="VerificarPresupuesto">Verificar</MudButton>
-                                </div>
-                                break;
-                            case Supuesto.SenalEnBateria:
-                                <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="_ocupado" OnClick="VerificarSenal">Verificar señal en batería</MudButton>
-                                break;
-                            case Supuesto.CorteConRetorno:
-                                <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="_ocupado" OnClick="VerificarCorte">Verificar corte con retorno</MudButton>
-                                break;
-                            case Supuesto.ReencendidoPorPlaca:
-                                <div class="d-flex align-center flex-wrap" style="gap:0.5rem;">
-                                    <MudButton Variant="Variant.Filled" Color="Color.Success" Disabled="_ocupado" OnClick="() => Reencendido(true)">Arrancó solo</MudButton>
-                                    <MudButton Variant="Variant.Outlined" Color="Color.Error" Disabled="_ocupado" OnClick="() => Reencendido(false)">No arrancó (refutar)</MudButton>
-                                </div>
-                                break;
-                        }
-                    }
-                </MudPaper>
-            </MudItem>
-        }
-    </MudGrid>
+    @if (_ocupado)
+    {
+        <MudProgressLinear Indeterminate="true" Color="Color.Primary" Class="mb-2" />
+        <MudText Typo="Typo.caption" Class="mud-text-secondary d-block mb-2">Ejecutando la prueba…</MudText>
+    }
+
+    @foreach (var vista in _tarjetas)
+    {
+        <TarjetaVerificacion Vista="vista"
+                             Ocupado="_ocupado"
+                             Resaltada="@(_ejercicio.HayEjercicio && vista.Supuesto == _ejercicio.PasoActual)"
+                             Atenuada="@(_ejercicio.HayEjercicio && vista.Supuesto != _ejercicio.PasoActual)"
+                             OnConfirmarSenal="ConfirmarSenal"
+                             OnRegistrarMedicion="RegistrarMedicion"
+                             OnDispararApagado="DispararApagado"
+                             OnEjecutarCorte="EjecutarCorte"
+                             OnReencendido="Reencendido" />
+    }
 
     @if (_mensaje is not null)
     {
@@ -101,23 +71,181 @@ else
 
 @code {
     private IReadOnlyList<Verificacion>? _verificaciones;
-    private int _segundos = 120;
+    private IReadOnlyList<VistaVerificacion> _tarjetas = [];
+    private ModoServicioVista _modo = new(ModoServicio.SoloAviso, 0, EvaluadorModalidad.SupuestosRequeridos, false);
+    private EstadoEjercicio _ejercicio = new(null, null, 0, SecuenciaFisica.Orden.Count);
+    private EstadoSai? _estadoSai;
+    private readonly CancellationTokenSource _cts = new();
+    // Refresco del estado en vivo, alineado con el intervalo de sondeo (5 s).
+    private static readonly TimeSpan IntervaloEnVivo = TimeSpan.FromSeconds(5);
     private bool _ocupado;
     private string? _mensaje;
     private Severity _severidad = Severity.Info;
 
     protected override async Task OnInitializedAsync() => await Cargar();
 
+    // El sondeo en vivo arranca recién en el circuito interactivo (no en el prerender estático).
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        await LeerEnVivo();
+        await InvokeAsync(StateHasChanged);
+        _ = SondearEnVivoAsync();
+    }
+
+    private async Task SondearEnVivoAsync()
+    {
+        using var temporizador = new PeriodicTimer(IntervaloEnVivo);
+        try
+        {
+            while (await temporizador.WaitForNextTickAsync(_cts.Token))
+            {
+                await LeerEnVivo();
+                await InvokeAsync(StateHasChanged);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // El panel se cerró: fin del sondeo.
+        }
+    }
+
+    // Lee el estado del equipo para la retroalimentación en vivo. Una lectura fallida no rompe el panel:
+    // se refleja como «sin lectura del equipo».
+    private async Task LeerEnVivo()
+    {
+        try
+        {
+            _estadoSai = await Adaptador.LeerEstadoAsync(_cts.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch
+        {
+            _estadoSai = null;
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await _cts.CancelAsync();
+        _cts.Dispose();
+    }
+
     private async Task Cargar()
     {
         using var alcance = FabricaAlcances.CreateScope();
-        _verificaciones = await alcance.ServiceProvider.GetRequiredService<ServicioVerificacion>().EstadoAsync(CancellationToken.None);
+        _verificaciones = await alcance.ServiceProvider.GetRequiredService<ServicioVerificacion>()
+            .EstadoAsync(CancellationToken.None);
+        _ejercicio = await alcance.ServiceProvider.GetRequiredService<ServicioEjercicioGuiado>()
+            .EstadoAsync(CancellationToken.None);
+
+        var constructor = new ConstructorVistaPanel(OpcionesVerif, OpcionesApag);
+        (_modo, _tarjetas) = constructor.Construir(_verificaciones, DateTimeOffset.UtcNow);
     }
 
-    private Task VerificarPresupuesto() => Ejecutar(s => s.VerificarPresupuestoAsync(_segundos, CancellationToken.None));
-    private Task VerificarSenal() => Ejecutar(s => s.VerificarSenalBateriaAsync(CancellationToken.None));
-    private Task VerificarCorte() => Ejecutar(s => s.VerificarCorteConRetornoAsync(CancellationToken.None));
-    private Task Reencendido(bool arrancoSolo) => Ejecutar(s => s.RegistrarReencendidoAsync(arrancoSolo, CancellationToken.None));
+    // --- Ejercicio guiado (P-7): acompaña, no verifica ---
+    private async Task IniciarEjercicio()
+    {
+        using var alcance = FabricaAlcances.CreateScope();
+        await alcance.ServiceProvider.GetRequiredService<ServicioEjercicioGuiado>()
+            .IniciarAsync(CancellationToken.None);
+        await Cargar();
+    }
+
+    private async Task SalirDelEjercicio()
+    {
+        using var alcance = FabricaAlcances.CreateScope();
+        await alcance.ServiceProvider.GetRequiredService<ServicioEjercicioGuiado>()
+            .AbandonarAsync(CancellationToken.None);
+        await Cargar();
+    }
+
+    // --- Acciones sin riesgo ---
+    private Task ConfirmarSenal() => Ejecutar(s => s.VerificarSenalBateriaAsync(CancellationToken.None));
+
+    private Task RegistrarMedicion(int segundos) =>
+        Ejecutar(s => s.VerificarPresupuestoAsync(segundos, CancellationToken.None));
+
+    private Task Reencendido(bool arrancoSolo) =>
+        Ejecutar(s => s.RegistrarReencendidoAsync(arrancoSolo, CancellationToken.None));
+
+    // --- Acciones destructivas: confirmación deliberada antes de ejecutar (P-5) ---
+    private async Task DispararApagado()
+    {
+        var confirmado = await ConfirmarRiesgo(
+            titulo: "Ejecutar prueba de apagado",
+            consecuencia: "Esto inicia el apagado ordenado del host: el equipo se va a apagar.",
+            precondiciones:
+            [
+                "Estás en sitio y podés encender el host si no arranca solo.",
+                "Nadie está trabajando sobre el host en este momento.",
+            ],
+            textoConfirmar: "Ejecutar apagado");
+
+        if (confirmado)
+        {
+            await Ejecutar(s => s.DispararPruebaPresupuestoAsync(CancellationToken.None));
+        }
+    }
+
+    private async Task EjecutarCorte()
+    {
+        var confirmado = await ConfirmarRiesgo(
+            titulo: "Ejecutar corte con retorno",
+            consecuencia: "Esto corta la corriente que alimenta al host.",
+            precondiciones:
+            [
+                "Verificaste el arranque automático en la BIOS del host.",
+                "Estás en sitio: si el host no vuelve a encender, hay que hacerlo a mano.",
+                "No hay garantía de que el SAI reponga su salida.",
+            ],
+            textoConfirmar: "Ejecutar corte");
+
+        if (confirmado)
+        {
+            await Ejecutar(s => s.VerificarCorteConRetornoAsync(CancellationToken.None));
+        }
+    }
+
+    private async Task<bool> ConfirmarRiesgo(string titulo, string consecuencia, string[] precondiciones, string textoConfirmar)
+    {
+        var parametros = new DialogParameters<DialogoConfirmacionRiesgo>
+        {
+            { x => x.Titulo, titulo },
+            { x => x.Consecuencia, consecuencia },
+            { x => x.Precondiciones, precondiciones },
+            { x => x.NombreEquipo, NombreEquipo },
+            { x => x.TextoConfirmar, textoConfirmar },
+        };
+        var opciones = new DialogOptions { CloseOnEscapeKey = true, BackdropClick = false, MaxWidth = MaxWidth.Small, FullWidth = true };
+
+        var dialogo = await Dialogos.ShowAsync<DialogoConfirmacionRiesgo>(titulo, parametros, opciones);
+        var resultado = await dialogo.Result;
+        return resultado is { Canceled: false, Data: bool ok } && ok;
+    }
+
+    // El nombre a tipear en la confirmación sale del código de la verificación ("ver-{dispositivo}-{supuesto}").
+    private string NombreEquipo
+    {
+        get
+        {
+            var codigo = _verificaciones?.FirstOrDefault()?.Codigo;
+            if (string.IsNullOrWhiteSpace(codigo))
+            {
+                return "equipo";
+            }
+
+            var partes = codigo.Split('-');
+            return partes.Length >= 2 ? partes[1] : codigo;
+        }
+    }
 
     private async Task Ejecutar(Func<ServicioVerificacion, Task<ResultadoVerificacion>> accion)
     {
@@ -130,6 +258,7 @@ else
             _severidad = resultado.Codigo switch
             {
                 CodigoResultadoVerificacion.Verificado => Severity.Success,
+                CodigoResultadoVerificacion.PruebaDisparada => Severity.Info,
                 CodigoResultadoVerificacion.Refutado => Severity.Error,
                 _ => Severity.Warning,
             };
@@ -140,37 +269,4 @@ else
             await Cargar();
         }
     }
-
-    private static string EtiquetaSupuesto(Supuesto supuesto) => supuesto switch
-    {
-        Supuesto.PresupuestoDeApagado => "Presupuesto de apagado",
-        Supuesto.SenalEnBateria => "Señal en batería",
-        Supuesto.ReencendidoPorPlaca => "Reencendido por placa",
-        Supuesto.CorteConRetorno => "Corte con retorno",
-        _ => supuesto.ToString(),
-    };
-
-    private static string EtiquetaEstado(EstadoVerificacion estado) => estado switch
-    {
-        EstadoVerificacion.NuncaVerificado => "Nunca verificado",
-        EstadoVerificacion.Verificado => "Verificado",
-        EstadoVerificacion.Vencido => "Vencido",
-        EstadoVerificacion.Refutado => "Refutado (bloqueo permanente)",
-        _ => estado.ToString(),
-    };
-
-    private static string IconoEstado(EstadoVerificacion estado) => estado switch
-    {
-        EstadoVerificacion.Verificado => Icons.Material.Filled.CheckCircle,
-        EstadoVerificacion.Vencido => Icons.Material.Filled.Schedule,
-        EstadoVerificacion.Refutado => Icons.Material.Filled.Block,
-        _ => Icons.Material.Filled.HourglassEmpty,
-    };
-
-    private static Color ColorEstado(EstadoVerificacion estado) => estado switch
-    {
-        EstadoVerificacion.Verificado => Color.Success,
-        EstadoVerificacion.Refutado => Color.Error,
-        _ => Color.Warning,
-    };
 }

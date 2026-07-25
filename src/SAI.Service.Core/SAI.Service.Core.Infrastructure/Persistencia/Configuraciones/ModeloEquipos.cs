@@ -191,6 +191,18 @@ internal static class ModeloEquipos
             e.Property(v => v.Evidencia);
             e.Property(v => v.VigenciaHasta);
             e.Property(v => v.ActualizadoEn).IsRequired();
+            e.Property(v => v.PruebaEnCursoDesde);
+            e.Property(v => v.MedicionSegundos);
+        });
+
+        builder.Entity<SesionEjercicio>(e =>
+        {
+            e.ToTable("SesionEjercicio");
+            e.HasKey(s => s.Codigo);
+            e.Property(s => s.Codigo);
+            e.Property(s => s.IniciadaEn).IsRequired();
+            e.Property(s => s.FinalizadaEn);
+            e.Property(s => s.Estado).HasConversion<string>().IsRequired();
         });
     }
 }

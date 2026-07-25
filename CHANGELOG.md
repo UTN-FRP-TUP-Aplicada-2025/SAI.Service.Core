@@ -9,6 +9,28 @@ y el versionado sigue [Semantic Versioning](https://semver.org/lang/es/).
 
 ### Añadido
 
+- **Ventana de mantenimiento — disparo del apagado y rearme por reinicio** (US-16, CU-10, ADR-25):
+  en el panel de verificaciones, la **"Prueba de tiempo de apagado del host"** ahora tiene un botón
+  **"Ejecutar prueba de apagado"** que **dispara** el apagado ordenado del host (reutiliza el write path
+  `OrdenarApagadoConRetornoAsync` — el host baja limpio y reenciende al volver la energía; en desarrollo el
+  adaptador **simulado** lo acepta de forma inerte). Al dispararse, el botón y la caja de tiempo se
+  **bloquean** con la leyenda *"Se activará cuando reinicie el equipo para iniciar una nueva prueba"* — el
+  freno para no re-disparar el apagado. El **tiempo se carga a mano (CU-10)** y **nunca** se rotula como
+  "medido": por **ADR-25** (NUT en contenedor) el servicio corre en el contenedor que el propio apagado
+  detiene, así que no puede cronometrarlo desde adentro.
+  - Marcador persistido `PruebaEnCursoDesde` en `Verificacion` (ortogonal al estado: una verificación puede
+    quedar verificada y aun así esperar el reinicio), con `IniciarPrueba` / `RearmarPorReinicio`. Migración
+    `EsquemaPruebaApagado`.
+  - `ServicioRearmePruebas` (`IHostedService`): **detección del reinicio = arranque del servicio**. Bajo
+    ADR-25, un reinicio real del host reinicia el contenedor; que el servicio vuelva a la vida es la señal
+    honesta de que el host cicló, y al arrancar limpia los marcadores pendientes y rehabilita los botones.
+  - El botón **"Encendido por presencia de energía en la alimentación del host"** aplica el mismo freno: al
+    registrar que el host arrancó solo, queda esperando el reinicio antes de admitir una nueva observación.
+  - 9 pruebas nuevas (dominio: `IniciarPrueba`/`RearmarPorReinicio`, ortogonalidad con el estado, guard del
+    refutado; integración: disparo deja esperando el reinicio sin verificar, freno al re-disparo, rearme y
+    carga manual del tiempo, gate del reencendido). *La auto-medición del tiempo queda fuera de alcance por
+    ADR-25; el write path NUT real se valida contra un host físico en despliegue, no en desarrollo.*
+
 - **Etapa 4 · Incremento C — Recambio de batería y ficha de vida útil** (CU-08, US-18, US-19,
   BT-26, BT-27): el recambio de batería como **un solo acto** (`ServicioRecambioBateria`): valida el
   **cuadre de costos** (RN-08: total = repuestos + mano de obra, misma moneda) y que **todo importe
@@ -280,6 +302,67 @@ y el versionado sigue [Semantic Versioning](https://semver.org/lang/es/).
   y `Bitacora-Validacion-Maqueta-v1.0.md`.
 
 ### Cambiado
+
+- **Ejercicio guiado de la ventana de mantenimiento** (P-7, US-16, CU-10): el panel gana un **modo de
+  acompañamiento** que recorre las cuatro pruebas como el **único ejercicio físico encadenado** que en
+  realidad son, en vez de cuatro verificaciones sueltas. No es un asistente aparte: es el mismo panel en
+  **modo foco** —se destaca la prueba del paso actual y se atenúan las demás— con un banner que indica en
+  qué paso va y desde cuándo, y una salida (`Salir del ejercicio`) que no pierde nada.
+  - **La sesión no guarda el progreso.** `SesionEjercicio` registra solo *intención* («se está haciendo el
+    ejercicio completo») y *momento*; **el paso se deriva** de las verificaciones con
+    `SecuenciaFisica.PrimeroPendiente`, que siguen siendo la única verdad de qué está verificado. Así no
+    puede desincronizarse, y salir del ejercicio nunca pierde lo ya verificado.
+  - **No cambia el proceso de verificación**: cada paso se confirma con los métodos que ya existían en
+    `ServicioVerificacion`. `ServicioEjercicioGuiado` solo acompaña (iniciar, estado, abandonar) y cierra
+    la sesión **sola** cuando los cuatro supuestos quedan vigentes.
+  - La sesión se **persiste** (migración `EsquemaSesionEjercicio`), no vive en el circuito Blazor: el
+    ejercicio sobrevive al **reinicio del host** —que es parte normal del ejercicio— y se puede consultar
+    desde cualquier navegador. Antes de los pasos que apagan el host, el banner avisa que se va a perder la
+    pantalla y qué conviene observar.
+  - El **orden físico de las pruebas pasa al dominio** (`SecuenciaFisica`), que antes vivía duplicado en la
+    vista: lo usan tanto el panel como la derivación del paso. 16 pruebas nuevas.
+
+- **Indicador de estado del SAI en vivo en el Panel de verificaciones** (mejora UX): el panel muestra,
+  refrescándose con el sondeo (cada 5 s), si el equipo está **en línea** o **en batería ahora** —con la
+  tensión de entrada y la carga—, leyendo el estado **tipado** del adaptador (sin interpretar `ups.status`
+  en la vista). Cierra el hueco de que, al cortar la red, el operador no tenía ninguna señal de que el
+  sistema estuviera viendo el corte: confirmar la señal deja de ser a ciegas. No cambia la verificación,
+  que sigue siendo un acto deliberado. `DescriptorEnVivo` (mapeo estado→cartel) con 4 pruebas.
+
+- **Rediseño UX/UI del Panel de verificaciones — Fases 1 y 2** (SPEC *Rediseño UX/UI del Panel de
+  verificaciones*, US-16, CU-10): el panel pasa de una grilla 2×2 con dos banners ámbar a una **columna
+  única con las cuatro pruebas numeradas en su secuencia física real** (señal en batería → apagado
+  ordenado → corte con retorno → arranque automático), de modo que el orden en pantalla coincide con el
+  orden en que ocurren (P-2, H-1).
+  - **Encabezado de estado del servicio** (P-1, H-2): reemplaza el primer banner por un bloque con chip de
+    modo, contador «N de 4 pruebas verificadas», barra de 4 segmentos y la **consecuencia en lenguaje
+    llano** («El sistema todavía no apaga el host automáticamente…»), en vez de la jerga «solo aviso».
+    El segundo banner pasa a una **tira de secuencia** neutra (P-3).
+  - **Divulgación progresiva** (P-4, H-3, H-9): una prueba vigente o **por vencer** se muestra colapsada en
+    una fila (evidencia resumida + vencimiento relativo) con «Ver procedimiento» y «Re-verificar»; las
+    pendientes, vencidas o refutadas van expandidas. Toda tarjeta ofrece al menos una acción.
+  - **Jerarquía de acciones por riesgo** (P-5, H-4): las acciones de solo lectura pasan a secundarias y
+    **las dos acciones que disparan un apagado** —«Ejecutar corte con retorno» y «Ejecutar prueba de
+    apagado»— son las únicas en rojo y exigen confirmación deliberada en un modal reusable
+    (`DialogoConfirmacionRiesgo`: enuncia la consecuencia, lista precondiciones y pide tipear el nombre del
+    equipo). Ninguna acción destructiva se ejecuta con un solo clic.
+  - **Nuevo estado efectivo `PorVencer`** (H-6, SPEC 4.1): computado (nunca persistido) a partir de la
+    vigencia y del umbral configurable `Sai:Verificacion:DiasPreavisoVencimiento` (30 días por defecto);
+    sigue contando como vigente (RN-02). Se **conserva `Refutado`**, que la SPEC omitía: es un bloqueo
+    permanente real del dominio.
+  - **Evidencia comparada** (H-7): la prueba de apagado guarda además el valor numérico medido
+    (`MedicionSegundos`, migración `EsquemaMedicionApagado`) y se muestra como *«20 s medidos vs. 120 s
+    reservados»* contra `Sai:Apagado:TiempoReservadoSeg`, en vez de un valor suelto.
+  - **Fechas legibles** (5.3): fecha localizada + tiempo relativo («vigente hasta el 18 ene 2027 (faltan 6
+    meses)»); el ISO queda solo en el tooltip. **Chips de contexto** por tarjeta (P-6): quién actúa, qué
+    hace el operador, «Presencial» y «Corta corriente real». **Microcopy** (sección 6): «supuestos» →
+    «pruebas», títulos cortos con subtítulo, badge «Pendiente».
+  - La lógica de estado sale del markup a un **view model** (`ConstructorVistaPanel`, SPEC 4.1/4.3/4.4) y la
+    página se descompone en componentes (`EncabezadoEstadoServicio`, `TiraSecuencia`, `ChipEstado`,
+    `TarjetaVerificacion`, `DialogoConfirmacionRiesgo`). 16 pruebas nuevas.
+  - *Fuera de alcance:* el **asistente de ejercicio guiado** (P-7) se planifica aparte; el theme global y el
+    sidebar no se tocan (afectan a todos los módulos y contradicen la maqueta aprobada), por lo que la regla
+    de color de 5.1 se aplica **dentro del panel**; el selector multi-equipo sigue fuera de alcance.
 
 - **Unificación de terminología** (retroalimentación de la Fase B2, propagada a toda la
   cadena: intake, 00, 01, 02, 03 y maqueta):

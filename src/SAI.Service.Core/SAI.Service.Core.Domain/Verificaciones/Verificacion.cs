@@ -28,6 +28,25 @@ public sealed class Verificacion
     /// <summary>Instante de la última actualización del estado.</summary>
     public DateTimeOffset ActualizadoEn { get; private set; }
 
+    /// <summary>
+    /// Instante en que se disparó una prueba física que exige un reinicio del host antes de repetirse
+    /// (Etapa 4·E), o nulo si no hay ninguna en curso. Mientras no sea nulo, la acción queda bloqueada en
+    /// el panel (<see cref="EsperandoReinicio"/>): es el freno para que no se re-dispare el apagado "a lo
+    /// loco". Es ortogonal al <see cref="Estado"/>: una verificación puede quedar verificada y aun así
+    /// esperar el reinicio para admitir una nueva prueba.
+    /// </summary>
+    public DateTimeOffset? PruebaEnCursoDesde { get; private set; }
+
+    /// <summary>Verdadero si hay una prueba disparada esperando el reinicio del host (Etapa 4·E).</summary>
+    public bool EsperandoReinicio => PruebaEnCursoDesde is not null;
+
+    /// <summary>
+    /// Segundos medidos en la prueba de tiempo de apagado del host, o nulo si no aplica / aún sin medir.
+    /// Es el valor numérico de la evidencia (además de la cadena textual), para poder compararlo contra la
+    /// ventana reservada en la vista (H-7). Solo lo usa el supuesto de presupuesto de apagado.
+    /// </summary>
+    public int? MedicionSegundos { get; private set; }
+
     // Constructor privado para EF (materialización) y las fábricas.
     private Verificacion(string codigo, Supuesto supuesto, EstadoVerificacion estado, DateTimeOffset actualizadoEn)
     {
@@ -51,8 +70,9 @@ public sealed class Verificacion
     /// Marca el supuesto como verificado por evidencia observada (US-16, US-17). Un supuesto
     /// <see cref="EstadoVerificacion.Refutado"/> es un bloqueo permanente y no puede reverificarse.
     /// </summary>
+    /// <param name="medicionSegundos">Valor numérico medido (solo el presupuesto de apagado), o nulo.</param>
     /// <exception cref="InvalidOperationException">Si la verificación está refutada.</exception>
-    public void Verificar(string metodo, string? evidencia, DateTimeOffset? vigenciaHasta, DateTimeOffset ahora)
+    public void Verificar(string metodo, string? evidencia, DateTimeOffset? vigenciaHasta, DateTimeOffset ahora, int? medicionSegundos = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(metodo);
         if (Estado == EstadoVerificacion.Refutado)
@@ -64,6 +84,7 @@ public sealed class Verificacion
         Metodo = metodo;
         Evidencia = evidencia;
         VigenciaHasta = vigenciaHasta;
+        MedicionSegundos = medicionSegundos;
         ActualizadoEn = ahora;
     }
 
@@ -78,6 +99,41 @@ public sealed class Verificacion
         Metodo = metodo;
         Evidencia = evidencia;
         VigenciaHasta = null;
+        PruebaEnCursoDesde = null; // refutar es un bloqueo permanente: no queda ninguna prueba pendiente.
+        ActualizadoEn = ahora;
+    }
+
+    /// <summary>
+    /// Marca que se disparó una prueba física que exige un reinicio del host antes de repetirse (Etapa
+    /// 4·E): la acción queda bloqueada (<see cref="EsperandoReinicio"/>) hasta que el servicio vuelva a
+    /// arrancar tras el reinicio. Un supuesto <see cref="EstadoVerificacion.Refutado"/> es un bloqueo
+    /// permanente y no admite disparar una prueba.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">Si la verificación está refutada.</exception>
+    public void IniciarPrueba(DateTimeOffset ahora)
+    {
+        if (Estado == EstadoVerificacion.Refutado)
+        {
+            throw new InvalidOperationException("Un supuesto refutado es un bloqueo permanente: no admite disparar una prueba.");
+        }
+
+        PruebaEnCursoDesde = ahora;
+        ActualizadoEn = ahora;
+    }
+
+    /// <summary>
+    /// Rearma la verificación tras detectarse el reinicio del host (Etapa 4·E): limpia el marcador de
+    /// prueba en curso, de modo que la acción vuelve a habilitarse en el panel. Es idempotente: si no
+    /// había ninguna prueba en curso, no hace nada.
+    /// </summary>
+    public void RearmarPorReinicio(DateTimeOffset ahora)
+    {
+        if (PruebaEnCursoDesde is null)
+        {
+            return;
+        }
+
+        PruebaEnCursoDesde = null;
         ActualizadoEn = ahora;
     }
 
@@ -90,10 +146,31 @@ public sealed class Verificacion
 
     /// <summary>
     /// Estado efectivo en <paramref name="ahora"/>: una verificación verificada cuya vigencia ya venció
-    /// se ve como <see cref="EstadoVerificacion.Vencido"/> (vencimiento perezoso, US-17).
+    /// se ve como <see cref="EstadoVerificacion.Vencido"/> (vencimiento perezoso, US-17). Sin umbral de
+    /// preaviso no se computa <see cref="EstadoVerificacion.PorVencer"/>.
     /// </summary>
-    public EstadoVerificacion EstadoEfectivo(DateTimeOffset ahora) =>
-        Estado == EstadoVerificacion.Verificado && VigenciaHasta is { } hasta && hasta < ahora
-            ? EstadoVerificacion.Vencido
-            : Estado;
+    public EstadoVerificacion EstadoEfectivo(DateTimeOffset ahora) => EstadoEfectivo(ahora, 0);
+
+    /// <summary>
+    /// Estado efectivo en <paramref name="ahora"/> con umbral de preaviso: una verificación verificada
+    /// cuya vigencia ya venció se ve como <see cref="EstadoVerificacion.Vencido"/>; si vence dentro de
+    /// <paramref name="diasPreaviso"/> días, como <see cref="EstadoVerificacion.PorVencer"/> (H-6). El
+    /// estado real subyacente no cambia (es un cómputo, US-17).
+    /// </summary>
+    public EstadoVerificacion EstadoEfectivo(DateTimeOffset ahora, int diasPreaviso)
+    {
+        if (Estado != EstadoVerificacion.Verificado || VigenciaHasta is not { } hasta)
+        {
+            return Estado;
+        }
+
+        if (hasta < ahora)
+        {
+            return EstadoVerificacion.Vencido;
+        }
+
+        return hasta <= ahora.AddDays(Math.Max(0, diasPreaviso))
+            ? EstadoVerificacion.PorVencer
+            : EstadoVerificacion.Verificado;
+    }
 }

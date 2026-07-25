@@ -131,6 +131,20 @@ public class AdaptadorConexionNutTests
     }
 
     [Fact]
+    public async Task ElMensajeAlOperadorNoFiltraJergaDeNutNiClavesDeConfiguracion()
+    {
+        var cliente = new ClienteNutFalso { Variables = VariablesReales(), ConCredenciales = false };
+        var adaptador = new AdaptadorConexionNut(cliente);
+
+        var resultado = await adaptador.OrdenarApagadoConRetornoAsync(TimeSpan.FromSeconds(30), CancellationToken.None);
+
+        // El detalle técnico va al log; a la UI llega un mensaje en términos de permiso de operación.
+        resultado.Motivo.Should()
+            .NotContain("shutdown.return").And.NotContain("Sai:Nut").And.NotContain("3493").And.NotContain("INSTCMD");
+        resultado.Motivo.Should().Contain("permiso", "el operador entiende autorización, no comandos de NUT");
+    }
+
+    [Fact]
     public async Task ElTestDeBateriaEmiteElComandoRapido()
     {
         var cliente = new ClienteNutFalso { Variables = VariablesReales(), ConCredenciales = true };
