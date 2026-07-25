@@ -3,7 +3,7 @@
 **Proyecto:** Sai-Service-Core
 **Fase auditada:** E — Calidad y pruebas (categoría 08-Calidad-Y-Pruebas)
 **Alcance:** web-monolith, caso degenerado (layout aplanado: 08 cuelga directo de `SDD/Docs/`, sin `Proyectos/`). Los 10 entregables de 08.
-**Reglas de referencia:** `08-Rules-Calidad-Y-Pruebas.md` v1.3 (§6, §4, §2.2) y `Deriva-Rules.md` v1.0 (§2.3, §3) para la Matriz-Sensado-Deriva.
+**Reglas de referencia:** `Rules-Calidad-Y-Pruebas.md` v1.3 (§6, §4, §2.2) y `Deriva-Rules.md` v1.0 (§2.3, §3) para la Matriz-Sensado-Deriva.
 **Upstream cotejado:** 02 (12 CU, 13 RN, 21 invariantes I-1..I-21), 05 (25 NFR N-01..N-25), 03 (Linea-Base-Visual: 11 SUP / 19 CMP / 79 EST / 9 NAV; Contrato-Datos-Maqueta: 24 DM), 06 (Definition-Of-Ready), 07 (Mini-Plan), intake §17.
 **Auditor:** Auditor independiente SDD
 **Fecha:** 2026-07-21
@@ -23,7 +23,7 @@ No se detectaron hallazgos P0 ni P1. Se registra un hallazgo P2 de coherencia (u
 | P2 (medio) | 1 |
 | P3 (bajo) | 3 |
 
-**Veredicto: APROBADO.** La Fase E cumple las reglas §6 de 08-Rules y §2.3/§3 de Deriva-Rules. Se recomienda subsanar el P2 de coherencia de umbrales antes de congelar los pisos de cobertura del pipeline.
+**Veredicto: APROBADO.** La Fase E cumple las reglas §6 de Rules-Calidad-Y-Pruebas y §2.3/§3 de Deriva-Rules. Se recomienda subsanar el P2 de coherencia de umbrales antes de congelar los pisos de cobertura del pipeline.
 
 ---
 
@@ -43,7 +43,7 @@ Nota sobre el tooling y el dominio: el nombramiento de xUnit, FluentAssertions, 
 
 ---
 
-## 3. Matriz de estructura obligatoria (§6 de 08-Rules + tabla maestra §2.1)
+## 3. Matriz de estructura obligatoria (§6 de Rules-Calidad-Y-Pruebas + tabla maestra §2.1)
 
 | # | Documento | Presente | Contenido obligatorio | Resultado |
 | --- | --- | --- | --- | --- |
@@ -155,4 +155,4 @@ La DoD se declara fuente canónica (§3) y el Plan-Pruebas, la Estrategia-Calida
 
 ## 7. Veredicto final
 
-**APROBADO — sin hallazgos P0 ni P1.** La categoría 08 de Sai-Service-Core satisface los criterios de aceptación §6 de `08-Rules-Calidad-Y-Pruebas.md` v1.3 y §2.3/§3 de `Deriva-Rules.md` v1.0. La trazabilidad CU/RN/NFR/invariantes está cerrada, la Matriz-Sensado-Deriva cubre uno a uno los 142 elementos de la línea de base, y la DoD no solapa la DoR. Se recomienda subsanar P2-01 (unificar los umbrales de cobertura por capa de Infraestructura/Api entre los tres documentos) antes de congelar los pisos del pipeline, y atender los P3 en la próxima revisión editorial. Ninguno de estos hallazgos bloquea el cierre de la Fase E.
+**APROBADO — sin hallazgos P0 ni P1.** La categoría 08 de Sai-Service-Core satisface los criterios de aceptación §6 de `Rules-Calidad-Y-Pruebas.md` v1.3 y §2.3/§3 de `Deriva-Rules.md` v1.0. La trazabilidad CU/RN/NFR/invariantes está cerrada, la Matriz-Sensado-Deriva cubre uno a uno los 142 elementos de la línea de base, y la DoD no solapa la DoR. Se recomienda subsanar P2-01 (unificar los umbrales de cobertura por capa de Infraestructura/Api entre los tres documentos) antes de congelar los pisos del pipeline, y atender los P3 en la próxima revisión editorial. Ninguno de estos hallazgos bloquea el cierre de la Fase E.

@@ -26,7 +26,7 @@ Aceptado el 2026-07-20. ADR obligatorio de web-monolith (persistencia, motor y m
 | --- | --- | --- |
 | SQLite + EF Core + migraciones versionadas | Un archivo, respaldo trivial, sin servidor de base; adecuado a un proceso escritor único; migraciones revisables | Sin concurrencia de escritura ni escalado horizontal (aceptado, T-01); tamaño máximo tras agregación sin dimensionar (P-08) |
 | Motor cliente-servidor (relacional en proceso aparte) | Concurrencia, escalado | Infraestructura sin contrapartida: un usuario, un dispositivo, un escritor (T-01) |
-| Generación automática de esquema (sin migraciones) | Menos archivos | Imposible auditar cambios; anti-patrón de modelo sin migración versionada (05-Rules §4.7) |
+| Generación automática de esquema (sin migraciones) | Menos archivos | Imposible auditar cambios; anti-patrón de modelo sin migración versionada (Rules-Arquitectura-Tecnica §4.7) |
 
 ## 5. Consecuencias positivas
 

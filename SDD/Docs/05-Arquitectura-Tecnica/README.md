@@ -57,5 +57,5 @@ La tabla completa de 25 NFR con objetivo numérico, mecanismo de medición y ADR
 ## Notas
 
 - Estructura de repositorio: **layout aplanado** del caso degenerado (un solo proyecto); las categorías 00 a 11 cuelgan directo de `SDD/Docs/`, sin `Proyectos/<Nombre>/` ni `Solucion/`.
-- No se produce vista de solución (`Solucion/`): con un único proyecto, el mapa tendría un solo nodo y el grafo ninguna arista (05-Rules §4.8).
+- No se produce vista de solución (`Solucion/`): con un único proyecto, el mapa tendría un solo nodo y el grafo ninguna arista (Rules-Arquitectura-Tecnica §4.8).
 - Terminología vigente: "equipos" (no "parque"), "contraseña" (no "secreto").

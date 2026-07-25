@@ -71,8 +71,8 @@
 | ADR-20 | Sprint 0 (P-04) | CU-01, §17 P.5 |
 | ADR-21 | Sprint 0 (P-05) | RN-09, CU-11, CL-21 |
 | ADR-22 | Sprint 0 (P-06) | CU-05, F-24, E-07 |
-| ADR-23 | Fase F (omisión de categoría 10, gating por tipo D8 y `tiene_portal_developers`) | Master-prompt §14; 10-Rules §2.2 |
-| ADR-24 | Fase F (desviación del piso de ambientes de 09-Rules §2.2) | Intake §17 P.8; 09-Rules §2.2 |
+| ADR-23 | Fase F (omisión de categoría 10, gating por tipo D8 y `tiene_portal_developers`) | Master-prompt §14; Rules-Developer-Guide §2.2 |
+| ADR-24 | Fase F (desviación del piso de ambientes de Rules-Devops §2.2) | Intake §17 P.8; Rules-Devops §2.2 |
 | ADR-25 | Sprint 0 — cierre de ADR-19 (P-03) | R-05, R-08, CL-28, ADR-03 |
 | ADR-26 | Sprint 0 — cierre de ADR-20 (P-04) | CU-01, §17 P.5, ADR-16 |
 | ADR-27 | Sprint 0 — cierre de ADR-22 (P-06) | ADR-02, ADR-11, RN-03 |
@@ -81,7 +81,7 @@
 
 ## Notas de versionado e inmutabilidad
 
-- Cada ADR es un archivo individual e inmutable (05-Rules §3.3). Una decisión aceptada no se edita; si evoluciona, se crea una ADR nueva con identificador siguiente y la anterior pasa a estado `Superado por ADR-YY`, sin moverse de `Adrs/`.
+- Cada ADR es un archivo individual e inmutable (Rules-Arquitectura-Tecnica §3.3). Una decisión aceptada no se edita; si evoluciona, se crea una ADR nueva con identificador siguiente y la anterior pasa a estado `Superado por ADR-YY`, sin moverse de `Adrs/`.
 - En el Sprint 0 se cerraron tres de las cuatro decisiones abiertas: ADR-19 → ADR-25, ADR-20 → ADR-26 y ADR-22 → ADR-27 (las originales pasan a `Superado por ADR-YY`). Queda una sola en estado Propuesto: ADR-21 (contrato del endpoint de rectificación del 409), diferida a la Etapa 5 por depender del endpoint de ingesta.
 
 ## Control de cambios
@@ -90,7 +90,7 @@
 | --- | --- | --- |
 | 1.0 | 2026-07-20 | Índice inicial de 22 ADR (18 Aceptado, 4 Propuesto). |
 | 1.1 | 2026-07-21 | Se incorpora ADR-23 (Aceptado): omisión de la categoría 10-Developer-Guide dedicada, registrada en la Fase F. Total: 23 ADR (19 Aceptado, 4 Propuesto). |
-| 1.2 | 2026-07-21 | Se incorpora ADR-24 (Aceptado): modelo de ambientes DEV/PROD sin staging, desviación del piso de 09-Rules §2.2 registrada en la Fase F. Total: 24 ADR (20 Aceptado, 4 Propuesto). |
+| 1.2 | 2026-07-21 | Se incorpora ADR-24 (Aceptado): modelo de ambientes DEV/PROD sin staging, desviación del piso de Rules-Devops §2.2 registrada en la Fase F. Total: 24 ADR (20 Aceptado, 4 Propuesto). |
 | 1.3 | 2026-07-21 | Sprint 0: se cierran tres decisiones abiertas con ADR-25 (NUT en el contenedor), ADR-26 (TLS autofirmado en Kestrel) y ADR-27 (contrato del puerto del adaptador); ADR-19/20/22 pasan a Superado. Total: 27 ADR (23 Aceptado, 1 Propuesto —ADR-21—, 3 Superado). |
 | 1.4 | 2026-07-21 | Etapa 1: se incorpora ADR-28 (Aceptado): autenticación de la API REST con Bearer JWT vía ROPC (esquema dual con la cookie del panel), que complementa a ADR-16. Total: 28 ADR (24 Aceptado, 1 Propuesto —ADR-21—, 3 Superado). |
 | 1.5 | 2026-07-21 | Etapa 1: se incorpora ADR-29 (Aceptado): persistencia del keyring de DataProtection en un volumen (sesión y antiforgery sobreviven a reinicios), derivada de ADR-16/ADR-20. Total: 29 ADR (25 Aceptado, 1 Propuesto —ADR-21—, 3 Superado). |

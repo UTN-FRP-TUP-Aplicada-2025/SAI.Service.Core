@@ -7,7 +7,7 @@
 | project_type | web-monolith (caso degenerado, layout aplanado) |
 | Alcance | 02: índice, README, 12 CU, 13 RN, modelo conceptual, 9 RC. 03: Experiencia-De-Uso, 8 wireframes, Glosario-UX, README |
 | Omisión legítima | 04-Prompts-AI (usa_llm=false); Fase B2 aún no ejecutada (maqueta no aprobada) |
-| Reglas aplicadas | 02-Rules-Especificacion-Funcional v1.2; 03-Rules-UX-UI-DX v1.6 |
+| Reglas aplicadas | Rules-Especificacion-Funcional v1.2; Rules-UX-UI-DX v1.6 |
 | Fuente de verdad | SOLUTION-INTAKE-Sai-Service-Core-v1.0.md |
 | Auditor | Auditor independiente SDD (Arquitecto de Soluciones + QA Senior) |
 | Fecha | 2026-07-20 |
@@ -49,7 +49,7 @@ Verificaciones automáticas ejecutadas: barrido de rangos de emoji (solo `→` U
 
 ## 3. Matriz de estructura obligatoria
 
-### 3.1 Categoría 02 (§6 de 02-Rules, 12 ítems)
+### 3.1 Categoría 02 (§6 de Rules-Especificacion-Funcional, 12 ítems)
 
 | Criterio §6 | Exigido web-monolith | Observado | Cumple |
 | --- | --- | --- | --- |
@@ -66,7 +66,7 @@ Verificaciones automáticas ejecutadas: barrido de rangos de emoji (solo `→` U
 | README de sección | Recomendado | Presente | Sí |
 | IDs contiguos y sin duplicar | Sí | CU-01..12, RN-01..13, RC-01..09; sin duplicados | Sí |
 
-### 3.2 Categoría 03 (§6 de 03-Rules, 14 ítems)
+### 3.2 Categoría 03 (§6 de Rules-UX-UI-DX, 14 ítems)
 
 | Criterio §6 | Exigido | Observado | Cumple |
 | --- | --- | --- | --- |
@@ -170,7 +170,7 @@ Todos los CU citados por los wireframes existen en 02. CU-05 (actor Planificador
 ### H-4 · P3 — Sección opcional §13 colocada como §11 en los CU
 
 - **Archivos:** los 12 CU (verificado en CU-01: §11 = "Interacción multiusuario y concurrencia", §12 = "Control de cambios").
-- **Evidencia:** la sección opcional web-monolith (§13 según 02-Rules §4.3) se numeró como §11, desplazando la obligatoria "Control de cambios" a §12. Todo el contenido obligatorio está presente; solo la numeración no es canónica.
+- **Evidencia:** la sección opcional web-monolith (§13 según Rules-Especificacion-Funcional §4.3) se numeró como §11, desplazando la obligatoria "Control de cambios" a §12. Todo el contenido obligatorio está presente; solo la numeración no es canónica.
 - **Recomendación:** renumerar la opcional como §13 (o §12) y mantener "Control de cambios" como cierre, para no desplazar la numeración de las obligatorias.
 
 ### H-5 · P3 — Divergencias menores índice §4 (RN→CU) vs "CU afectados" de cada RN
@@ -182,7 +182,7 @@ Todos los CU citados por los wireframes existen en 02. CU-05 (actor Planificador
 ### H-6 · P2 — CU con interacción humana sin wireframe (CU-08, CU-09, CU-12)
 
 - **Archivos:** carpeta `03-UX-UI-DX/` (conjunto de wireframes) vs CU-08/09/12 de 02.
-- **Evidencia:** CU-08 (recambio de batería), CU-09 (reparación/sustitución del SAI) y CU-12 (informe de período y comparación) tienen actor primario Administrador y flujo con formulario/lectura, pero no hay wireframe que los origine. Se supera el mínimo de 4, pero la guía §5.1 de 03-Rules pide que cada CU con interacción humana significativa mapee a un artefacto de 03.
+- **Evidencia:** CU-08 (recambio de batería), CU-09 (reparación/sustitución del SAI) y CU-12 (informe de período y comparación) tienen actor primario Administrador y flujo con formulario/lectura, pero no hay wireframe que los origine. Se supera el mínimo de 4, pero la guía §5.1 de Rules-UX-UI-DX pide que cada CU con interacción humana significativa mapee a un artefacto de 03.
 - **Recomendación:** agregar wireframes para las tres superficies (registro de intervención de batería, registro de reparación/sustitución con cobertura suplente, informe de período), o justificar explícitamente en Experiencia-De-Uso por qué se difieren.
 
 ---

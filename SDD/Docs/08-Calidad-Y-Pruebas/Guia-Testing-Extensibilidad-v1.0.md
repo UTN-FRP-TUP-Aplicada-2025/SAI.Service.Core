@@ -11,7 +11,7 @@
 
 ## 1. Por qué aplica esta guía
 
-Sai-Service-Core es `web-monolith` y, por regla (§2.2 de `08-Rules-Calidad-Y-Pruebas.md`), este tipo no lleva guía de extensibilidad **salvo que tenga un motor de extensión interno**. Sai-Service-Core lo tiene: el **puerto del adaptador de conexión con el equipo**, el único punto de extensión del sistema (`Extensibilidad-v1.0.md` §1, ADR-02, ADR-22). Esta guía documenta cómo probar ese puerto y sus implementaciones sin tocar el núcleo, cómo se agrega y testea una implementación nueva, y cómo el adaptador simulado habilita probar el camino de apagado sin hardware ni riesgo.
+Sai-Service-Core es `web-monolith` y, por regla (§2.2 de `Rules-Calidad-Y-Pruebas.md`), este tipo no lleva guía de extensibilidad **salvo que tenga un motor de extensión interno**. Sai-Service-Core lo tiene: el **puerto del adaptador de conexión con el equipo**, el único punto de extensión del sistema (`Extensibilidad-v1.0.md` §1, ADR-02, ADR-22). Esta guía documenta cómo probar ese puerto y sus implementaciones sin tocar el núcleo, cómo se agrega y testea una implementación nueva, y cómo el adaptador simulado habilita probar el camino de apagado sin hardware ni riesgo.
 
 El puerto se declara en `SAI.Service.Core.Application`; sus implementaciones viven en `SAI.Service.Core.Infrastructure`. Esa separación es exactamente lo que hace testeable el camino de apagado irreversible sin cortar energía real (T-07, T-08).
 

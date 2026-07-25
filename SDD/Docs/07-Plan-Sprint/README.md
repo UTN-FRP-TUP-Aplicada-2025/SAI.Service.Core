@@ -10,7 +10,7 @@
 
 ## Modo de un solo desarrollador
 
-Este es un proyecto de **un único desarrollador**. Por la regla §2.2 de 07-Rules-Plan-Sprint (modo 1 dev), la categoría 07 se reduce a un **Mini-Plan** condensado que **sustituye** a los cuatro artefactos de equipo. En consecuencia:
+Este es un proyecto de **un único desarrollador**. Por la regla §2.2 de Rules-Plan-Sprint (modo 1 dev), la categoría 07 se reduce a un **Mini-Plan** condensado que **sustituye** a los cuatro artefactos de equipo. En consecuencia:
 
 - **No existen** `Plan-Iteracion-Sprint-XX-v1.0.md` (planes de iteración por sprint).
 - **No existen** `Template-Sprint-Review-v1.0.md` ni `Template-Sprint-Retrospectiva-v1.0.md`.

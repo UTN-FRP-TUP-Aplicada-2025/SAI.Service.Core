@@ -10,11 +10,11 @@
 
 ## 1. Contexto
 
-Las reglas de la categoría 09 (`09-Rules-Devops.md` §2.2) fijan para `web-monolith` un piso de ambientes DEV / QA / STAGING / PROD, y advierten que quitar cualquiera del piso requiere un ADR que lo justifique. Este proyecto opera con solo dos ambientes: DEV (Dev Container en la máquina del desarrollador) y PROD (contenedor en el host `i7infra`). La razón es del dominio: el sistema administra un SAI físico concreto conectado por USB al host protegido, y su comportamiento crítico —el apagado ordenado y el reencendido— solo se puede validar de extremo a extremo contra ese equipo. El intake lo declara textualmente en §17 P.8: «No hay ambiente de *staging*: no habría a qué SAI conectarlo». Un ambiente intermedio sin el equipo real validaría únicamente la lógica ya cubierta por el adaptador simulado en las pruebas de 08, sin agregar garantía sobre el camino físico.
+Las reglas de la categoría 09 (`Rules-Devops.md` §2.2) fijan para `web-monolith` un piso de ambientes DEV / QA / STAGING / PROD, y advierten que quitar cualquiera del piso requiere un ADR que lo justifique. Este proyecto opera con solo dos ambientes: DEV (Dev Container en la máquina del desarrollador) y PROD (contenedor en el host `i7infra`). La razón es del dominio: el sistema administra un SAI físico concreto conectado por USB al host protegido, y su comportamiento crítico —el apagado ordenado y el reencendido— solo se puede validar de extremo a extremo contra ese equipo. El intake lo declara textualmente en §17 P.8: «No hay ambiente de *staging*: no habría a qué SAI conectarlo». Un ambiente intermedio sin el equipo real validaría únicamente la lógica ya cubierta por el adaptador simulado en las pruebas de 08, sin agregar garantía sobre el camino físico.
 
 ## 2. Decisión
 
-Se adopta un modelo de dos ambientes: DEV (Dev Container, depuración por F5) y PROD (contenedor en `i7infra`, con el dispositivo USB anclado por ruta física de puerto según ADR-03). Se omiten QA y STAGING del piso de `09-Rules` §2.2. La validación de extremo a extremo del camino crítico se realiza en PROD durante la ventana de mantenimiento (UF-8), y la lógica de decisión se cubre antes con el adaptador simulado (08).
+Se adopta un modelo de dos ambientes: DEV (Dev Container, depuración por F5) y PROD (contenedor en `i7infra`, con el dispositivo USB anclado por ruta física de puerto según ADR-03). Se omiten QA y STAGING del piso de `Rules-Devops` §2.2. La validación de extremo a extremo del camino crítico se realiza en PROD durante la ventana de mantenimiento (UF-8), y la lógica de decisión se cubre antes con el adaptador simulado (08).
 
 ## 3. Estado
 
@@ -38,7 +38,7 @@ Aceptado — 2026-07-21.
 
 1. No hay un ambiente intermedio donde ensayar un despliegue antes de PROD; se mitiga con el smoke test del pipeline (stage 8) y con el rollback por tag de imagen.
 2. Si en el futuro se dispone de un segundo SAI de laboratorio, convendrá reintroducir un STAGING; el trade-off de no anticiparlo está aceptado.
-3. La desviación del piso queda formalmente aceptada acá; sin este ADR, el pipeline y los entornos estarían en incumplimiento de `09-Rules` §2.2.
+3. La desviación del piso queda formalmente aceptada acá; sin este ADR, el pipeline y los entornos estarían en incumplimiento de `Rules-Devops` §2.2.
 
 ## 7. Implementación
 
@@ -53,7 +53,7 @@ Aceptado — 2026-07-21.
 ## 9. Referencias
 
 - Intake §17 P.8 (pipeline y ambientes; justificación textual del no-staging) y §10 (sin presupuesto, un solo SAI activo).
-- `09-Rules-Devops.md` §2.2 (piso de ambientes web-monolith y regla de desviación por ADR).
+- `Rules-Devops.md` §2.2 (piso de ambientes web-monolith y regla de desviación por ADR).
 - ADR-03 (anclaje del USB por ruta física en PROD); ADR-19 (ubicación de NUT, Sprint 0, condiciona el `docker run` de PROD).
 - `Entornos-Deploy-v1.0.md`, `Pipeline-CI-CD-v1.0.md`.
 
@@ -61,4 +61,4 @@ Aceptado — 2026-07-21.
 
 | Versión | Fecha | Descripción |
 |---|---|---|
-| 1.0 | 2026-07-21 | Registro del modelo de dos ambientes (DEV/PROD) y de la omisión justificada de QA y STAGING del piso de 09-Rules §2.2, con respaldo en el intake §17 P.8. |
+| 1.0 | 2026-07-21 | Registro del modelo de dos ambientes (DEV/PROD) y de la omisión justificada de QA y STAGING del piso de Rules-Devops §2.2, con respaldo en el intake §17 P.8. |
