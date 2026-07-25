@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SAI.Service.Core.Infrastructure.Persistencia;
 
@@ -11,9 +12,11 @@ using SAI.Service.Core.Infrastructure.Persistencia;
 namespace SAI.Service.Core.Infrastructure.Persistencia.Migraciones
 {
     [DbContext(typeof(SaiDbContext))]
-    partial class SaiDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260723040000_EsquemaMedicionApagado")]
+    partial class EsquemaMedicionApagado
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.0");
@@ -777,26 +780,6 @@ namespace SAI.Service.Core.Infrastructure.Persistencia.Migraciones
                     b.HasIndex("FuenteDatosCodigo");
 
                     b.ToTable("SesionSondeo", (string)null);
-                });
-
-            modelBuilder.Entity("SAI.Service.Core.Domain.Verificaciones.SesionEjercicio", b =>
-                {
-                    b.Property<string>("Codigo")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Estado")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<long?>("FinalizadaEn")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long>("IniciadaEn")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Codigo");
-
-                    b.ToTable("SesionEjercicio", (string)null);
                 });
 
             modelBuilder.Entity("SAI.Service.Core.Domain.Verificaciones.Verificacion", b =>

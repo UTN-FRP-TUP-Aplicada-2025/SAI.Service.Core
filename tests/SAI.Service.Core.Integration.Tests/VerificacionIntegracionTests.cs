@@ -148,6 +148,22 @@ public class VerificacionIntegracionTests
         reencendido.EsperandoReinicio.Should().BeTrue("mismo freno que el presupuesto: gate hasta el reinicio");
     }
 
+    [Fact]
+    public async Task RegistrarElPresupuestoPersisteLaMedicionNumerica()
+    {
+        using var fabrica = new FabricaSai();
+        using var scope = fabrica.Services.CreateScope();
+        var sp = scope.ServiceProvider;
+        await DarDeAlta(sp);
+        var servicio = sp.GetRequiredService<ServicioVerificacion>();
+
+        await servicio.VerificarPresupuestoAsync(42, CancellationToken.None);
+
+        var presupuesto = (await servicio.EstadoAsync(CancellationToken.None))
+            .Single(v => v.Supuesto == Supuesto.PresupuestoDeApagado);
+        presupuesto.MedicionSegundos.Should().Be(42, "la evidencia se guarda también como valor (H-7)");
+    }
+
     private static async Task DarDeAlta(IServiceProvider sp) =>
         await sp.GetRequiredService<ServicioAltaEquipos>().RegistrarAsync(SolicitudValida(), CancellationToken.None);
 

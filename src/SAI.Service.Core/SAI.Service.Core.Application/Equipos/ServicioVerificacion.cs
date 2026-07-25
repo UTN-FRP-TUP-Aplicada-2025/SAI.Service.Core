@@ -46,7 +46,7 @@ public sealed class ServicioVerificacion(IRepositorioEquipos repositorio, IAdapt
     /// apagado detiene, así que no puede cronometrarlo desde adentro. Nunca se rotula como "medido".
     /// </remarks>
     public Task<ResultadoVerificacion> VerificarPresupuestoAsync(int segundos, CancellationToken ct) =>
-        VerificarAsync(Supuesto.PresupuestoDeApagado, $"apagado cronometrado a mano en {segundos} s bajo carga", ct);
+        VerificarAsync(Supuesto.PresupuestoDeApagado, $"apagado cronometrado a mano en {segundos} s bajo carga", ct, medicionSegundos: segundos);
 
     /// <summary>
     /// Etapa 4·E — dispara el apagado ordenado del host para la prueba de tiempo de apagado y deja la
@@ -157,7 +157,7 @@ public sealed class ServicioVerificacion(IRepositorioEquipos repositorio, IAdapt
         return new ResultadoVerificacion(CodigoResultadoVerificacion.Verificado, "supuesto verificado");
     }
 
-    private async Task<ResultadoVerificacion> VerificarAsync(Supuesto supuesto, string evidencia, CancellationToken ct)
+    private async Task<ResultadoVerificacion> VerificarAsync(Supuesto supuesto, string evidencia, CancellationToken ct, int? medicionSegundos = null)
     {
         var verificacion = await repositorio.VerificacionDeSupuestoAsync(supuesto, ct);
         if (verificacion is null)
@@ -168,7 +168,7 @@ public sealed class ServicioVerificacion(IRepositorioEquipos repositorio, IAdapt
         var ahora = DateTimeOffset.UtcNow;
         try
         {
-            verificacion.Verificar(Metodo, evidencia, VigenciasSupuesto.VigenciaHasta(supuesto, ahora), ahora);
+            verificacion.Verificar(Metodo, evidencia, VigenciasSupuesto.VigenciaHasta(supuesto, ahora), ahora, medicionSegundos);
         }
         catch (InvalidOperationException)
         {

@@ -1,0 +1,77 @@
+@* P-7 · Banner del ejercicio guiado en curso. Indica en qué paso va (derivado de las verificaciones,
+   no persistido), desde cuándo, y avisa cuando el próximo paso apaga el host — momento en el que el
+   operador pierde esta pantalla y conviene que sepa de antemano qué observar. *@
+
+<MudPaper Elevation="0" Outlined="true" Class="pa-3 mb-4"
+          Style="border-color:var(--mud-palette-secondary);" role="region" aria-label="Ejercicio guiado en curso">
+    <div class="d-flex align-center flex-wrap" style="gap:12px;">
+        <MudIcon Icon="@Icons.Material.Filled.Assistant" Color="Color.Secondary" />
+        <div class="flex-grow-1" style="min-width:0;">
+            <MudText Typo="Typo.body2">
+                <b>Ejercicio guiado en curso</b>
+                @if (Estado.PasoActual is not null)
+                {
+                    <span> · paso @Estado.NumeroPaso de @Estado.Total</span>
+                }
+                <span class="mud-text-secondary"> · empezado @Comienzo</span>
+            </MudText>
+            <MudText Typo="Typo.caption" Class="mud-text-secondary d-block">
+                Seguí la prueba destacada. Lo que ya verificaste no se pierde si salís.
+            </MudText>
+        </div>
+        <MudButton Variant="Variant.Text" Color="Color.Default" Size="Size.Small"
+                   Disabled="Ocupado" OnClick="OnSalir">Salir del ejercicio</MudButton>
+    </div>
+
+    @if (ProximoApaga)
+    {
+        <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined" Dense="true" Class="mt-3">
+            <b>El próximo paso apaga el host: vas a perder esta pantalla.</b> Antes de disparar, anotá qué
+            tenés que observar — cuánto tarda en apagarse del todo, si el SAI corta y repone la salida, y si
+            el host arranca solo al volver la energía. Cuando el equipo vuelva, el ejercicio sigue acá y vas
+            a poder cargar lo que viste.
+        </MudAlert>
+    }
+</MudPaper>
+
+@code {
+    [Parameter, EditorRequired] public EstadoEjercicio Estado { get; set; } = default!;
+    [Parameter] public bool Ocupado { get; set; }
+    [Parameter] public EventCallback OnSalir { get; set; }
+
+    // Los pasos que dejan al operador sin interfaz: el apagado del host y el corte con retorno.
+    private bool ProximoApaga =>
+        Estado.PasoActual is Supuesto.PresupuestoDeApagado or Supuesto.CorteConRetorno;
+
+    private string Comienzo
+    {
+        get
+        {
+            if (Estado.Sesion is not { } sesion)
+            {
+                return string.Empty;
+            }
+
+            var transcurrido = DateTimeOffset.UtcNow - sesion.IniciadaEn;
+            if (transcurrido < TimeSpan.FromMinutes(1))
+            {
+                return "recién";
+            }
+
+            if (transcurrido < TimeSpan.FromHours(1))
+            {
+                var minutos = (int)transcurrido.TotalMinutes;
+                return minutos == 1 ? "hace 1 minuto" : $"hace {minutos} minutos";
+            }
+
+            if (transcurrido < TimeSpan.FromDays(1))
+            {
+                var horas = (int)transcurrido.TotalHours;
+                return horas == 1 ? "hace 1 hora" : $"hace {horas} horas";
+            }
+
+            var dias = (int)transcurrido.TotalDays;
+            return dias == 1 ? "hace 1 día" : $"hace {dias} días";
+        }
+    }
+}

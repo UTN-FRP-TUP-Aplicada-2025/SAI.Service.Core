@@ -1,0 +1,30 @@
+@using SAI.Service.Core.Application.Abstractions
+@* Retroalimentación en vivo del estado del SAI, refrescada por el panel con el sondeo. Hace visible lo
+   que el sistema ve del equipo; no verifica nada (eso sigue siendo un acto deliberado del operador). *@
+
+<MudPaper Elevation="0" Outlined="true" Class="pa-3 mb-4" role="status" aria-live="polite"
+          Style="@Estilo">
+    <div class="d-flex align-center" style="gap:12px;">
+        <MudIcon Icon="@Vista.Icono" Color="@Vista.Tono" />
+        <div class="flex-grow-1" style="min-width:0;">
+            <MudText Typo="Typo.body2"><b>@Vista.Titulo</b></MudText>
+            @if (Vista.Detalle is { } detalle)
+            {
+                <MudText Typo="Typo.caption" Class="mud-text-secondary d-block">@detalle</MudText>
+            }
+        </div>
+        @if (Vista.EnBateria)
+        {
+            <MudChip T="string" Size="Size.Small" Color="Color.Warning" Variant="Variant.Text">En batería</MudChip>
+        }
+    </div>
+</MudPaper>
+
+@code {
+    [Parameter] public EstadoSai? Estado { get; set; }
+
+    private VistaEnVivo Vista => DescriptorEnVivo.Describir(Estado);
+
+    // Solo la condición «en batería» tiñe el borde; en línea o sin lectura quedan neutros.
+    private string Estilo => Vista.EnBateria ? "border-color:var(--mud-palette-warning);" : string.Empty;
+}

@@ -1,5 +1,7 @@
 using System.Diagnostics;
 using System.Globalization;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using SAI.Service.Core.Application.Abstractions;
 
 namespace SAI.Service.Core.Infrastructure.Adaptadores.Nut;
@@ -15,8 +17,19 @@ namespace SAI.Service.Core.Infrastructure.Adaptadores.Nut;
 /// veredicto sobre el equipo, se traduce a "no alcanzable / no conectado" (ADR-27 §2).
 /// </para>
 /// </summary>
-public sealed class AdaptadorConexionNut : IAdaptadorConexion, IDescubridorSai
+public sealed partial class AdaptadorConexionNut : IAdaptadorConexion, IDescubridorSai
 {
+    // --- Mensajes para el operador (UI). En términos de permiso/operación, sin jerga de NUT ni claves
+    // de configuración: el detalle técnico (comando, punto final, causa) va al log, no a la pantalla. ---
+    private const string MensajeSinPermiso =
+        "El sistema no tiene permiso para enviarle órdenes al SAI, así que la prueba no se ejecutó. "
+        + "Es un ajuste de configuración del servicio —sus credenciales de operación del SAI—, no un "
+        + "problema del equipo ni de esta prueba. Consultá con quien administra el sistema.";
+
+    private const string MensajeEquipoNoRespondio =
+        "El SAI no respondió la orden o la rechazó, así que la prueba no se ejecutó. "
+        + "Revisá que el equipo esté conectado y en línea, y reintentá.";
+
     // Variables NUT que alimentan el estado, con su procedencia (Matriz-Sensado §5, RN-05).
     private const string VarEstado = "ups.status";
     private const string VarTensionEntrada = "input.voltage";   // Medido
@@ -26,12 +39,14 @@ public sealed class AdaptadorConexionNut : IAdaptadorConexion, IDescubridorSai
     private const string VarTensionBateria = "battery.voltage"; // Medido
 
     private readonly IClienteNut _cliente;
+    private readonly ILogger<AdaptadorConexionNut> _registro;
 
-    /// <summary>Crea el adaptador sobre un cliente NUT.</summary>
-    public AdaptadorConexionNut(IClienteNut cliente)
+    /// <summary>Crea el adaptador sobre un cliente NUT. El logger es opcional (útil en pruebas).</summary>
+    public AdaptadorConexionNut(IClienteNut cliente, ILogger<AdaptadorConexionNut>? registro = null)
     {
         ArgumentNullException.ThrowIfNull(cliente);
         _cliente = cliente;
+        _registro = registro ?? NullLogger<AdaptadorConexionNut>.Instance;
     }
 
     /// <inheritdoc />
@@ -168,6 +183,12 @@ public sealed class AdaptadorConexionNut : IAdaptadorConexion, IDescubridorSai
             (VarRetardoRetorno, RetardoRetornoSeg.ToString(CultureInfo.InvariantCulture)),
         };
 
+        if (!_cliente.TieneCredencialesEscritura)
+        {
+            SinCredencialesEscritura(CmdApagadoConRetorno);
+            return new ResultadoAccion(false, MensajeSinPermiso, ahora);
+        }
+
         try
         {
             await _cliente.EnviarComandoInstantaneoAsync(CmdApagadoConRetorno, ajustes, ct);
@@ -176,14 +197,15 @@ public sealed class AdaptadorConexionNut : IAdaptadorConexion, IDescubridorSai
             // físico ocurre tras el retardo; no se cancela aunque vuelva la red (ciclo forzado, ADR-09).
             return new ResultadoAccion(
                 Aceptada: true,
-                Motivo: $"El SAI admitió '{CmdApagadoConRetorno}' (retardo de corte {retardoApagadoSeg} s, retorno {RetardoRetornoSeg} s). "
-                    + "El corte ocurrirá al vencer el retardo y no se cancelará (ciclo forzado).",
+                Motivo: "El SAI aceptó la orden: cortará su salida tras el tiempo de espera configurado "
+                    + "y la repondrá cuando vuelva la energía de red.",
                 MarcaTiempoUtc: ahora);
         }
         catch (NutException e)
         {
             // Falla de transporte o rechazo del servidor: no se observó el efecto (ADR-11).
-            return new ResultadoAccion(false, e.Message, ahora);
+            OrdenNoConfirmada(CmdApagadoConRetorno, e);
+            return new ResultadoAccion(false, MensajeEquipoNoRespondio, ahora);
         }
     }
 
@@ -191,19 +213,34 @@ public sealed class AdaptadorConexionNut : IAdaptadorConexion, IDescubridorSai
     public async Task<ResultadoAccion> LanzarTestBateriaAsync(CancellationToken ct)
     {
         var ahora = DateTimeOffset.UtcNow;
+        if (!_cliente.TieneCredencialesEscritura)
+        {
+            SinCredencialesEscritura(CmdTestBateria);
+            return new ResultadoAccion(false, MensajeSinPermiso, ahora);
+        }
+
         try
         {
             await _cliente.EnviarComandoInstantaneoAsync(CmdTestBateria, [], ct);
             return new ResultadoAccion(
                 Aceptada: true,
-                Motivo: $"El SAI admitió '{CmdTestBateria}': autotest rápido de batería iniciado.",
+                Motivo: "El SAI aceptó la orden: inició el autotest de batería.",
                 MarcaTiempoUtc: ahora);
         }
         catch (NutException e)
         {
-            return new ResultadoAccion(false, e.Message, ahora);
+            OrdenNoConfirmada(CmdTestBateria, e);
+            return new ResultadoAccion(false, MensajeEquipoNoRespondio, ahora);
         }
     }
+
+    [LoggerMessage(Level = LogLevel.Warning,
+        Message = "Sin credenciales de escritura para operar el SAI (comando {Comando}). Configurar Sai:Nut:Usuario y Sai:Nut:Password (rol de escritura).")]
+    private partial void SinCredencialesEscritura(string comando);
+
+    [LoggerMessage(Level = LogLevel.Warning,
+        Message = "El SAI no confirmó la orden (comando {Comando}): no se observó el efecto.")]
+    private partial void OrdenNoConfirmada(string comando, Exception causa);
 
     // ups.status puede traer varios flags (p. ej. "OL CHRG", "OB DISCHRG"). La presencia de "OB"
     // indica que el equipo pasó a batería (DM-05).

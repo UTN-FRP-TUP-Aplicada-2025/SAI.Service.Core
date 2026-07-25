@@ -1,0 +1,29 @@
+@* P-3 · Tira de secuencia. Reemplaza el segundo banner ámbar por una tira neutra de nodos encadenados,
+   que enseña la cadena causal del ejercicio físico. No usa estilo de alerta. *@
+
+<MudPaper Elevation="0" Class="pa-3 mb-5" Style="background:var(--mud-palette-background-gray);">
+    <MudText Typo="Typo.caption" Class="mud-text-secondary d-block mb-2">
+        Es un solo ejercicio físico, con presencia. Cada paso registra un tramo:
+    </MudText>
+    <div class="d-flex align-center flex-wrap" style="gap:8px;">
+        @for (var i = 0; i < Nodos.Length; i++)
+        {
+            <span style="background:var(--mud-palette-surface);border:1px solid var(--mud-palette-lines-default);border-radius:8px;padding:5px 10px;font-size:0.8125rem;color:var(--mud-palette-text-secondary);white-space:nowrap;">@Nodos[i]</span>
+            @if (i < Nodos.Length - 1)
+            {
+                <MudIcon Icon="@Icons.Material.Filled.ArrowForward" Size="Size.Small" Class="mud-text-secondary" />
+            }
+        }
+    </div>
+</MudPaper>
+
+@code {
+    private static readonly string[] Nodos =
+    [
+        "Cortás la red",
+        "El SAI avisa OB",
+        "El host se apaga",
+        "El SAI corta salida",
+        "Vuelve la luz, arranca solo",
+    ];
+}

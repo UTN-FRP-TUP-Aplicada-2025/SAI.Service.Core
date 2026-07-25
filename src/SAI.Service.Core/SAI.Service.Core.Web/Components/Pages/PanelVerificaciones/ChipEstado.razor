@@ -1,0 +1,35 @@
+@* Mapea EstadoVerificacion → etiqueta + color + ícono en un solo lugar (SPEC 5.1/7). El estado nunca
+   se comunica solo por color: siempre etiqueta + ícono. Verde=vigente, ámbar=pendiente/por vencer,
+   rojo=vencido/refutado. *@
+
+<MudChip T="string" Size="Size.Small" Color="@Tono" Variant="Variant.Text" Icon="@Icono">@Etiqueta</MudChip>
+
+@code {
+    [Parameter, EditorRequired] public EstadoVerificacion Estado { get; set; }
+
+    private string Etiqueta => Estado switch
+    {
+        EstadoVerificacion.NuncaVerificado => "Pendiente",
+        EstadoVerificacion.Verificado => "Vigente",
+        EstadoVerificacion.PorVencer => "Por vencer",
+        EstadoVerificacion.Vencido => "Vencido",
+        EstadoVerificacion.Refutado => "Refutado",
+        _ => Estado.ToString(),
+    };
+
+    private Color Tono => Estado switch
+    {
+        EstadoVerificacion.Verificado => Color.Success,
+        EstadoVerificacion.NuncaVerificado or EstadoVerificacion.PorVencer => Color.Warning,
+        _ => Color.Error, // Vencido, Refutado
+    };
+
+    private string Icono => Estado switch
+    {
+        EstadoVerificacion.Verificado => Icons.Material.Filled.CheckCircle,
+        EstadoVerificacion.PorVencer => Icons.Material.Filled.Schedule,
+        EstadoVerificacion.Vencido => Icons.Material.Filled.ErrorOutline,
+        EstadoVerificacion.Refutado => Icons.Material.Filled.Block,
+        _ => Icons.Material.Filled.HourglassEmpty, // NuncaVerificado
+    };
+}

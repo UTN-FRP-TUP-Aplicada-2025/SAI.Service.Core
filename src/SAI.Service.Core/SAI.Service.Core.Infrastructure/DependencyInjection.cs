@@ -75,6 +75,8 @@ public static class DependencyInjection
         services.AddScoped<IRepositorioEquipos, Persistencia.RepositorioEquipos>();
         services.AddScoped<ServicioAltaEquipos>();
         services.AddScoped<ServicioVerificacion>();
+        services.AddScoped<ServicioEjercicioGuiado>();
+        services.AddSingleton(LeerOpcionesVerificacion(configuration));
 
         // Monitoreo (Etapa 3): planificador de sondeo (hosted service) y persistencia de muestras
         // append-only. El repositorio y el orquestador son scoped (una ronda = un alcance de DI).
@@ -115,6 +117,17 @@ public static class DependencyInjection
             TimeoutSegundos = int.TryParse(seccion["TimeoutSegundos"], out var timeout) ? timeout : defecto.TimeoutSegundos,
             Usuario = seccion["Usuario"] ?? defecto.Usuario,
             Password = seccion["Password"] ?? defecto.Password,
+        };
+    }
+
+    // Lee 'Sai:Verificacion' de forma manual (sin el binder de configuración).
+    private static OpcionesVerificacion LeerOpcionesVerificacion(IConfiguration configuration)
+    {
+        var seccion = configuration.GetSection(OpcionesVerificacion.Seccion);
+        var defecto = new OpcionesVerificacion();
+        return new OpcionesVerificacion
+        {
+            DiasPreavisoVencimiento = int.TryParse(seccion["DiasPreavisoVencimiento"], out var d) ? d : defecto.DiasPreavisoVencimiento,
         };
     }
 

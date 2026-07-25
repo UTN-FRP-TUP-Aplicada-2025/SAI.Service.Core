@@ -32,6 +32,15 @@ public interface IRepositorioEquipos
 
     /// <summary>Verdadero si ya hay al menos una unidad física dada de alta.</summary>
     Task<bool> HayEquiposAsync(CancellationToken ct);
+
+    /// <summary>Sesión de ejercicio guiado en curso, o <c>null</c> si no hay ninguna abierta (P-7).</summary>
+    Task<SesionEjercicio?> SesionEjercicioEnCursoAsync(CancellationToken ct);
+
+    /// <summary>Da de alta una sesión de ejercicio guiado.</summary>
+    Task AgregarSesionEjercicioAsync(SesionEjercicio sesion, CancellationToken ct);
+
+    /// <summary>Persiste el cierre de una sesión de ejercicio guiado (update in-place).</summary>
+    Task ActualizarSesionEjercicioAsync(SesionEjercicio sesion, CancellationToken ct);
 }
 
 /// <summary>
