@@ -2,9 +2,9 @@
 
 **Proyecto:** Sai-Service-Core
 **Documento:** Mini-Plan-v1.0.md
-**Versión:** 1.0
+**Versión:** 1.1
 **Estado:** Borrador
-**Fecha:** 2026-07-21
+**Fecha:** 2026-07-26
 **Autor:** Orquestador SDD (AG-07)
 **Trazabilidad upstream:** 00 Roadmap-Producto (F0-F5); 06 Product-Backlog (EP-01..EP-07, US-01..US-26) y Backlog-Tecnico (BT-01..BT-30); 02 CU-01..CU-12; 05 ADR-01..ADR-22; Intake §15 (delivery por etapas) y §11 (riesgos)
 **Trazabilidad downstream:** 08-Calidad-Y-Pruebas (Definition of Done canónica, pendiente de generación)
@@ -324,7 +324,7 @@ La ventana de mantenimiento guiada recorre los cuatro supuestos y registra su ev
 
 ## 8. Etapa 5 — Integración e informes (EP-07)
 
-**Estado:** Propuesto · **Release:** v1.0 · **Fase:** F5 · **Flujos:** UF-10 → UF-9 · **SP:** 47
+**Estado:** En curso · **UF-9 (informe de período) realizado; UF-10 (ingesta) pendiente** · **Release:** v1.0 · **Fase:** F5 · **Flujos:** UF-10 → UF-9 · **SP:** 47
 
 ### 8.1 Objetivo del sprint
 
@@ -345,11 +345,13 @@ Abrir la ingesta idempotente de intervenciones desde sistemas externos y cerrar 
 
 | ID | Tipo | Descripción | Prioridad | Estim. | Dependencias | Estado |
 |---|---|---|---|---|---|---|
-| BT-30 | BT | Informe de período y comparación de marcas | Should | 8 | BT-12, BT-27 | Pendiente |
-| US-23 | US | Informe de período | Should | 8 | BT-30 | Pendiente |
-| US-24 | US | Comparación de marcas por costo por año de servicio | Should | 5 | BT-30 | Pendiente |
+| BT-30 | BT | Informe de período y comparación de marcas | Should | 8 | BT-12, BT-27 | **Realizado** |
+| US-23 | US | Informe de período | Should | 8 | BT-30 | **Realizado** |
+| US-24 | US | Comparación de marcas por costo por año de servicio | Should | 5 | BT-30 | **Realizado** |
 
-Total comprometido: 47 SP (26 de US + 21 de BT).
+Total comprometido: 47 SP (26 de US + 21 de BT). **Realizado UF-9: 21 SP (BT-30, US-23, US-24); pendiente UF-10: 26 SP.**
+
+> **UF-9 cerrado (informe de período y comparación de marcas, CU-12).** Módulo de solo lectura que interseca la historia ya registrada (sin entidad nueva ni migración): informe con cobertura (días con/sin protección e intervalos de baterías recortados al período, incluidas las bajas, RN-12), intervenciones y costos por tipo con moneda y fecha (RN-07), eventos y calidad de suministro con cobertura y advertencia sobre agregados (RN-10) y `PERIODO_SIN_DATOS`; comparación de marcas por costo por año normalizado a USD marcado como derivado con su fuente (RN-07), con aviso de confianza baja con menos de dos modelos (FA-1). Núcleo temporal `Vigencia.Intersecar`/`DiasEnPeriodo`. 15 pruebas nuevas; suite en verde. Validado en contenedor; verificación visual en el navegador, en la validación del despliegue. **UF-10 (ingesta idempotente, CU-11, BT-28/BT-29/US-21/US-22) queda como único flujo pendiente para cerrar la Etapa 5 y el release v1.0.**
 
 ### 8.3 Criterio de cierre (validación humana)
 
@@ -380,14 +382,13 @@ Este plan **no define ni duplica** la Definition of Done. El cierre de cada íte
 
 ## 10. Bitácora de avance
 
-Plantilla semanal lista para completar a medida que se ejecuta cada etapa. Una fila por semana; se anota la etapa vigente, los ítems en curso, los cerrados en la semana y los bloqueos con su acción de destrabe.
+El detalle por incremento (qué se construyó, con qué pruebas y decisiones) vive en el `CHANGELOG.md` del repositorio, que es la fuente autoritativa del avance. Esta bitácora condensa el cierre de cada flujo por sus identificadores.
 
-| Semana | Etapa vigente | Ítems en curso | Ítems cerrados esta semana | Bloqueos / acción de destrabe |
+| Hito | Etapa | Flujo(s) cerrados | Ítems cerrados | Notas |
 |---|---|---|---|---|
-| — | Sprint 0 — Arranque | — | — | — |
-| — | — | — | — | — |
-| — | — | — | — | — |
-| — | — | — | — | — |
+| Sprint 0 → Etapa 4 | 1–4 | UF-1 → UF-2 → UF-3 → UF-5 → UF-4 → UF-8 → UF-6 → UF-7 | CU-01..CU-10 | Entregados de forma incremental; ver `CHANGELOG.md` por el detalle. |
+| Etapa 5 · UF-9 | 5 | UF-9 (informe de período y comparación de marcas) | CU-12: BT-30, US-23, US-24 | Módulo de solo lectura; 15 pruebas nuevas; suite en verde. |
+| Pendiente | 5 | UF-10 (ingesta idempotente de intervenciones) | CU-11: BT-28, BT-29, US-21, US-22 | Único flujo restante para cerrar la Etapa 5 y el release v1.0. |
 
 Notas de uso de la bitácora:
 
@@ -417,3 +418,4 @@ Resumen de qué casos de uso y qué necesidades de negocio avanzan al cierre de 
 | Versión | Fecha | Descripción |
 |---|---|---|
 | 1.0 | 2026-07-21 | Versión inicial del Mini-Plan para proyecto de un solo desarrollador. Estructura en Sprint 0 de arranque (EP-01 + EP-02) más cinco etapas de valor (EP-03 a EP-07), alineadas a las fases F0-F5 del roadmap y a los flujos UF en orden topológico de §15. Reutiliza los identificadores US-XX/BT-XX y las estimaciones de 06 sin re-estimar. Sustituye a los planes de sprint, plantillas de review y retrospectiva y tracking de velocidad (regla §2.2, modo 1 dev). |
+| 1.1 | 2026-07-26 | Actualización de avance: cerrado el flujo **UF-9** (informe de período y comparación de marcas, CU-12: BT-30, US-23, US-24). La Etapa 5 pasa a **En curso**, con **UF-10** (ingesta idempotente, CU-11) como único flujo pendiente para el release v1.0. Bitácora (§10) poblada con el resumen de flujos cerrados; el detalle por incremento reside en `CHANGELOG.md`. |
