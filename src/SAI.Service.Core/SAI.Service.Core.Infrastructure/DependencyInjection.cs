@@ -96,6 +96,10 @@ public static class DependencyInjection
         services.AddScoped<IRepositorioIntervenciones, Persistencia.RepositorioIntervenciones>();
         services.AddScoped<ServicioRecambioBateria>();
 
+        // Sustitución/reparación del SAI con cobertura suplente (CU-09, US-20).
+        services.AddScoped<IRepositorioSustituciones, Persistencia.RepositorioSustituciones>();
+        services.AddScoped<ServicioSustitucionSai>();
+
         services.AddHostedService<ServicioSondeo>();
 
         // Rearme de pruebas de verificación al arrancar tras un reinicio del host (Etapa 4·E, ADR-25).
