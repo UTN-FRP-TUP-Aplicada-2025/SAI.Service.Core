@@ -9,6 +9,33 @@ y el versionado sigue [Semantic Versioning](https://semver.org/lang/es/).
 
 ### Añadido
 
+- **Etapa 4 · Informe de período y comparación de marcas** (CU-12, US-11, EP-07, F-22): la superficie
+  `InformeDePeriodo.razor` deja de ser un placeholder y arma, **intersecando historia ya registrada** (solo
+  lectura, sin entidad nueva ni migración), el informe de un período y la comparación de modelos de batería.
+  - **Informe de período** (`ServicioInformePeriodo.ArmarInformeAsync`): *cobertura* (dispositivos activos,
+    días con y sin protección recortados al período, baterías intervinientes con intervalos recortados
+    **incluidas las dadas de baja**, RN-12); *intervenciones y costos por tipo* (recambios de batería y
+    reparaciones/sustituciones del SAI, con totales en **su moneda y fecha**, RN-07); *eventos y calidad de
+    suministro* reutilizando `ServicioHistoricos` (microcortes desde eventos y, sobre agregados, cobertura y
+    advertencia, RN-10). Un período sin actividad devuelve `PERIODO_SIN_DATOS` (no arma un informe engañoso).
+  - **Comparación de marcas** (`CompararMarcasAsync`): agrupa las fichas de vida útil cerradas por modelo y
+    muestra el **costo por año de servicio normalizado a USD**, marcado como **derivado** con su fuente de
+    cotización (RN-07), si cumplió la expectativa y el desvío. Con menos de dos modelos con ficha cerrada
+    avisa **confianza baja** (FA-1).
+  - Núcleo temporal nuevo: `Vigencia.Intersecar` / `DiasEnPeriodo` (recorte de un intervalo semiabierto al
+    período, con el fin abierto contado hasta el corte del informe). Puerto de solo lectura
+    `IRepositorioInformes` (consultas por período de coberturas, montajes, intervenciones, sustituciones y
+    fichas cerradas con su modelo/marca resueltos) + `RepositorioInformes` (EF).
+  - **Decisión de honestidad**: los costos de intervenciones se muestran en su moneda y fecha original
+    (RN-07); el equivalente USD-normalizado aparece solo en la comparación de marcas, donde el valor derivado
+    está registrado con su fuente, en vez de fabricar una conversión que el sistema no almacena para esos
+    totales. Host **implícito** (el sistema es mono-host): la barra de parámetros pide solo el período.
+  - 15 pruebas nuevas (dominio: recorte de intervalos, suma de intervalos sucesivos = período; aplicación:
+    CA-01 baterías recortadas, CA-02 bajas incluidas, FA-2 días sin protección, costos por tipo, CA-04 USD
+    derivado, FA-1 confianza baja, `PERIODO_SIN_DATOS`; integración: informe tras el alta, período sin datos,
+    comparación sin fichas). **Con esto se completan los tres módulos placeholder de Sprint 0 (EP-04, EP-06,
+    EP-07).** *La verificación visual en el navegador queda para la validación del despliegue.*
+
 - **Etapa 4 · Configuración de políticas de apagado versionadas** (CU-03, US-06, EP-04, BT-16): la
   política de apagado deja de vivir dispersa en `appsettings`/entorno y pasa a ser **historia versionada
   e inmutable en base** (`VersionPolitica`, append-only ADR-04), **fuente de verdad** del apagado. Se

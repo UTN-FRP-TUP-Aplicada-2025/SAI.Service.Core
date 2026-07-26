@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using SAI.Service.Core.Application.Abstractions;
 using SAI.Service.Core.Application.Acciones;
 using SAI.Service.Core.Application.Equipos;
+using SAI.Service.Core.Application.Informes;
 using SAI.Service.Core.Application.Intervenciones;
 using SAI.Service.Core.Application.Monitoreo;
 using SAI.Service.Core.Application.Politicas;
@@ -104,6 +105,10 @@ public static class DependencyInjection
         // Sustitución/reparación del SAI con cobertura suplente (CU-09, US-20).
         services.AddScoped<IRepositorioSustituciones, Persistencia.RepositorioSustituciones>();
         services.AddScoped<ServicioSustitucionSai>();
+
+        // Informe de período y comparación de marcas (CU-12, US-11): solo lectura sobre la historia.
+        services.AddScoped<IRepositorioInformes, Persistencia.RepositorioInformes>();
+        services.AddScoped<ServicioInformePeriodo>();
 
         services.AddHostedService<ServicioSondeo>();
 
