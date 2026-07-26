@@ -35,6 +35,8 @@ builder.Services.AddMudServices();
 
 // --- Composition root: se componen las capas Api e Infrastructure (ADR-15) --
 builder.Services.AddApi();
+// Errores en formato problem+json (RFC 7807) para la API de ingesta (ADR-17).
+builder.Services.AddProblemDetails();
 builder.Services.AddInfrastructure(builder.Configuration);
 
 // --- Identity: administrador unico sobre SaiDbContext (ADR-16) -------------
@@ -183,6 +185,15 @@ using (var scope = app.Services.CreateScope())
             DescriptorPoliticas.Defecto.UmbralDisparoSegundos,
             opciones.TiempoReservadoSeg,
             DateTimeOffset.UtcNow));
+        await db.SaveChangesAsync();
+    }
+
+    // Semilla de la fuente de datos del GMAO externo (CU-11): el header X-Fuente-Datos de la ingesta la
+    // referencia, y aporta la confianza base (media, menor que el sondeo local). Idempotente.
+    if (!await db.FuentesDatos.AnyAsync(f => f.Codigo == "fd-gmao-externo"))
+    {
+        db.FuentesDatos.Add(new FuenteDatos("fd-gmao-externo", ConfianzaFuente.Media,
+            "Sistema externo de gestión de mantenimiento (ingesta automatizada, CU-11)."));
         await db.SaveChangesAsync();
     }
 }
