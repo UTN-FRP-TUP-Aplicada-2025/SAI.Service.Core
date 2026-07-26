@@ -104,6 +104,24 @@ public sealed class Verificacion
     }
 
     /// <summary>
+    /// Reinicia el supuesto a <see cref="EstadoVerificacion.NuncaVerificado"/> (CU-09 FA-2): al sustituir
+    /// el SAI por uno de otro modelo, lo verificado —o refutado— contra el equipo anterior deja de valer y
+    /// hay que recaracterizar el firmware contra el nuevo. Limpia método, evidencia, vigencia, medición y
+    /// el marcador de prueba en curso. A diferencia de una reverificación, <b>también reinicia un
+    /// <see cref="EstadoVerificacion.Refutado"/></b>: el bloqueo permanente era del equipo viejo.
+    /// </summary>
+    public void Reiniciar(DateTimeOffset ahora)
+    {
+        Estado = EstadoVerificacion.NuncaVerificado;
+        Metodo = null;
+        Evidencia = null;
+        VigenciaHasta = null;
+        MedicionSegundos = null;
+        PruebaEnCursoDesde = null;
+        ActualizadoEn = ahora;
+    }
+
+    /// <summary>
     /// Marca que se disparó una prueba física que exige un reinicio del host antes de repetirse (Etapa
     /// 4·E): la acción queda bloqueada (<see cref="EsperandoReinicio"/>) hasta que el servicio vuelva a
     /// arrancar tras el reinicio. Un supuesto <see cref="EstadoVerificacion.Refutado"/> es un bloqueo

@@ -12,8 +12,8 @@ using SAI.Service.Core.Infrastructure.Persistencia;
 namespace SAI.Service.Core.Infrastructure.Persistencia.Migraciones
 {
     [DbContext(typeof(SaiDbContext))]
-    [Migration("20260726040106_EsquemaPoliticas")]
-    partial class EsquemaPoliticas
+    [Migration("20260726022434_EsquemaSustituciones")]
+    partial class EsquemaSustituciones
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -479,6 +479,71 @@ namespace SAI.Service.Core.Infrastructure.Persistencia.Migraciones
                     b.ToTable("Intervencion", (string)null);
                 });
 
+            modelBuilder.Entity("SAI.Service.Core.Domain.Intervenciones.SustitucionSai", b =>
+                {
+                    b.Property<string>("Codigo")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateOnly?>("CostoFecha")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CostoMoneda")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal?>("CostoMonto")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DisposicionDestino")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DisposicionReceptor")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DispositivoEntranteCodigo")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DispositivoSalienteCodigo")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Ejecutor")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("FirmwareReiniciado")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Hallazgos")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("HostCodigo")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("InstanteOcurrido")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("InstanteRegistrado")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Proveedor")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Tipo")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Codigo");
+
+                    b.HasIndex("DispositivoSalienteCodigo");
+
+                    b.HasIndex("HostCodigo", "InstanteOcurrido");
+
+                    b.ToTable("SustitucionSai", (string)null);
+                });
+
             modelBuilder.Entity("SAI.Service.Core.Domain.Inventario.UnidadFisica", b =>
                 {
                     b.Property<string>("Codigo")
@@ -780,38 +845,6 @@ namespace SAI.Service.Core.Infrastructure.Persistencia.Migraciones
                     b.HasIndex("FuenteDatosCodigo");
 
                     b.ToTable("SesionSondeo", (string)null);
-                });
-
-            modelBuilder.Entity("SAI.Service.Core.Domain.Politicas.VersionPolitica", b =>
-                {
-                    b.Property<string>("Codigo")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("ModalidadSolicitada")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("Numero")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("TiempoReservadoApagadoSeg")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("UmbralDisparoSegundos")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long>("VigenteDesde")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Codigo");
-
-                    b.HasIndex("Numero")
-                        .IsUnique();
-
-                    b.ToTable("VersionPolitica", null, t =>
-                        {
-                            t.HasCheckConstraint("CK_VersionPolitica_TechoApagado", "\"TiempoReservadoApagadoSeg\" >= 0 AND \"TiempoReservadoApagadoSeg\" <= 540");
-                        });
                 });
 
             modelBuilder.Entity("SAI.Service.Core.Domain.Verificaciones.SesionEjercicio", b =>
@@ -1173,6 +1206,15 @@ namespace SAI.Service.Core.Infrastructure.Persistencia.Migraciones
                     b.HasOne("SAI.Service.Core.Domain.Inventario.UnidadFisica", null)
                         .WithMany()
                         .HasForeignKey("DispositivoCodigo")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("SAI.Service.Core.Domain.Intervenciones.SustitucionSai", b =>
+                {
+                    b.HasOne("SAI.Service.Core.Domain.Inventario.UnidadFisica", null)
+                        .WithMany()
+                        .HasForeignKey("DispositivoSalienteCodigo")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });

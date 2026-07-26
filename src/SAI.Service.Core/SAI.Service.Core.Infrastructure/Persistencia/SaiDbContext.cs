@@ -84,6 +84,9 @@ public class SaiDbContext(DbContextOptions<SaiDbContext> options)
     /// <summary>Fichas de vida útil proyectadas al recambiar (Etapa 4·C, US-19).</summary>
     public DbSet<FichaVidaUtil> FichasVidaUtil => Set<FichaVidaUtil>();
 
+    /// <summary>Historia de sustituciones/reparaciones del SAI (CU-09).</summary>
+    public DbSet<SustitucionSai> Sustituciones => Set<SustitucionSai>();
+
     /// <summary>Políticas de apagado versionadas (Etapa 4·D, CU-03, append-only ADR-04).</summary>
     public DbSet<VersionPolitica> Politicas => Set<VersionPolitica>();
 
@@ -113,6 +116,9 @@ public class SaiDbContext(DbContextOptions<SaiDbContext> options)
 
         // Historia de intervenciones: recambio de batería y ficha de vida útil (Etapa 4·C).
         ModeloIntervenciones.Configurar(builder);
+
+        // Sustituciones del SAI (CU-09).
+        ModeloSustituciones.Configurar(builder);
 
         // Políticas de apagado versionadas (Etapa 4·D, CU-03).
         ModeloPoliticas.Configurar(builder);
