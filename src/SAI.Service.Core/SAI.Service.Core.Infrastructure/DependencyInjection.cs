@@ -6,6 +6,7 @@ using SAI.Service.Core.Application.Acciones;
 using SAI.Service.Core.Application.Equipos;
 using SAI.Service.Core.Application.Intervenciones;
 using SAI.Service.Core.Application.Monitoreo;
+using SAI.Service.Core.Application.Politicas;
 using SAI.Service.Core.Domain.Verificaciones;
 using SAI.Service.Core.Infrastructure.Adaptadores;
 using SAI.Service.Core.Infrastructure.Adaptadores.Nut;
@@ -89,7 +90,11 @@ public static class DependencyInjection
         services.AddScoped<ServicioPruebaBateria>();
 
         // Ejecución del apagado ordenado (Etapa 4·B, CU-05): política de apagado y orquestador.
+        // La versión vigente (Etapa 4·D, CU-03) es la fuente de verdad de modalidad y tiempo reservado;
+        // OpcionesApagado queda solo como semilla de la versión inicial en el arranque.
         services.AddSingleton(LeerOpcionesApagado(configuration));
+        services.AddScoped<IRepositorioPoliticas, Persistencia.RepositorioPoliticas>();
+        services.AddScoped<ServicioPoliticas>();
         services.AddScoped<ServicioApagadoOrdenado>();
 
         // Recambio de batería y ficha de vida útil (Etapa 4·C, CU-08).

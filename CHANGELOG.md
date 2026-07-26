@@ -9,6 +9,30 @@ y el versionado sigue [Semantic Versioning](https://semver.org/lang/es/).
 
 ### Añadido
 
+- **Etapa 4 · Configuración de políticas de apagado versionadas** (CU-03, US-06, EP-04, BT-16): la
+  política de apagado deja de vivir dispersa en `appsettings`/entorno y pasa a ser **historia versionada
+  e inmutable en base** (`VersionPolitica`, append-only ADR-04), **fuente de verdad** del apagado. Se
+  configura **creando una versión nueva** (nunca editando la vigente): cada versión fija la modalidad, el
+  umbral de disparo y el tiempo reservado; la vigente es la de mayor número. La superficie
+  `ConfiguracionDePoliticas.razor` es **dirigida por descriptores** (etiqueta/ayuda/límites por parámetro),
+  con **presets** («Solo aviso», «Apagado con retorno», «Ciclo forzado»), bloque **"En palabras"** que se
+  regenera al cambiar valores, chip de **modo simulación** y el **historial de versiones**.
+  - `ServicioPoliticas`: *la UI propone, el humano confirma, el sistema valida*. `CrearVersionAsync` valida
+    el **techo duro** (≤540 s, RN-04/I-10 → `TIEMPO_APAGADO_EXCEDE_TECHO`) y los parámetros
+    (`PARAMETRO_INVALIDO`) **antes** de persistir (postcondición de fallo: no se crea versión), incrementa
+    el número y deja la nueva vigente sin tocar las anteriores. `PrevisualizarAsync` deriva la **modalidad
+    efectiva** con el bloqueo por verificación (RN-02) y avisa si **degradaría a solo aviso**, sin ejecutar
+    nada. El techo duro se defiende además en base con un *check constraint*.
+  - **Efecto real**: `ServicioApagadoOrdenado` lee la **versión vigente** (modalidad + tiempo reservado)
+    en vez del singleton `OpcionesApagado`, que queda solo como **semilla** de la versión inicial (sembrada
+    al arranque en solo aviso, RN-01). Migración `EsquemaPoliticas`.
+  - 17 pruebas nuevas (dominio: techo 540, umbral positivo, `Siguiente` incrementa sin tocar la anterior;
+    aplicación: crea v2 con la vigente intacta, rechazos por techo y parámetro, cambio de solo umbral,
+    previsualización con/sin degradación; integración: seed inicial, persistir + vigente + historial, techo
+    sin persistir, append-only). *Se difieren RN-11/I-13 (ligar cada `Accion` a su `VersionPolitica`) y las
+    verificaciones requeridas editables por versión (se derivan de la modalidad); la ranura del asistente de
+    IA queda reservada.*
+
 - **Etapa 4 · Sustitución del SAI con cobertura suplente** (CU-09, US-20, EP-06): el panel
   `SustitucionDelSai.razor` deja de ser un placeholder e implementa la reparación/sustitución del SAI como
   **un solo acto** (`ServicioSustitucionSai`): valida **antes** de aplicar (postcondición de fallo: nada se

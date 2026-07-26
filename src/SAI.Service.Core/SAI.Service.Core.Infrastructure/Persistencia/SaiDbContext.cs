@@ -7,6 +7,7 @@ using SAI.Service.Core.Domain.Catalogo;
 using SAI.Service.Core.Domain.Intervenciones;
 using SAI.Service.Core.Domain.Inventario;
 using SAI.Service.Core.Domain.Monitoreo;
+using SAI.Service.Core.Domain.Politicas;
 using SAI.Service.Core.Domain.Verificaciones;
 using SAI.Service.Core.Domain.Vinculos;
 using SAI.Service.Core.Infrastructure.Persistencia.Configuraciones;
@@ -86,6 +87,9 @@ public class SaiDbContext(DbContextOptions<SaiDbContext> options)
     /// <summary>Historia de sustituciones/reparaciones del SAI (CU-09).</summary>
     public DbSet<SustitucionSai> Sustituciones => Set<SustitucionSai>();
 
+    /// <summary>Políticas de apagado versionadas (Etapa 4·D, CU-03, append-only ADR-04).</summary>
+    public DbSet<VersionPolitica> Politicas => Set<VersionPolitica>();
+
     /// <inheritdoc />
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
@@ -115,5 +119,8 @@ public class SaiDbContext(DbContextOptions<SaiDbContext> options)
 
         // Sustituciones del SAI (CU-09).
         ModeloSustituciones.Configurar(builder);
+
+        // Políticas de apagado versionadas (Etapa 4·D, CU-03).
+        ModeloPoliticas.Configurar(builder);
     }
 }

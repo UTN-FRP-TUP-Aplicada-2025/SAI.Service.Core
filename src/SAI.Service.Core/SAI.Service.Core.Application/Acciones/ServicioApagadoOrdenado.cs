@@ -1,6 +1,7 @@
 using SAI.Service.Core.Application.Abstractions;
 using SAI.Service.Core.Application.Equipos;
 using SAI.Service.Core.Application.Monitoreo;
+using SAI.Service.Core.Application.Politicas;
 using SAI.Service.Core.Domain.Acciones;
 using SAI.Service.Core.Domain.Verificaciones;
 
@@ -23,11 +24,17 @@ public sealed record SituacionApagado(
 /// admitió la orden, nunca por ausencia de excepción. Toda decisión —incluido el bloqueo y el solo
 /// aviso— deja una <see cref="Accion"/> append-only. El ciclo forzado no se cancela (ADR-09): este
 /// servicio nunca emite un <c>shutdown.stop</c>.
+/// <para>
+/// La <b>modalidad solicitada</b> y el <b>tiempo reservado</b> los toma de la versión vigente de la
+/// política (CU-03, EP-04); si aún no hay ninguna versión, cae en <see cref="OpcionesApagado"/> como
+/// semilla (arranque seguro en solo aviso).
+/// </para>
 /// </summary>
 public sealed class ServicioApagadoOrdenado(
     IRepositorioMonitoreo repositorioMonitoreo,
     IRepositorioEquipos repositorioEquipos,
     IAdaptadorConexion adaptador,
+    IRepositorioPoliticas repositorioPoliticas,
     OpcionesApagado opciones)
 {
     /// <summary>
@@ -45,13 +52,15 @@ public sealed class ServicioApagadoOrdenado(
         }
 
         var ahora = DateTimeOffset.UtcNow;
+        var vigente = await repositorioPoliticas.VigenteAsync(ct);
         var verificaciones = await repositorioEquipos.ListarVerificacionesAsync(ct);
-        var solicitada = opciones.ModalidadSolicitada;
+        var solicitada = vigente?.ModalidadSolicitada ?? opciones.ModalidadSolicitada;
+        var reservado = vigente?.TiempoReservadoApagadoSeg ?? opciones.TiempoReservadoSeg;
         var efectiva = EvaluadorModalidad.Efectiva(solicitada, verificaciones, ahora);
         var verificados = EvaluadorModalidad.Verificados(verificaciones, ahora);
         var codigo = $"acc-{Guid.NewGuid():N}";
 
-        var accion = await DecidirAsync(codigo, dispositivo.Codigo, solicitada, efectiva, verificados, ahora, eventoDisparoCodigo, ct);
+        var accion = await DecidirAsync(codigo, dispositivo.Codigo, solicitada, efectiva, verificados, reservado, ahora, eventoDisparoCodigo, ct);
         await repositorioMonitoreo.GuardarAccionAsync(accion, ct);
         return accion;
     }
@@ -66,18 +75,20 @@ public sealed class ServicioApagadoOrdenado(
         }
 
         var ahora = DateTimeOffset.UtcNow;
+        var vigente = await repositorioPoliticas.VigenteAsync(ct);
         var verificaciones = await repositorioEquipos.ListarVerificacionesAsync(ct);
-        var solicitada = opciones.ModalidadSolicitada;
+        var solicitada = vigente?.ModalidadSolicitada ?? opciones.ModalidadSolicitada;
+        var reservado = vigente?.TiempoReservadoApagadoSeg ?? opciones.TiempoReservadoSeg;
         var efectiva = EvaluadorModalidad.Efectiva(solicitada, verificaciones, ahora);
         var verificados = EvaluadorModalidad.Verificados(verificaciones, ahora);
         var acciones = await repositorioMonitoreo.AccionesRecientesAsync(dispositivo.Codigo, 10, ct);
 
-        return new SituacionApagado(solicitada, efectiva, verificados, EvaluadorModalidad.SupuestosRequeridos, opciones.TiempoReservadoSeg, acciones);
+        return new SituacionApagado(solicitada, efectiva, verificados, EvaluadorModalidad.SupuestosRequeridos, reservado, acciones);
     }
 
     private async Task<Accion> DecidirAsync(
         string codigo, string dispositivoCodigo, Modalidad solicitada, Modalidad efectiva, int verificados,
-        DateTimeOffset ahora, string? eventoDisparoCodigo, CancellationToken ct)
+        int reservado, DateTimeOffset ahora, string? eventoDisparoCodigo, CancellationToken ct)
     {
         // Modalidad base segura: solo aviso, no se apaga nada (RN-01).
         if (solicitada == Modalidad.SoloAlerta)
@@ -95,7 +106,6 @@ public sealed class ServicioApagadoOrdenado(
         }
 
         // Habilitada: se ordena el apagado con retorno y se confirma por efecto observado (ADR-11).
-        var reservado = opciones.TiempoReservadoSeg;
         var resultado = await adaptador.OrdenarApagadoConRetornoAsync(TimeSpan.FromSeconds(reservado), ct);
         return resultado.Aceptada
             ? Accion.Ejecutada(codigo, dispositivoCodigo, solicitada, efectiva, reservado, ahora,
