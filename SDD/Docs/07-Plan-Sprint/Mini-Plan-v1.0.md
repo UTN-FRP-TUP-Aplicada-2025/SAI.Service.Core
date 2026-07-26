@@ -2,7 +2,7 @@
 
 **Proyecto:** Sai-Service-Core
 **Documento:** Mini-Plan-v1.0.md
-**Versión:** 1.1
+**Versión:** 1.2
 **Estado:** Borrador
 **Fecha:** 2026-07-26
 **Autor:** Orquestador SDD (AG-07)
@@ -324,7 +324,7 @@ La ventana de mantenimiento guiada recorre los cuatro supuestos y registra su ev
 
 ## 8. Etapa 5 — Integración e informes (EP-07)
 
-**Estado:** En curso · **UF-9 (informe de período) realizado; UF-10 (ingesta) pendiente** · **Release:** v1.0 · **Fase:** F5 · **Flujos:** UF-10 → UF-9 · **SP:** 47
+**Estado:** Realizada · **UF-10 (ingesta) y UF-9 (informe de período) cerrados** · **Release:** v1.0 · **Fase:** F5 · **Flujos:** UF-10 → UF-9 · **SP:** 47
 
 ### 8.1 Objetivo del sprint
 
@@ -336,10 +336,10 @@ Abrir la ingesta idempotente de intervenciones desde sistemas externos y cerrar 
 
 | ID | Tipo | Descripción | Prioridad | Estim. | Dependencias | Estado |
 |---|---|---|---|---|---|---|
-| BT-28 | BT | Endpoint de ingesta idempotente con cuatro caminos de respuesta | Must | 8 | BT-26 | Pendiente |
-| BT-29 | BT | Adaptador de conexión simulado para pruebas | Should | 5 | BT-14 | Pendiente |
-| US-21 | US | Ingesta idempotente de intervenciones por API | Must | 8 | BT-28 | Pendiente |
-| US-22 | US | Rechazo de conflictos de idempotencia e invariantes rotos | Must | 5 | BT-28, BT-03 | Pendiente |
+| BT-28 | BT | Endpoint de ingesta idempotente con cuatro caminos de respuesta | Must | 8 | BT-26 | **Realizado** |
+| BT-29 | BT | Adaptador de conexión simulado para pruebas | Should | 5 | BT-14 | **Realizado** |
+| US-21 | US | Ingesta idempotente de intervenciones por API | Must | 8 | BT-28 | **Realizado** |
+| US-22 | US | Rechazo de conflictos de idempotencia e invariantes rotos | Must | 5 | BT-28, BT-03 | **Realizado** |
 
 **Flujo UF-9 · Informe de período y comparación de marcas (S14)**
 
@@ -349,9 +349,11 @@ Abrir la ingesta idempotente de intervenciones desde sistemas externos y cerrar 
 | US-23 | US | Informe de período | Should | 8 | BT-30 | **Realizado** |
 | US-24 | US | Comparación de marcas por costo por año de servicio | Should | 5 | BT-30 | **Realizado** |
 
-Total comprometido: 47 SP (26 de US + 21 de BT). **Realizado UF-9: 21 SP (BT-30, US-23, US-24); pendiente UF-10: 26 SP.**
+Total comprometido: 47 SP (26 de US + 21 de BT). **Etapa 5 completa: UF-9 (21 SP) + UF-10 (26 SP).**
 
-> **UF-9 cerrado (informe de período y comparación de marcas, CU-12).** Módulo de solo lectura que interseca la historia ya registrada (sin entidad nueva ni migración): informe con cobertura (días con/sin protección e intervalos de baterías recortados al período, incluidas las bajas, RN-12), intervenciones y costos por tipo con moneda y fecha (RN-07), eventos y calidad de suministro con cobertura y advertencia sobre agregados (RN-10) y `PERIODO_SIN_DATOS`; comparación de marcas por costo por año normalizado a USD marcado como derivado con su fuente (RN-07), con aviso de confianza baja con menos de dos modelos (FA-1). Núcleo temporal `Vigencia.Intersecar`/`DiasEnPeriodo`. 15 pruebas nuevas; suite en verde. Validado en contenedor; verificación visual en el navegador, en la validación del despliegue. **UF-10 (ingesta idempotente, CU-11, BT-28/BT-29/US-21/US-22) queda como único flujo pendiente para cerrar la Etapa 5 y el release v1.0.**
+> **UF-10 cerrado (ingesta automatizada de intervenciones, CU-11).** `POST /api/v1/intervenciones`, el único contrato formal hacia terceros (ADR-17): idempotente por clave, con los cuatro caminos en problem+json —201 creado, 200 reintento idéntico (mismo id, sin duplicar, RN-09), 409 conflicto por huella sha256 distinta (con ambas huellas, nunca 200), 422 `validacion` (cuadre RN-08 / dinero RN-07) y `coherencia_temporal` (fecha posterior a la baja, RN-12)—. Entidad append-only `IntervencionIngerida` (la historia es el almacén de idempotencia, índice único en la clave), confianza media por origen externo (ADR-06). 18 pruebas nuevas, incluidos los cuatro caminos con `WebApplicationFactory` + token ROPC (métrica de validación de ADR-17 §8). El endpoint de rectificación del 409 queda fuera de alcance (P-05 / ADR-21, «Propuesto»).
+
+> **UF-9 cerrado (informe de período y comparación de marcas, CU-12).** Módulo de solo lectura que interseca la historia ya registrada (sin entidad nueva ni migración): informe con cobertura (días con/sin protección e intervalos de baterías recortados al período, incluidas las bajas, RN-12), intervenciones y costos por tipo con moneda y fecha (RN-07), eventos y calidad de suministro con cobertura y advertencia sobre agregados (RN-10) y `PERIODO_SIN_DATOS`; comparación de marcas por costo por año normalizado a USD marcado como derivado con su fuente (RN-07), con aviso de confianza baja con menos de dos modelos (FA-1). Núcleo temporal `Vigencia.Intersecar`/`DiasEnPeriodo`. 15 pruebas nuevas; suite en verde. Validado en contenedor; verificación visual en el navegador, en la validación del despliegue.
 
 ### 8.3 Criterio de cierre (validación humana)
 
@@ -388,7 +390,7 @@ El detalle por incremento (qué se construyó, con qué pruebas y decisiones) vi
 |---|---|---|---|---|
 | Sprint 0 → Etapa 4 | 1–4 | UF-1 → UF-2 → UF-3 → UF-5 → UF-4 → UF-8 → UF-6 → UF-7 | CU-01..CU-10 | Entregados de forma incremental; ver `CHANGELOG.md` por el detalle. |
 | Etapa 5 · UF-9 | 5 | UF-9 (informe de período y comparación de marcas) | CU-12: BT-30, US-23, US-24 | Módulo de solo lectura; 15 pruebas nuevas; suite en verde. |
-| Pendiente | 5 | UF-10 (ingesta idempotente de intervenciones) | CU-11: BT-28, BT-29, US-21, US-22 | Único flujo restante para cerrar la Etapa 5 y el release v1.0. |
+| Etapa 5 · UF-10 | 5 | UF-10 (ingesta idempotente de intervenciones) | CU-11: BT-28, BT-29, US-21, US-22 | API idempotente `POST /api/v1/intervenciones`, cuatro caminos en problem+json; 18 pruebas nuevas. **Cierra la Etapa 5 y todos los CU (CU-01..CU-12): release v1.0 en alcance.** |
 
 Notas de uso de la bitácora:
 
@@ -419,3 +421,4 @@ Resumen de qué casos de uso y qué necesidades de negocio avanzan al cierre de 
 |---|---|---|
 | 1.0 | 2026-07-21 | Versión inicial del Mini-Plan para proyecto de un solo desarrollador. Estructura en Sprint 0 de arranque (EP-01 + EP-02) más cinco etapas de valor (EP-03 a EP-07), alineadas a las fases F0-F5 del roadmap y a los flujos UF en orden topológico de §15. Reutiliza los identificadores US-XX/BT-XX y las estimaciones de 06 sin re-estimar. Sustituye a los planes de sprint, plantillas de review y retrospectiva y tracking de velocidad (regla §2.2, modo 1 dev). |
 | 1.1 | 2026-07-26 | Actualización de avance: cerrado el flujo **UF-9** (informe de período y comparación de marcas, CU-12: BT-30, US-23, US-24). La Etapa 5 pasa a **En curso**, con **UF-10** (ingesta idempotente, CU-11) como único flujo pendiente para el release v1.0. Bitácora (§10) poblada con el resumen de flujos cerrados; el detalle por incremento reside en `CHANGELOG.md`. |
+| 1.2 | 2026-07-26 | Cerrado el flujo **UF-10** (ingesta automatizada de intervenciones, CU-11: BT-28, BT-29, US-21, US-22). La **Etapa 5 queda Realizada** y con ella los doce casos de uso (CU-01..CU-12) y los diez flujos UF: **release v1.0 en alcance**. Bitácora (§10) actualizada. |
