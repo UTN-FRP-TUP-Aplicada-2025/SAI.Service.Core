@@ -78,4 +78,29 @@ public readonly record struct Vigencia
 
         return new Vigencia(Desde, hasta);
     }
+
+    /// <summary>
+    /// Recorta esta vigencia al período <c>[desde, hasta)</c> (CU-12): devuelve la porción del
+    /// intervalo que cae dentro del período, o <c>null</c> si no lo toca. El fin abierto se trata como
+    /// si terminara en el fin del período (una cobertura o montaje aún vigente cuenta hasta el corte del
+    /// informe). Es la intersección de dos intervalos semiabiertos.
+    /// </summary>
+    public Vigencia? Intersecar(DateTimeOffset desde, DateTimeOffset hasta)
+    {
+        var finEste = Hasta ?? DateTimeOffset.MaxValue;
+        var inicio = Desde > desde ? Desde : desde;
+        var fin = finEste < hasta ? finEste : hasta;
+        return inicio < fin ? new Vigencia(inicio, fin) : null;
+    }
+
+    /// <summary>
+    /// Días de esta vigencia que caen dentro del período <c>[desde, hasta)</c> (CU-12): la duración de la
+    /// intersección, o 0 si no lo toca. Base del cálculo de días con protección y de los intervalos
+    /// recortados de las baterías intervinientes.
+    /// </summary>
+    public double DiasEnPeriodo(DateTimeOffset desde, DateTimeOffset hasta)
+    {
+        var recorte = Intersecar(desde, hasta);
+        return recorte is { Hasta: { } fin } ? (fin - recorte.Value.Desde).TotalDays : 0;
+    }
 }

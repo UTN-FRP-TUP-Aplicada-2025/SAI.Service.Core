@@ -1,11 +1,216 @@
 @page "/informe-de-periodo"
 @attribute [Authorize]
+@using SAI.Service.Core.Application.Informes
+@using SAI.Service.Core.Domain.Valores
+@using Microsoft.Extensions.DependencyInjection
+@inject IServiceScopeFactory FabricaAlcances
 
-<PageTitle>Informe de periodo — SAI.Service.Core</PageTitle>
+<PageTitle>Informe de período — SAI.Service.Core</PageTitle>
 
-<h1 class="mud-typography mud-typography-h4">Informe de periodo</h1>
+<h1 class="mud-typography mud-typography-h4 mb-4">Informe de período</h1>
 
-<MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Class="mt-4">
-    Superficie placeholder de Sprint 0. La cobertura del periodo, las intervenciones y
-    costos, y la calidad de suministro se implementan en EP-07.
-</MudAlert>
+<MudPaper Elevation="1" Class="pa-4 mb-4" Style="border-radius:10px;">
+    <MudGrid>
+        <MudItem xs="12" sm="3">
+            <MudDatePicker Label="Desde" @bind-Date="_desde" />
+        </MudItem>
+        <MudItem xs="12" sm="3">
+            <MudDatePicker Label="Hasta" @bind-Date="_hasta" />
+        </MudItem>
+        <MudItem xs="12" sm="4" Class="d-flex align-center gap-1">
+            <MudButton Variant="@(_modoComparacion ? Variant.Outlined : Variant.Filled)" Color="Color.Primary"
+                       Size="Size.Small" OnClick="@(() => _modoComparacion = false)">Informe de período</MudButton>
+            <MudButton Variant="@(_modoComparacion ? Variant.Filled : Variant.Outlined)" Color="Color.Primary"
+                       Size="Size.Small" OnClick="@(() => _modoComparacion = true)">Comparación de marcas</MudButton>
+        </MudItem>
+        <MudItem xs="12" sm="2" Class="d-flex align-center">
+            <MudButton Variant="Variant.Filled" Color="Color.Secondary" OnClick="Generar" Disabled="_cargando">Generar</MudButton>
+        </MudItem>
+    </MudGrid>
+</MudPaper>
+
+@if (_cargando)
+{
+    <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+}
+else if (!_modoComparacion)
+{
+    @if (_informe is null)
+    {
+        <MudAlert Severity="Severity.Info" Variant="Variant.Outlined">Elegí un período y tocá «Generar» para armar el informe.</MudAlert>
+    }
+    else if (_informe.Codigo == CodigoInforme.PeriodoSinDatos)
+    {
+        <MudAlert Severity="Severity.Warning" Variant="Variant.Filled"><b>PERIODO_SIN_DATOS</b>: el período no tiene actividad registrada. No se arma un informe vacío como si fuera real.</MudAlert>
+    }
+    else
+    {
+        <MudPaper Elevation="1" Class="pa-4 mb-4" Style="border-radius:10px;">
+            <MudText Typo="Typo.subtitle1" Class="mb-2">Cobertura</MudText>
+            @if (_informe.Cobertura is { } c)
+            {
+                <div class="d-flex flex-wrap gap-2 mb-3">
+                    <MudChip T="string" Size="Size.Small" Color="Color.Success" Variant="Variant.Text">Días con protección: @c.DiasConProteccion</MudChip>
+                    <MudChip T="string" Size="Size.Small" Color="@(c.DiasSinProteccion > 0 ? Color.Warning : Color.Default)" Variant="Variant.Text">Días sin protección: @c.DiasSinProteccion</MudChip>
+                    <MudChip T="string" Size="Size.Small" Color="Color.Info" Variant="Variant.Text">Dispositivos activos: @(c.DispositivosActivos.Count == 0 ? "—" : string.Join(", ", c.DispositivosActivos))</MudChip>
+                </div>
+                <MudText Typo="Typo.body2" Class="mud-text-secondary mb-1">Baterías intervinientes (intervalos recortados al período; incluye las dadas de baja):</MudText>
+                @if (c.BateriasIntervinientes.Count == 0)
+                {
+                    <MudText Typo="Typo.body2" Class="mud-text-secondary">Ninguna batería montada en el período.</MudText>
+                }
+                else
+                {
+                    <MudSimpleTable Dense="true" Hover="true" Style="background:transparent;">
+                        <thead><tr><th>Batería</th><th>Desde</th><th>Hasta</th><th style="text-align:right;">Días</th></tr></thead>
+                        <tbody>
+                            @foreach (var b in c.BateriasIntervinientes)
+                            {
+                                <tr>
+                                    <td>@b.BateriaCodigo</td>
+                                    <td>@b.Desde.UtcDateTime.ToString("yyyy-MM-dd")</td>
+                                    <td>@b.Hasta.UtcDateTime.ToString("yyyy-MM-dd")</td>
+                                    <td style="text-align:right;">@b.Dias</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </MudSimpleTable>
+                }
+            }
+        </MudPaper>
+
+        <MudPaper Elevation="1" Class="pa-4 mb-4" Style="border-radius:10px;">
+            <MudText Typo="Typo.subtitle1" Class="mb-2">Intervenciones y costos por tipo</MudText>
+            @if (_informe.Costos is { PorTipo.Count: > 0 } costos)
+            {
+                <MudSimpleTable Dense="true" Hover="true" Style="background:transparent;">
+                    <thead><tr><th>Tipo</th><th style="text-align:right;">Cantidad</th><th>Costo total</th></tr></thead>
+                    <tbody>
+                        @foreach (var t in costos.PorTipo)
+                        {
+                            <tr>
+                                <td>@t.Tipo</td>
+                                <td style="text-align:right;">@t.Cantidad</td>
+                                <td>@(t.Total is { } d ? FormatoDinero(d) : "sin costo declarado")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </MudSimpleTable>
+                <MudText Typo="Typo.caption" Class="mud-text-secondary mt-2">
+                    Los importes viajan en su moneda y fecha (RN-07). El equivalente normalizado a USD se muestra en la comparación de marcas,
+                    donde el valor derivado está registrado con su fuente de cotización.
+                </MudText>
+            }
+            else
+            {
+                <MudText Typo="Typo.body2" Class="mud-text-secondary">Sin intervenciones en el período.</MudText>
+            }
+        </MudPaper>
+
+        <MudPaper Elevation="1" Class="pa-4" Style="border-radius:10px;">
+            <MudText Typo="Typo.subtitle1" Class="mb-2">Eventos y calidad de suministro</MudText>
+            @if (_informe.EventosCalidad is { } ec)
+            {
+                <div class="d-flex flex-wrap gap-2 mb-2">
+                    <MudChip T="string" Size="Size.Small" Color="Color.Info" Variant="Variant.Text">Microcortes (desde eventos): @ec.Microcortes</MudChip>
+                    @foreach (var e in ec.EventosPorTipo)
+                    {
+                        <MudChip T="string" Size="Size.Small" Variant="Variant.Text">@e.Tipo: @e.Cantidad</MudChip>
+                    }
+                </div>
+                @if (ec.SobreAgregados && ec.CoberturaAgregados is { } cob)
+                {
+                    <MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Dense="true">
+                        Calidad construida sobre agregados horarios · cobertura @cob.ToString("0.000").
+                        El promedio horario no representa los microcortes (RN-10). @ec.AdvertenciaAgregados
+                    </MudAlert>
+                }
+                else
+                {
+                    <MudText Typo="Typo.body2" Class="mud-text-secondary">Calidad sobre muestras crudas del período.</MudText>
+                }
+            }
+        </MudPaper>
+    }
+}
+else
+{
+    @if (_comparacion is null)
+    {
+        <MudAlert Severity="Severity.Info" Variant="Variant.Outlined">Tocá «Generar» para comparar los modelos por costo por año de servicio.</MudAlert>
+    }
+    else if (_comparacion.Codigo == CodigoInforme.PeriodoSinDatos)
+    {
+        <MudAlert Severity="Severity.Warning" Variant="Variant.Filled">@_comparacion.Aviso</MudAlert>
+    }
+    else
+    {
+        @if (!_comparacion.Concluyente)
+        {
+            <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined" Class="mb-3">
+                <b>Confianza baja</b>: @_comparacion.Aviso
+            </MudAlert>
+        }
+        <MudPaper Elevation="1" Class="pa-4" Style="border-radius:10px;">
+            <MudText Typo="Typo.subtitle1" Class="mb-2">Comparación de marcas por costo por año de servicio</MudText>
+            <MudSimpleTable Dense="true" Hover="true" Style="background:transparent;">
+                <thead>
+                    <tr><th>Modelo</th><th>Marca</th><th>Costo/año (USD)</th><th style="text-align:right;">Fichas</th><th>Cumplió</th><th style="text-align:right;">Desvío (días)</th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var m in _comparacion.Modelos)
+                    {
+                        <tr>
+                            <td>@m.ModeloNombre</td>
+                            <td>@(m.Fabricante ?? "—")</td>
+                            <td>
+                                @FormatoDinero(m.CostoPorAnioUsd)
+                                <MudChip T="string" Size="Size.Small" Color="Color.Warning" Variant="Variant.Text" Class="ml-1">derivado · @m.FuenteCotizacion</MudChip>
+                            </td>
+                            <td style="text-align:right;">@m.FichasCerradas</td>
+                            <td>@(m.CumplioExpectativa ? "sí" : "no")</td>
+                            <td style="text-align:right;">@m.DesvioDiasPromedio</td>
+                        </tr>
+                    }
+                </tbody>
+            </MudSimpleTable>
+        </MudPaper>
+    }
+}
+
+@code {
+    private DateTime? _desde = new DateTime(DateTime.UtcNow.Year, 1, 1);
+    private DateTime? _hasta = DateTime.UtcNow.Date;
+    private bool _modoComparacion;
+    private bool _cargando;
+    private InformePeriodo? _informe;
+    private ComparacionMarcas? _comparacion;
+
+    private async Task Generar()
+    {
+        _cargando = true;
+        try
+        {
+            using var alcance = FabricaAlcances.CreateScope();
+            var servicio = alcance.ServiceProvider.GetRequiredService<ServicioInformePeriodo>();
+
+            if (_modoComparacion)
+            {
+                _comparacion = await servicio.CompararMarcasAsync(CancellationToken.None);
+            }
+            else
+            {
+                var desde = new DateTimeOffset(DateTime.SpecifyKind(_desde ?? DateTime.UtcNow.Date, DateTimeKind.Utc));
+                var hasta = new DateTimeOffset(DateTime.SpecifyKind(_hasta ?? DateTime.UtcNow.Date, DateTimeKind.Utc));
+                _informe = await servicio.ArmarInformeAsync(desde, hasta, CancellationToken.None);
+            }
+        }
+        finally
+        {
+            _cargando = false;
+        }
+    }
+
+    private static string FormatoDinero(Dinero d) =>
+        $"{d.Monto.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture)} {d.Moneda} ({d.Fecha:yyyy-MM-dd})";
+}
