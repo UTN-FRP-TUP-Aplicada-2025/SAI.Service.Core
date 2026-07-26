@@ -1,11 +1,199 @@
 @page "/sustitucion-del-sai"
 @attribute [Authorize]
+@using SAI.Service.Core.Application.Intervenciones
+@using SAI.Service.Core.Domain.Intervenciones
+@using SAI.Service.Core.Domain.Vinculos
+@using Microsoft.Extensions.DependencyInjection
+@inject IServiceScopeFactory FabricaAlcances
 
-<PageTitle>Reparacion y sustitucion del SAI — SAI.Service.Core</PageTitle>
+<PageTitle>Reparación y sustitución del SAI — SAI.Service.Core</PageTitle>
 
-<h1 class="mud-typography mud-typography-h4">Reparacion y sustitucion del SAI</h1>
+<h1 class="mud-typography mud-typography-h4 mb-4">Reparación y sustitución del SAI</h1>
 
-<MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Class="mt-4">
-    Superficie placeholder de Sprint 0. La cobertura vigente, la intervencion sobre el
-    equipo y la sucesion de coberturas del host se implementan en EP-06.
-</MudAlert>
+@if (_cobertura is null)
+{
+    <MudAlert Severity="Severity.Info" Variant="Variant.Filled">
+        No hay una cobertura vigente de ningún host. <MudLink Href="/alta-de-equipos" Color="Color.Inherit"><b>Dá de alta un equipo</b></MudLink>.
+    </MudAlert>
+}
+else
+{
+    @* Cobertura vigente arriba *@
+    <MudPaper Elevation="0" Outlined="true" Class="pa-3 mb-4">
+        <MudText Typo="Typo.caption" Class="mud-text-secondary d-block">Cobertura vigente</MudText>
+        <MudText Typo="Typo.body1">
+            El host <b>@_hostCodigo</b> está protegido por <b>@_salienteCodigo</b> desde
+            @_cobertura.Vigencia.Desde.UtcDateTime.ToString("yyyy-MM-dd").
+        </MudText>
+    </MudPaper>
+
+    <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined" Class="mb-4" Icon="@Icons.Material.Filled.Info">
+        Registrar una intervención es <b>un solo acto</b>: cierra la cobertura vigente, deja el equipo saliente en
+        reparación o dado de baja, y —si hay suplente— abre una cobertura nueva sin solapar (I-4). Un tramo sin
+        cobertura es legítimo y se mide como días sin protección. Sustituir por otro modelo reinicia las
+        verificaciones de firmware (recaracterización).
+    </MudAlert>
+
+    <MudGrid>
+        <MudItem xs="12" md="6">
+            <MudPaper Elevation="1" Class="pa-4" Style="border-radius:10px;height:100%;">
+                <MudText Typo="Typo.subtitle1" Class="mb-3">Intervención</MudText>
+                <MudTextField @bind-Value="_salienteCodigo" Label="Equipo saliente" ReadOnly="true" Margin="Margin.Dense" Class="mb-2" />
+                <MudSelect T="TipoIntervencionSai" @bind-Value="_tipo" Label="Tipo" Margin="Margin.Dense" Class="mb-2">
+                    <MudSelectItem Value="TipoIntervencionSai.Reparacion">Reparación (queda en reparación)</MudSelectItem>
+                    <MudSelectItem Value="TipoIntervencionSai.Reemplazo">Reemplazo (queda dado de baja)</MudSelectItem>
+                </MudSelect>
+                <MudDatePicker @bind-Date="_fechaOcurrida" Label="Fecha de la intervención" Margin="Margin.Dense" Class="mb-2" />
+                <MudTextField @bind-Value="_proveedor" Label="Proveedor" Margin="Margin.Dense" Class="mb-2" />
+                <MudTextField @bind-Value="_ejecutor" Label="Ejecutor" Margin="Margin.Dense" Class="mb-2" />
+                <MudTextField @bind-Value="_hallazgos" Label="Hallazgos" Lines="2" Margin="Margin.Dense" />
+                @if (_tipo == TipoIntervencionSai.Reemplazo)
+                {
+                    <div class="d-flex mt-2" style="gap:0.5rem;">
+                        <MudTextField @bind-Value="_destino" Label="Destino (disposición final)" Margin="Margin.Dense" />
+                        <MudTextField @bind-Value="_receptor" Label="Receptor" Margin="Margin.Dense" />
+                    </div>
+                }
+            </MudPaper>
+        </MudItem>
+
+        <MudItem xs="12" md="6">
+            <MudPaper Elevation="1" Class="pa-4" Style="border-radius:10px;height:100%;">
+                <MudText Typo="Typo.subtitle1" Class="mb-3">Suplente (opcional)</MudText>
+                <MudText Typo="Typo.caption" Class="mud-text-secondary d-block mb-2">
+                    Dejalo vacío si el host queda sin protección hasta una intervención futura.
+                </MudText>
+                <MudTextField @bind-Value="_entranteCodigo" Label="Código del suplente" Margin="Margin.Dense" Class="mb-2" />
+                <MudTextField @bind-Value="_modeloEntrante" Label="Modelo (si es un equipo nuevo)" Margin="Margin.Dense" Class="mb-2" />
+                <MudTextField @bind-Value="_serieEntrante" Label="Número de serie (opcional)" Margin="Margin.Dense" Class="mb-2" />
+                <MudDatePicker @bind-Date="_fechaInicioCobertura" Label="Empieza a cubrir (≥ fecha de intervención)" Margin="Margin.Dense" Class="mb-2" />
+                <MudText Typo="Typo.subtitle2" Class="mt-3 mb-1">Costo (opcional)</MudText>
+                <div class="d-flex" style="gap:0.5rem;">
+                    <MudNumericField @bind-Value="_costoMonto" Label="Monto" Margin="Margin.Dense" />
+                    <MudTextField @bind-Value="_moneda" Label="Moneda" Margin="Margin.Dense" Style="max-width:100px;" />
+                    <MudDatePicker @bind-Date="_fechaCosto" Label="Fecha" Margin="Margin.Dense" />
+                </div>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-3" Disabled="_ocupado" OnClick="Registrar">
+        Registrar intervención
+    </MudButton>
+
+    @if (_mensaje is not null)
+    {
+        <MudAlert Severity="@_severidad" Variant="Variant.Filled" Class="mt-4">@_mensaje</MudAlert>
+    }
+
+    @* Sucesión de coberturas del host *@
+    <MudPaper Elevation="2" Class="pa-4 mt-4" Style="border-radius:10px;">
+        <div class="d-flex align-center mb-2">
+            <MudText Typo="Typo.h6">Sucesión de coberturas de @_hostCodigo</MudText>
+            <MudSpacer />
+            @if (_diasSinProteccion > 0)
+            {
+                <MudChip T="string" Color="Color.Error" Variant="Variant.Text" Icon="@Icons.Material.Filled.WarningAmber">
+                    @_diasSinProteccion días sin protección
+                </MudChip>
+            }
+        </div>
+        <MudSimpleTable Dense="true" Bordered="true" Style="border-radius:10px;overflow:hidden;">
+            <thead>
+                <tr><th>Desde</th><th>Hasta</th><th>Protección</th></tr>
+            </thead>
+            <tbody>
+                @foreach (var tramo in _tramos)
+                {
+                    <tr style="@(tramo.SinProteccion ? "background:var(--mud-palette-error-hover);" : "")">
+                        <td>@tramo.Desde.UtcDateTime.ToString("yyyy-MM-dd")</td>
+                        <td>@(tramo.Hasta is { } h ? h.UtcDateTime.ToString("yyyy-MM-dd") : "— (vigente)")</td>
+                        <td>@(tramo.SinProteccion ? "SIN PROTECCIÓN" : tramo.DispositivoCodigo)</td>
+                    </tr>
+                }
+            </tbody>
+        </MudSimpleTable>
+    </MudPaper>
+}
+
+@code {
+    private CoberturaHost? _cobertura;
+    private string _hostCodigo = "";
+    private string _salienteCodigo = "";
+    private TipoIntervencionSai _tipo = TipoIntervencionSai.Reparacion;
+    private DateTime? _fechaOcurrida = DateTime.UtcNow;
+    private string _proveedor = "";
+    private string _ejecutor = "";
+    private string _hallazgos = "";
+    private string _destino = "";
+    private string _receptor = "";
+    private string _entranteCodigo = "";
+    private string _modeloEntrante = "";
+    private string _serieEntrante = "";
+    private DateTime? _fechaInicioCobertura;
+    private decimal _costoMonto;
+    private string _moneda = "ARS";
+    private DateTime? _fechaCosto = DateTime.UtcNow;
+
+    private bool _ocupado;
+    private string? _mensaje;
+    private Severity _severidad = Severity.Info;
+    private IReadOnlyList<TramoProteccion> _tramos = [];
+    private int _diasSinProteccion;
+
+    protected override async Task OnInitializedAsync() => await Cargar();
+
+    private async Task Cargar()
+    {
+        using var alcance = FabricaAlcances.CreateScope();
+        var repo = alcance.ServiceProvider.GetRequiredService<IRepositorioSustituciones>();
+        _cobertura = await repo.CoberturaVigenteAsync(CancellationToken.None);
+        if (_cobertura is null)
+        {
+            return;
+        }
+
+        _hostCodigo = _cobertura.HostCodigo;
+        _salienteCodigo = _cobertura.DispositivoCodigo;
+        var coberturas = await repo.CoberturasDeHostAsync(_hostCodigo, CancellationToken.None);
+        _tramos = CalculadorProteccion.Sucesion(coberturas);
+        _diasSinProteccion = CalculadorProteccion.DiasSinProteccion(coberturas, DateTimeOffset.UtcNow);
+    }
+
+    private async Task Registrar()
+    {
+        _ocupado = true;
+        try
+        {
+            var instante = new DateTimeOffset(DateTime.SpecifyKind(_fechaOcurrida ?? DateTime.UtcNow, DateTimeKind.Utc));
+            DateTimeOffset? inicio = _fechaInicioCobertura is { } f
+                ? new DateTimeOffset(DateTime.SpecifyKind(f, DateTimeKind.Utc))
+                : null;
+            ImporteEntrada? costo = _costoMonto > 0
+                ? new ImporteEntrada(_costoMonto, _moneda, DateOnly.FromDateTime(_fechaCosto ?? DateTime.UtcNow))
+                : null;
+
+            var solicitud = new SolicitudSustitucion(
+                instante, DateTimeOffset.UtcNow, _hostCodigo, _salienteCodigo, _tipo,
+                string.IsNullOrWhiteSpace(_entranteCodigo) ? null : _entranteCodigo,
+                string.IsNullOrWhiteSpace(_modeloEntrante) ? null : _modeloEntrante,
+                string.IsNullOrWhiteSpace(_serieEntrante) ? null : _serieEntrante,
+                inicio, _proveedor, _ejecutor, _hallazgos, costo,
+                string.IsNullOrWhiteSpace(_destino) ? null : _destino,
+                string.IsNullOrWhiteSpace(_receptor) ? null : _receptor);
+
+            using var alcance = FabricaAlcances.CreateScope();
+            var resultado = await alcance.ServiceProvider.GetRequiredService<ServicioSustitucionSai>()
+                .RegistrarAsync(solicitud, CancellationToken.None);
+            _mensaje = resultado.Codigo == CodigoSustitucion.Registrado && resultado.FirmwareReiniciado
+                ? resultado.Mensaje + " Las verificaciones de firmware volvieron a «Pendiente»."
+                : resultado.Mensaje;
+            _severidad = resultado.Codigo == CodigoSustitucion.Registrado ? Severity.Success : Severity.Error;
+        }
+        finally
+        {
+            _ocupado = false;
+            await Cargar();
+        }
+    }
+}

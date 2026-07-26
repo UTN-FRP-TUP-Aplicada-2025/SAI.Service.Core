@@ -214,6 +214,34 @@ public class VerificacionesTests
         verificacion.MedicionSegundos.Should().Be(42);
     }
 
+    [Fact]
+    public void ReiniciarVuelveANuncaVerificadoLimpiandoTodo()
+    {
+        var verificacion = Verificacion.Sembrar("ver-1", Supuesto.SenalEnBateria, Ahora);
+        verificacion.Verificar("ventana", "ok", Ahora.AddDays(365), Ahora, medicionSegundos: 50);
+
+        verificacion.Reiniciar(Ahora.AddDays(1));
+
+        verificacion.Estado.Should().Be(EstadoVerificacion.NuncaVerificado);
+        verificacion.Metodo.Should().BeNull();
+        verificacion.Evidencia.Should().BeNull();
+        verificacion.VigenciaHasta.Should().BeNull();
+        verificacion.MedicionSegundos.Should().BeNull();
+    }
+
+    [Fact]
+    public void ReiniciarTambienDesbloqueaUnRefutado()
+    {
+        var verificacion = Verificacion.Sembrar("ver-1", Supuesto.ReencendidoPorPlaca, Ahora);
+        verificacion.Refutar("ventana", "el host no arrancó solo", Ahora);
+
+        verificacion.Reiniciar(Ahora);
+
+        verificacion.Estado.Should().Be(EstadoVerificacion.NuncaVerificado, "la refutación era contra el equipo viejo (CU-09 FA-2)");
+        var acto = () => verificacion.Verificar("ventana", "ok", null, Ahora);
+        acto.Should().NotThrow("un supuesto reiniciado ya no está refutado");
+    }
+
     private static List<Verificacion> SembrarLasCuatro() =>
         Enum.GetValues<Supuesto>().Select(s => Verificacion.Sembrar($"ver-{s}", s, Ahora)).ToList();
 }

@@ -9,6 +9,29 @@ y el versionado sigue [Semantic Versioning](https://semver.org/lang/es/).
 
 ### Añadido
 
+- **Etapa 4 · Sustitución del SAI con cobertura suplente** (CU-09, US-20, EP-06): el panel
+  `SustitucionDelSai.razor` deja de ser un placeholder e implementa la reparación/sustitución del SAI como
+  **un solo acto** (`ServicioSustitucionSai`): valida **antes** de aplicar (postcondición de fallo: nada se
+  aplica), **cierra la cobertura vigente** del host por el equipo saliente (RC-03), cambia su estado a **en
+  reparación** o **dado de baja** (RN-12, con disposición final), y —si hay **suplente** (de stock o nuevo,
+  registrado inline)— lo pone **en servicio** y abre una **cobertura nueva sin solapar** (I-4). Un hueco entre
+  coberturas es legítimo y se mide como **días sin protección** (`CalculadorProteccion`, función pura). Costo
+  **opcional** con moneda y fecha (RN-07), sin cuadre. Errores tipados: `SIN_COBERTURA_VIGENTE`,
+  `COBERTURA_SOLAPADA`, `COHERENCIA_TEMPORAL`, `DINERO_SIN_MONEDA_O_FECHA`.
+  - **Recaracterización de firmware (FA-2, CA-04):** al sustituir por un SAI de **otro modelo**, las cuatro
+    verificaciones vuelven a **«sin verificar»** (nuevo `Verificacion.Reiniciar`, que reinicia incluso un
+    supuesto refutado: el bloqueo era contra el equipo viejo). ADR-03 mantiene el anclaje USB.
+  - Reusa el patrón del recambio de batería (Etapa 4·C) sobre `CoberturaHost` en vez de `MontajeBateria`:
+    `Vigencia`/`Vigencias.AdmiteNuevo`, `UnidadFisica` (baja lógica / servicio / reparación), `IEntidadHistoria`
+    + interceptor append-only, `Dinero`/`DisposicionFinal`. Nueva entidad append-only `SustitucionSai`
+    (costo y disposición opcionales como columnas nullable) + migración `EsquemaSustituciones`. El panel muestra
+    la cobertura vigente, el formulario de intervención y la **sucesión de coberturas** con los días sin
+    protección resaltados.
+  - 18 pruebas nuevas (dominio: `SustitucionSai`, `Verificacion.Reiniciar`; aplicación: `CalculadorProteccion`;
+    integración: los cuatro criterios de aceptación CA-01..CA-04, coherencia temporal sin efectos, costo sin
+    moneda, sin cobertura vigente, append-only). *La corrección de fecha con reatribución del histórico y el
+    informe de período completo (EP-07) quedan fuera del incremento.*
+
 - **Ventana de mantenimiento — disparo del apagado y rearme por reinicio** (US-16, CU-10, ADR-25):
   en el panel de verificaciones, la **"Prueba de tiempo de apagado del host"** ahora tiene un botón
   **"Ejecutar prueba de apagado"** que **dispara** el apagado ordenado del host (reutiliza el write path
