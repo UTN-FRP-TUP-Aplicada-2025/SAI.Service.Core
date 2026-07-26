@@ -87,6 +87,9 @@ public class SaiDbContext(DbContextOptions<SaiDbContext> options)
     /// <summary>Historia de sustituciones/reparaciones del SAI (CU-09).</summary>
     public DbSet<SustitucionSai> Sustituciones => Set<SustitucionSai>();
 
+    /// <summary>Historia de intervenciones ingresadas por la API externa (CU-11, append-only, ADR-04/ADR-17).</summary>
+    public DbSet<IntervencionIngerida> IntervencionesIngeridas => Set<IntervencionIngerida>();
+
     /// <summary>Políticas de apagado versionadas (Etapa 4·D, CU-03, append-only ADR-04).</summary>
     public DbSet<VersionPolitica> Politicas => Set<VersionPolitica>();
 
@@ -122,5 +125,8 @@ public class SaiDbContext(DbContextOptions<SaiDbContext> options)
 
         // Políticas de apagado versionadas (Etapa 4·D, CU-03).
         ModeloPoliticas.Configurar(builder);
+
+        // Ingesta de intervenciones externas (Etapa 5·UF-10, CU-11).
+        ModeloIngesta.Configurar(builder);
     }
 }

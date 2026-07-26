@@ -9,6 +9,31 @@ y el versionado sigue [Semantic Versioning](https://semver.org/lang/es/).
 
 ### Añadido
 
+- **Etapa 5 · Ingesta automatizada de intervenciones** (CU-11, US-21, US-22, BT-28): el **único contrato
+  formal hacia terceros**, `POST /api/v1/intervenciones` (autenticado por Bearer), que un GMAO externo usa
+  sin intervención humana. Es idempotente por clave: un reintento de red no duplica el hecho ni corrompe el
+  histórico (RN-09). Los cuatro caminos del contrato (ADR-17) en **problem+json (RFC 7807)**:
+  - **201** cuerpo válido y clave nueva → `{id, creado:true, confianza:"media", tiempoValido, tiempoRegistrado}`;
+  - **200** misma clave con el mismo cuerpo → `{id, creado:false}` (mismo id, sin duplicar);
+  - **409** `conflicto_idempotencia`: misma clave con cuerpo distinto → huellas `sha256Original`/`sha256Recibido`
+    + `accionSugerida`; **nunca** 200 ("devolver 200 sería peor que duplicar");
+  - **422** invariante roto: `validacion` (cuadre de costos RN-08, o dinero sin moneda/fecha RN-07) y
+    `coherencia_temporal` (intervención fechada después de la baja de una unidad, RN-12).
+  - Entidad append-only nueva `IntervencionIngerida` (ADR-04): la propia historia **es** el almacén de
+    idempotencia (índice único en la clave), con la huella sha256 del cuerpo para distinguir reintento de
+    conflicto y los **dos tiempos** (válido/registrado). Confianza **media** por origen externo (ADR-06),
+    tomada de la fuente del encabezado `X-Fuente-Datos` (se siembra `fd-gmao-externo` al arranque). Migración
+    `EsquemaIngesta`. `ServicioIngesta` valida los invariantes reutilizando `Costos.Cuadra()`, `Dinero` y
+    `UnidadFisica.AdmiteOperacionEn` **antes** de registrar (postcondición de fallo: nada se registra).
+  - **Decisión de robustez**: la entidad de ingesta **no** lleva FK a `UnidadFisica` — registra un hecho
+    externo de baja confianza que puede referenciar un dispositivo aún no dado de alta localmente, sin
+    romper por integridad referencial; la coherencia temporal (RN-12) se valida sobre las unidades conocidas.
+  - 18 pruebas nuevas (dominio: entidad/cuadre/append-only; aplicación: los seis códigos de resultado;
+    integración con `WebApplicationFactory` + token ROPC: los cuatro caminos 201/200/409/422 —CA-01..05— más
+    401 sin token y 400 sin cabeceras). **Cierra el flujo UF-10 y la Etapa 5.** *El endpoint de rectificación
+    que sugiere el 409 queda fuera de alcance (P-05 / ADR-21, "Propuesto"): el 409 devuelve la acción sugerida
+    como texto, sin implementar la rectificación.*
+
 - **Etapa 4 · Informe de período y comparación de marcas** (CU-12, US-11, EP-07, F-22): la superficie
   `InformeDePeriodo.razor` deja de ser un placeholder y arma, **intersecando historia ya registrada** (solo
   lectura, sin entidad nueva ni migración), el informe de un período y la comparación de modelos de batería.

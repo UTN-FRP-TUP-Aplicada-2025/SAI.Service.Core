@@ -5,6 +5,7 @@ using SAI.Service.Core.Application.Abstractions;
 using SAI.Service.Core.Application.Acciones;
 using SAI.Service.Core.Application.Equipos;
 using SAI.Service.Core.Application.Informes;
+using SAI.Service.Core.Application.Ingesta;
 using SAI.Service.Core.Application.Intervenciones;
 using SAI.Service.Core.Application.Monitoreo;
 using SAI.Service.Core.Application.Politicas;
@@ -109,6 +110,10 @@ public static class DependencyInjection
         // Informe de período y comparación de marcas (CU-12, US-11): solo lectura sobre la historia.
         services.AddScoped<IRepositorioInformes, Persistencia.RepositorioInformes>();
         services.AddScoped<ServicioInformePeriodo>();
+
+        // Ingesta automatizada de intervenciones (CU-11, US-21/US-22): idempotencia por clave.
+        services.AddScoped<IRepositorioIngesta, Persistencia.RepositorioIngesta>();
+        services.AddScoped<ServicioIngesta>();
 
         services.AddHostedService<ServicioSondeo>();
 
