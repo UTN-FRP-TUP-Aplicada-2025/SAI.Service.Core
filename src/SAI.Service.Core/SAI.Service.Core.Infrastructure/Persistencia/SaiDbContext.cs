@@ -7,6 +7,7 @@ using SAI.Service.Core.Domain.Catalogo;
 using SAI.Service.Core.Domain.Intervenciones;
 using SAI.Service.Core.Domain.Inventario;
 using SAI.Service.Core.Domain.Monitoreo;
+using SAI.Service.Core.Domain.Politicas;
 using SAI.Service.Core.Domain.Verificaciones;
 using SAI.Service.Core.Domain.Vinculos;
 using SAI.Service.Core.Infrastructure.Persistencia.Configuraciones;
@@ -83,6 +84,9 @@ public class SaiDbContext(DbContextOptions<SaiDbContext> options)
     /// <summary>Fichas de vida útil proyectadas al recambiar (Etapa 4·C, US-19).</summary>
     public DbSet<FichaVidaUtil> FichasVidaUtil => Set<FichaVidaUtil>();
 
+    /// <summary>Políticas de apagado versionadas (Etapa 4·D, CU-03, append-only ADR-04).</summary>
+    public DbSet<VersionPolitica> Politicas => Set<VersionPolitica>();
+
     /// <inheritdoc />
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
@@ -109,5 +113,8 @@ public class SaiDbContext(DbContextOptions<SaiDbContext> options)
 
         // Historia de intervenciones: recambio de batería y ficha de vida útil (Etapa 4·C).
         ModeloIntervenciones.Configurar(builder);
+
+        // Políticas de apagado versionadas (Etapa 4·D, CU-03).
+        ModeloPoliticas.Configurar(builder);
     }
 }

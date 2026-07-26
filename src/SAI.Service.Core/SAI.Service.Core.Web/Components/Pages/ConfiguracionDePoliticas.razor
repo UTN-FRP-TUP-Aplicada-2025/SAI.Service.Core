@@ -1,11 +1,259 @@
 @page "/configuracion-de-politicas"
 @attribute [Authorize]
+@using SAI.Service.Core.Application.Politicas
+@using SAI.Service.Core.Domain.Politicas
+@using SAI.Service.Core.Domain.Verificaciones
+@using Microsoft.Extensions.DependencyInjection
+@inject IServiceScopeFactory FabricaAlcances
 
-<PageTitle>Configuracion de politicas — SAI.Service.Core</PageTitle>
+<PageTitle>Configuración de políticas — SAI.Service.Core</PageTitle>
 
-<h1 class="mud-typography mud-typography-h4">Configuracion de politicas</h1>
+<h1 class="mud-typography mud-typography-h4 mb-2">Configuración de políticas</h1>
+<MudText Typo="Typo.body2" Class="mud-text-secondary mb-4">
+    La política de apagado se configura creando una <b>versión nueva</b> (nunca se edita la vigente): cada
+    versión fija la modalidad, el umbral de disparo y el tiempo reservado. La UI propone, vos confirmás, el
+    sistema valida (techo duro de @Domain.Acciones.Accion.TechoDuroApagadoSeg s, RN-04).
+</MudText>
 
-<MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Class="mt-4">
-    Superficie placeholder de Sprint 0. La configuracion dirigida por descriptores,
-    los presets y la previsualizacion de propuestas se implementan en EP-04.
-</MudAlert>
+@if (_vigente is not null)
+{
+    <MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Class="mb-4">
+        Versión vigente: <b>v@_vigente.Numero</b> · @EtiquetaModalidad(_vigente.ModalidadSolicitada)
+        · umbral @_vigente.UmbralDisparoSegundos s · reserva @_vigente.TiempoReservadoApagadoSeg s.
+    </MudAlert>
+}
+
+<MudGrid>
+    <MudItem xs="12" md="7">
+        <MudPaper Elevation="1" Class="pa-4 mb-4" Style="border-radius:10px;">
+            <MudText Typo="Typo.subtitle1" Class="mb-1">Nueva versión</MudText>
+
+            <MudText Typo="Typo.caption" Class="mud-text-secondary">Presets</MudText>
+            <div class="d-flex flex-wrap gap-2 mb-4 mt-1">
+                @foreach (var preset in DescriptorPoliticas.Presets)
+                {
+                    <MudChip T="string" Variant="Variant.Outlined" Color="Color.Primary" Size="Size.Small"
+                             OnClick="@(() => AplicarPreset(preset))">@preset.Nombre</MudChip>
+                }
+            </div>
+
+            <MudSelect T="Modalidad" Value="_modalidad" ValueChanged="CambiarModalidad" Label="@Desc("modalidad").Etiqueta"
+                       HelperText="@Desc("modalidad").Ayuda" Variant="Variant.Outlined" Dense="true" Class="mb-3">
+                @foreach (var opcion in Desc("modalidad").Opciones!)
+                {
+                    <MudSelectItem T="Modalidad" Value="ModalidadDe(opcion.Valor)">@opcion.Etiqueta</MudSelectItem>
+                }
+            </MudSelect>
+
+            <MudNumericField T="int" Value="_umbral" ValueChanged="CambiarUmbral" Label="@Desc("umbralDisparoSegundos").Etiqueta"
+                             HelperText="@Desc("umbralDisparoSegundos").Ayuda" Adornment="Adornment.End" AdornmentText="s"
+                             Min="@(Desc("umbralDisparoSegundos").Minimo ?? 1)" Variant="Variant.Outlined" Class="mb-3" />
+
+            <MudNumericField T="int" Value="_tiempoReservado" ValueChanged="CambiarTiempo" Label="@Desc("tiempoReservadoApagadoSeg").Etiqueta"
+                             HelperText="@Desc("tiempoReservadoApagadoSeg").Ayuda" Adornment="Adornment.End" AdornmentText="s"
+                             Min="@(Desc("tiempoReservadoApagadoSeg").Minimo ?? 0)" Max="@(Desc("tiempoReservadoApagadoSeg").Maximo ?? Domain.Acciones.Accion.TechoDuroApagadoSeg)"
+                             Variant="Variant.Outlined" Class="mb-2" />
+
+            <div class="d-flex gap-2 mt-4">
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="_ocupado" OnClick="Confirmar">
+                    Confirmar versión
+                </MudButton>
+                <MudButton Variant="Variant.Text" Color="Color.Default" Disabled="_ocupado" OnClick="Descartar">
+                    Descartar
+                </MudButton>
+            </div>
+        </MudPaper>
+    </MudItem>
+
+    <MudItem xs="12" md="5">
+        <MudPaper Elevation="0" Outlined="true" Class="pa-4 mb-4" Style="border-radius:10px;">
+            <div class="d-flex align-center gap-2 mb-2">
+                <MudText Typo="Typo.subtitle1">En palabras</MudText>
+                <MudChip T="string" Size="Size.Small" Color="Color.Secondary" Variant="Variant.Text"
+                         Icon="@Icons.Material.Filled.Science">Modo simulación</MudChip>
+            </div>
+            <MudText Typo="Typo.body2" Class="mb-3">@(_previa?.EnPalabras ?? "…")</MudText>
+
+            @if (_previa is not null)
+            {
+                @if (_modalidad != Modalidad.SoloAlerta)
+                {
+                    <MudText Typo="Typo.caption" Class="mud-text-secondary d-block mb-1">
+                        Verificaciones requeridas: <b>@_previa.Verificados de @_previa.Requeridos</b> supuestos verificados y vigentes.
+                    </MudText>
+                }
+
+                @if (_previa.Degradada)
+                {
+                    <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined" Dense="true" Class="mt-2">
+                        Con las verificaciones actuales, esta modalidad <b>degradaría a solo aviso</b> (RN-02): no se
+                        apagaría nada hasta verificar los cuatro supuestos.
+                        <MudLink Href="/panel-de-verificaciones" Color="Color.Inherit"><b>Ir a verificaciones</b></MudLink>.
+                    </MudAlert>
+                }
+                else if (_modalidad != Modalidad.SoloAlerta)
+                {
+                    <MudAlert Severity="Severity.Success" Variant="Variant.Outlined" Dense="true" Class="mt-2">
+                        Modalidad efectiva: <b>@EtiquetaModalidad(_previa.ModalidadEfectiva)</b> (los supuestos están verificados).
+                    </MudAlert>
+                }
+            }
+        </MudPaper>
+    </MudItem>
+</MudGrid>
+
+@if (_mensaje is not null)
+{
+    <MudAlert Severity="@_severidad" Variant="Variant.Filled" Class="mb-4">@_mensaje</MudAlert>
+}
+
+<MudText Typo="Typo.subtitle1" Class="mb-2">Historial de versiones</MudText>
+@if (_historial.Count == 0)
+{
+    <MudText Typo="Typo.body2" Class="mud-text-secondary">Todavía no hay versiones de política.</MudText>
+}
+else
+{
+    <MudSimpleTable Dense="true" Hover="true" Bordered="true" Style="border-radius:10px;overflow:hidden;">
+        <thead>
+            <tr><th>Versión</th><th>Modalidad</th><th>Umbral</th><th>Reserva</th><th>Vigente desde (UTC)</th><th></th></tr>
+        </thead>
+        <tbody>
+            @foreach (var v in _historial)
+            {
+                <tr>
+                    <td>v@v.Numero</td>
+                    <td>@EtiquetaModalidad(v.ModalidadSolicitada)</td>
+                    <td>@v.UmbralDisparoSegundos s</td>
+                    <td>@v.TiempoReservadoApagadoSeg s</td>
+                    <td>@v.VigenteDesde.UtcDateTime.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                    <td>
+                        @if (_vigente is not null && v.Numero == _vigente.Numero)
+                        {
+                            <MudChip T="string" Size="Size.Small" Color="Color.Success" Variant="Variant.Text">Vigente</MudChip>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </MudSimpleTable>
+}
+
+@code {
+    private VersionPolitica? _vigente;
+    private IReadOnlyList<VersionPolitica> _historial = [];
+    private Previsualizacion? _previa;
+
+    private Modalidad _modalidad = DescriptorPoliticas.Defecto.ModalidadSolicitada;
+    private int _umbral = DescriptorPoliticas.Defecto.UmbralDisparoSegundos;
+    private int _tiempoReservado = DescriptorPoliticas.Defecto.TiempoReservadoApagadoSeg;
+
+    private bool _ocupado;
+    private string? _mensaje;
+    private Severity _severidad = Severity.Info;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Cargar();
+        SembrarDesdeVigente();
+        await Previsualizar();
+    }
+
+    private async Task Cargar()
+    {
+        using var alcance = FabricaAlcances.CreateScope();
+        var servicio = alcance.ServiceProvider.GetRequiredService<ServicioPoliticas>();
+        _vigente = await servicio.VigenteAsync(CancellationToken.None);
+        _historial = await servicio.HistorialAsync(CancellationToken.None);
+    }
+
+    private void SembrarDesdeVigente()
+    {
+        if (_vigente is null)
+        {
+            return;
+        }
+
+        _modalidad = _vigente.ModalidadSolicitada;
+        _umbral = _vigente.UmbralDisparoSegundos;
+        _tiempoReservado = _vigente.TiempoReservadoApagadoSeg;
+    }
+
+    private static DescriptorParametro Desc(string clave) =>
+        DescriptorPoliticas.Parametros.First(p => p.Clave == clave);
+
+    private static Modalidad ModalidadDe(string valor) => Enum.Parse<Modalidad>(valor);
+
+    private PropuestaPolitica Propuesta() => new(_modalidad, _umbral, _tiempoReservado);
+
+    private async Task CambiarModalidad(Modalidad valor) { _modalidad = valor; await Previsualizar(); }
+    private async Task CambiarUmbral(int valor) { _umbral = valor; await Previsualizar(); }
+    private async Task CambiarTiempo(int valor) { _tiempoReservado = valor; await Previsualizar(); }
+
+    private async Task AplicarPreset(Preset preset)
+    {
+        _modalidad = preset.Propuesta.ModalidadSolicitada;
+        _umbral = preset.Propuesta.UmbralDisparoSegundos;
+        _tiempoReservado = preset.Propuesta.TiempoReservadoApagadoSeg;
+        await Previsualizar();
+    }
+
+    private async Task Previsualizar()
+    {
+        // Con valores fuera de rango (< 1) no se previsualiza; el servicio los rechaza al confirmar.
+        if (_umbral <= 0)
+        {
+            _previa = null;
+            return;
+        }
+
+        using var alcance = FabricaAlcances.CreateScope();
+        _previa = await alcance.ServiceProvider.GetRequiredService<ServicioPoliticas>()
+            .PrevisualizarAsync(Propuesta(), CancellationToken.None);
+    }
+
+    private void Descartar()
+    {
+        SembrarDesdeVigente();
+        _mensaje = null;
+        _ = Previsualizar();
+    }
+
+    private async Task Confirmar()
+    {
+        _ocupado = true;
+        try
+        {
+            using var alcance = FabricaAlcances.CreateScope();
+            var resultado = await alcance.ServiceProvider.GetRequiredService<ServicioPoliticas>()
+                .CrearVersionAsync(Propuesta(), CancellationToken.None);
+
+            if (resultado.Codigo == CodigoPolitica.Creada)
+            {
+                _mensaje = resultado.Mensaje;
+                _severidad = Severity.Success;
+                await Cargar();
+                SembrarDesdeVigente();
+                await Previsualizar();
+            }
+            else
+            {
+                _mensaje = resultado.Mensaje;
+                _severidad = Severity.Error;
+            }
+        }
+        finally
+        {
+            _ocupado = false;
+        }
+    }
+
+    private static string EtiquetaModalidad(Modalidad modalidad) => modalidad switch
+    {
+        Modalidad.SoloAlerta => "Solo aviso",
+        Modalidad.ApagarHostConRetorno => "Apagar host (con retorno)",
+        Modalidad.ApagarHostLuegoUpsConRetorno => "Apagar host y SAI (con retorno)",
+        Modalidad.CicloForzado => "Ciclo forzado",
+        _ => modalidad.ToString(),
+    };
+}

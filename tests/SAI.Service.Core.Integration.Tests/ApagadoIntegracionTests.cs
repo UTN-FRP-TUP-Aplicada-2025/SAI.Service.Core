@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using SAI.Service.Core.Application.Acciones;
 using SAI.Service.Core.Application.Equipos;
+using SAI.Service.Core.Application.Politicas;
 using SAI.Service.Core.Domain.Acciones;
 using SAI.Service.Core.Domain.Verificaciones;
 using SAI.Service.Core.Infrastructure.Adaptadores;
@@ -26,7 +27,7 @@ public class ApagadoIntegracionTests
         using var scope = fabrica.Services.CreateScope();
         var sp = scope.ServiceProvider;
         await DarDeAlta(sp);
-        sp.GetRequiredService<OpcionesApagado>().ModalidadSolicitada = Modalidad.ApagarHostConRetorno;
+        await FijarModalidad(sp, Modalidad.ApagarHostConRetorno);
 
         var accion = await sp.GetRequiredService<ServicioApagadoOrdenado>().EjecutarDisparoAsync("evt-disparo", CancellationToken.None);
 
@@ -43,7 +44,7 @@ public class ApagadoIntegracionTests
         var sp = scope.ServiceProvider;
         await DarDeAlta(sp);
         sp.GetRequiredService<AdaptadorConexionSimulado>().SimularEnBateria = true;
-        sp.GetRequiredService<OpcionesApagado>().ModalidadSolicitada = Modalidad.ApagarHostConRetorno;
+        await FijarModalidad(sp, Modalidad.ApagarHostConRetorno);
         await VerificarLosCuatro(sp);
 
         var accion = await sp.GetRequiredService<ServicioApagadoOrdenado>().EjecutarDisparoAsync("evt-disparo", CancellationToken.None);
@@ -81,6 +82,12 @@ public class ApagadoIntegracionTests
 
         await acto.Should().ThrowAsync<EscrituraDestructivaProhibidaException>("las acciones son historia append-only (ADR-04)");
     }
+
+    // Fija la modalidad de la política vigente creando una versión nueva (CU-03): es la fuente de verdad
+    // que lee el apagado. El arranque siembra v1 en solo aviso; esto crea la v2 con la modalidad pedida.
+    private static async Task FijarModalidad(IServiceProvider sp, Modalidad modalidad) =>
+        await sp.GetRequiredService<ServicioPoliticas>()
+            .CrearVersionAsync(new PropuestaPolitica(modalidad, 300, 120), CancellationToken.None);
 
     private static async Task VerificarLosCuatro(IServiceProvider sp)
     {

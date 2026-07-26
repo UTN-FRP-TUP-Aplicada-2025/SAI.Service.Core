@@ -7,7 +7,10 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using MudBlazor.Services;
 using SAI.Service.Core.Api;
+using SAI.Service.Core.Application.Acciones;
+using SAI.Service.Core.Application.Politicas;
 using SAI.Service.Core.Domain.Monitoreo;
+using SAI.Service.Core.Domain.Politicas;
 using SAI.Service.Core.Infrastructure;
 using SAI.Service.Core.Infrastructure.Persistencia;
 using SAI.Service.Core.Web;
@@ -165,6 +168,21 @@ using (var scope = app.Services.CreateScope())
                 new Dictionary<string, double> { ["sondeosPerdidos"] = 3 }, "Pérdida de comunicación por sondeos perdidos"),
             new ReglaDerivacion(DerivadorEventos.ReglaDisparo, 1, vigenteDesde,
                 new Dictionary<string, double> { ["umbralObSeg"] = 300, ["batVoltMin"] = 13.3, ["batVoltMax"] = 14.5 }, "Disparo del apagado por tiempo en batería y tensión (BT-20)"));
+        await db.SaveChangesAsync();
+    }
+
+    // Semilla de la política de apagado inicial (v1, CU-03/EP-04) si no existe ninguna versión.
+    // Toma los valores de OpcionesApagado (Sai:Apagado) como semilla: modalidad y tiempo reservado;
+    // el umbral de disparo arranca en el default del descriptor. A partir de acá la versión vigente
+    // es la fuente de verdad del apagado (ServicioApagadoOrdenado la lee).
+    if (!await db.Politicas.AnyAsync())
+    {
+        var opciones = scope.ServiceProvider.GetRequiredService<OpcionesApagado>();
+        db.Politicas.Add(VersionPolitica.Inicial(
+            opciones.ModalidadSolicitada,
+            DescriptorPoliticas.Defecto.UmbralDisparoSegundos,
+            opciones.TiempoReservadoSeg,
+            DateTimeOffset.UtcNow));
         await db.SaveChangesAsync();
     }
 }
