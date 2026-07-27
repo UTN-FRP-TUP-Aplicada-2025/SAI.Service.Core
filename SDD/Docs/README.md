@@ -98,7 +98,7 @@ Artefactos complementarios, fuera del árbol numerado:
 | Artefacto | Propósito | Enlace |
 | --- | --- | --- |
 | Maqueta aprobada | Prototipo navegable de las pantallas del panel | [Maquetas/Sai-Service-Core](../Maquetas/Sai-Service-Core/) |
-| Auditorías por fase | Registros de auditoría de las fases A a G del proceso SDD | [Audit](Audit/) |
+| Auditorías por fase | Registros de auditoría de las fases A a H del proceso SDD | [Audit](Audit/) |
 
 ### 4.1 Cadena de trazabilidad
 
@@ -140,7 +140,7 @@ El onboarding del desarrollador vive en el **cuerpo mantenedor de la categoría 
 
 Todas las categorías están en estado Borrador y fueron auditadas por fase (ver [Audit](Audit/)). El roadmap detallado no se replica acá: vive en [00-Contexto/Roadmap-Producto-v1.0.md](00-Contexto/Roadmap-Producto-v1.0.md).
 
-La carpeta de auditoría reúne un registro por fase del proceso SDD: contexto y necesidades de negocio (A), especificación funcional y UX/UI (B), arquitectura técnica (C), backlog y plan de sprint (D), calidad y pruebas (E), devops (F) y ejemplos (G). Cada registro documenta hallazgos y correcciones aplicadas sobre la categoría correspondiente, y es la referencia para entender por qué un documento tiene su forma actual.
+La carpeta de auditoría reúne un registro por fase del proceso SDD: contexto y necesidades de negocio (A), especificación funcional y UX/UI (B), arquitectura técnica (C), backlog y plan de sprint (D), calidad y pruebas (E), devops (F), ejemplos (G) y consolidación final / README raíz (H). Cada registro documenta hallazgos y correcciones aplicadas sobre la categoría correspondiente, y es la referencia para entender por qué un documento tiene su forma actual. Las auditorías de las fases F, G y H llevan una nota de reajuste al framework SDD v3.0 (intercambio de categorías 10↔11).
 
 | Categoría | Estado | Versión vigente |
 | --- | --- | --- |
@@ -154,6 +154,7 @@ La carpeta de auditoría reúne un registro por fase del proceso SDD: contexto y
 | 08-Calidad-Y-Pruebas | Borrador | 1.0 |
 | 09-Devops | Borrador | 1.0 |
 | 10-Examples | Borrador | 1.0 |
+| 11-Documentacion | Vigente | 1.0 |
 
 ---
 
