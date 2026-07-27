@@ -86,11 +86,12 @@ Cada categoría existente bajo `SDD/Docs/` con su propósito y enlace relativo. 
 | 08-Calidad-Y-Pruebas | Estrategia de calidad, testing, cobertura y Definition of Done | AG-08 | [08-Calidad-Y-Pruebas](08-Calidad-Y-Pruebas/) |
 | 09-Devops | Versionado, ramas, pipeline CI/CD, entornos y publicación de imagen | AG-09 | [09-Devops](09-Devops/) |
 | 10-Examples | Ejemplos progresivos de uso e integración, con su contrato de verificación (`VER-XX`) | AG-10 | [10-Examples](10-Examples/) |
+| 11-Documentacion | Cuerpo documental de entrega: visión general, recorrido de código, guías de contribución/contenedor/despliegue, runbook, bitácora y contrato de agentes | AG-11 | [11-Documentacion](11-Documentacion/) |
 
 Numeración conforme al framework SDD v3.0: la categoría 10 es **Examples** y la 11 es **Documentacion** (cuerpo documental de entrega). Estado de las categorías del catálogo estándar en esta solución:
 
 - 04-Prompts-AI: omitida porque el proyecto no usa LLM en su producto ni en su operación. No hay prompts de IA que documentar.
-- 11-Documentacion: **pendiente de generación**. El framework SDD v3.0 intercambió las categorías 10 y 11 e hizo **obligatorio** el cuerpo mantenedor de la nueva categoría 11 para todos los tipos de proyecto; su generación (visión general, recorrido de código, guías de contribución/contenedor/despliegue, runbook y `AGENTS.md`) queda como paso siguiente del reajuste. Con esto queda **superado ADR-23**, que registraba la omisión de la antigua categoría 10-Developer-Guide: esa categoría ya no existe en el framework y su contenido de onboarding pasa a ser materia del cuerpo mantenedor de la 11.
+- 11-Documentacion: **vigente**. Generada para `web-monolith` con sus cuerpos obligatorios (mantenedor y operador) y los artefactos de nivel solución; el `AGENTS.md` se emite en la raíz del repositorio. El cuerpo integrador se omite por gating (la única superficie externa, la API de ingesta, ya está cubierta por `Contratos-REST` de 05). Con esta categoría queda **superado ADR-23**, que registraba la omisión de la antigua 10-Developer-Guide: su contenido de onboarding pasó al cuerpo mantenedor de la 11.
 
 Artefactos complementarios, fuera del árbol numerado:
 
@@ -126,7 +127,7 @@ Por tratarse de un proyecto interno de un único desarrollador y sin consumidore
 
 ### 6.1 Onboarding del desarrollador (provisional)
 
-Con el reajuste al framework SDD v3.0, el onboarding del desarrollador pasa a ser materia del **cuerpo mantenedor de la categoría 11 Documentacion** (`Guia-Contribucion`, `Recorrido-Codigo`), hoy pendiente de generación. Hasta que esa categoría exista, esta subsección lo concentra de forma provisional. No duplica el detalle: refiere a las categorías que lo contienen.
+El onboarding del desarrollador vive en el **cuerpo mantenedor de la categoría 11 Documentacion**: [Guia-Contribucion](11-Documentacion/Guia-Contribucion-v1.0.md) (setup, tests, cómo agregar una funcionalidad) y [Recorrido-Codigo](11-Documentacion/Recorrido-Codigo-v1.0.md) (mapa arquitectura→archivos). Esta subsección queda como resumen de entrada; el detalle canónico está en esos documentos.
 
 - Abrir el Dev Container: el único requisito del host es Docker; el SDK de .NET 10 vive dentro del contenedor. Se abre con «Reopen in Container» en el editor o con `devcontainer up`. La depuración va por `.vscode/launch.json` con F5, nunca por scripts sueltos. Detalle de entornos en [09-Devops](09-Devops/).
 - Ejecutar el servicio: en desarrollo, el servicio corre dentro del Dev Container; en producción, es el contenedor corriendo en el host `i7infra`, con el dispositivo USB compartido por ruta física de puerto vía regla `udev`. No hay ambiente de staging. Ver [09-Devops](09-Devops/).
