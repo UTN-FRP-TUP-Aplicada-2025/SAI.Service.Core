@@ -32,6 +32,13 @@ public sealed class VersionPolitica : IEntidadHistoria
     /// <summary>Tiempo reservado para el apagado del host, en segundos (≤ techo duro, RN-04).</summary>
     public int TiempoReservadoApagadoSeg { get; private set; }
 
+    /// <summary>
+    /// Tiempo, en segundos, que el SAI espera tras el retorno de la red antes de restaurar la salida al host
+    /// (<c>ups.delay.start</c>). Fuerza una transición ausencia→presencia limpia, que es la que la BIOS del
+    /// host necesita para autoencender (ADR-09). Debe ser positivo.
+    /// </summary>
+    public int TiempoRetornoSeg { get; private set; }
+
     /// <summary>Instante desde el que esta versión rige.</summary>
     public DateTimeOffset VigenteDesde { get; private set; }
 
@@ -41,7 +48,7 @@ public sealed class VersionPolitica : IEntidadHistoria
         Codigo = null!;
     }
 
-    private VersionPolitica(string codigo, int numero, Modalidad modalidad, int umbralDisparoSegundos, int tiempoReservadoApagadoSeg, DateTimeOffset vigenteDesde)
+    private VersionPolitica(string codigo, int numero, Modalidad modalidad, int umbralDisparoSegundos, int tiempoReservadoApagadoSeg, int tiempoRetornoSeg, DateTimeOffset vigenteDesde)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(codigo);
         if (numero < 1)
@@ -60,22 +67,28 @@ public sealed class VersionPolitica : IEntidadHistoria
                 $"El tiempo reservado no puede superar el techo duro de {Accion.TechoDuroApagadoSeg} s (RN-04, I-10).");
         }
 
+        if (tiempoRetornoSeg <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(tiempoRetornoSeg), "El tiempo de retorno debe ser positivo.");
+        }
+
         Codigo = codigo;
         Numero = numero;
         ModalidadSolicitada = modalidad;
         UmbralDisparoSegundos = umbralDisparoSegundos;
         TiempoReservadoApagadoSeg = tiempoReservadoApagadoSeg;
+        TiempoRetornoSeg = tiempoRetornoSeg;
         VigenteDesde = vigenteDesde;
     }
 
     /// <summary>Crea la versión inicial (número 1) de la política, sembrada en la puesta en marcha.</summary>
-    public static VersionPolitica Inicial(Modalidad modalidad, int umbralDisparoSegundos, int tiempoReservadoApagadoSeg, DateTimeOffset ahora) =>
-        new($"pol-v1-{Guid.NewGuid():N}", 1, modalidad, umbralDisparoSegundos, tiempoReservadoApagadoSeg, ahora);
+    public static VersionPolitica Inicial(Modalidad modalidad, int umbralDisparoSegundos, int tiempoReservadoApagadoSeg, int tiempoRetornoSeg, DateTimeOffset ahora) =>
+        new($"pol-v1-{Guid.NewGuid():N}", 1, modalidad, umbralDisparoSegundos, tiempoReservadoApagadoSeg, tiempoRetornoSeg, ahora);
 
     /// <summary>
     /// Crea la versión siguiente a esta, con el número incrementado. La actual no se modifica: la nueva
     /// queda vigente y esta pasa a ser historia consultable (append-only).
     /// </summary>
-    public VersionPolitica Siguiente(Modalidad modalidad, int umbralDisparoSegundos, int tiempoReservadoApagadoSeg, DateTimeOffset ahora) =>
-        new($"pol-v{Numero + 1}-{Guid.NewGuid():N}", Numero + 1, modalidad, umbralDisparoSegundos, tiempoReservadoApagadoSeg, ahora);
+    public VersionPolitica Siguiente(Modalidad modalidad, int umbralDisparoSegundos, int tiempoReservadoApagadoSeg, int tiempoRetornoSeg, DateTimeOffset ahora) =>
+        new($"pol-v{Numero + 1}-{Guid.NewGuid():N}", Numero + 1, modalidad, umbralDisparoSegundos, tiempoReservadoApagadoSeg, tiempoRetornoSeg, ahora);
 }

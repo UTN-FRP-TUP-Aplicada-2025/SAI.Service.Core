@@ -26,6 +26,7 @@ internal static class ModeloPoliticas
             e.Property(p => p.ModalidadSolicitada).HasConversion<string>().IsRequired();
             e.Property(p => p.UmbralDisparoSegundos).IsRequired();
             e.Property(p => p.TiempoReservadoApagadoSeg).IsRequired();
+            e.Property(p => p.TiempoRetornoSeg).IsRequired();
             e.Property(p => p.VigenteDesde).IsRequired();
 
             e.HasIndex(p => p.Numero).IsUnique();

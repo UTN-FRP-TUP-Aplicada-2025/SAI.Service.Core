@@ -184,6 +184,7 @@ using (var scope = app.Services.CreateScope())
             opciones.ModalidadSolicitada,
             DescriptorPoliticas.Defecto.UmbralDisparoSegundos,
             opciones.TiempoReservadoSeg,
+            opciones.TiempoRetornoSeg,
             DateTimeOffset.UtcNow));
         await db.SaveChangesAsync();
     }

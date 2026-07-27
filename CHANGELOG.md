@@ -9,6 +9,27 @@ y el versionado sigue [Semantic Versioning](https://semver.org/lang/es/).
 
 ### Añadido
 
+- **Configuración de políticas — tiempo de retorno del SAI configurable y "En palabras" más preciso**
+  (CU-03, ADR-09/ADR-27): el retardo con el que el SAI restaura la salida al host tras el retorno de la red
+  (`ups.delay.start`) estaba **fijo en 180 s dentro del adaptador NUT**, quedando fuera de la política
+  versionada que es la fuente de verdad de la temporización. Ahora es un campo de la política:
+  - `VersionPolitica.TiempoRetornoSeg` (dominio, validado > 0) + `PropuestaPolitica` + descriptor y campo en
+    el panel. `ServicioApagadoOrdenado` lo lee de la versión vigente y lo pasa al adaptador; el contrato del
+    puerto `IAdaptadorConexion.OrdenarApagadoConRetornoAsync` suma el parámetro `retardoRetorno` (el NUT lo
+    emite como `ups.delay.start`, el simulado lo refleja). La ventana de mantenimiento usa el default
+    (`OpcionesApagado.TiempoRetornoPorDefectoSeg = 180`). Migración `PoliticaTiempoRetorno`: las políticas
+    existentes toman 180 s (comportamiento previo intacto).
+  - **Mensaje "En palabras" reescrito** para mayor precisión: nombra que el servicio ordena el apagado al
+    sistema operativo, que el tiempo reservado es la ventana del host antes de que el SAI corte su salida, y
+    —lo que antes faltaba— que tras el retorno de la red el SAI espera el tiempo de retorno antes de
+    reponer la energía, con el host reencendiendo por el **autoencendido de la BIOS** (que debe estar activado).
+  - **Chip "Modo simulación" → "Previsualización"**: el rótulo confundía (sugería que el SAI estaba
+    simulado, cuando con el adaptador NUT real no lo está); ahora indica correctamente que el panel "En
+    palabras" es una previsualización de la propuesta, no aplicada hasta confirmar.
+  - 4 pruebas nuevas/actualizadas (dominio: retorno positivo y su conservación; aplicación: rechazo por
+    retorno no positivo, mensaje que nombra el retorno y la BIOS; adaptador NUT: el retorno emitido sale del
+    argumento, ya no de un fijo).
+
 - **Etapa 5 · Ingesta automatizada de intervenciones** (CU-11, US-21, US-22, BT-28): el **único contrato
   formal hacia terceros**, `POST /api/v1/intervenciones` (autenticado por Bearer), que un GMAO externo usa
   sin intervención humana. Es idempotente por clave: un reintento de red no duplica el hecho ni corrompe el
