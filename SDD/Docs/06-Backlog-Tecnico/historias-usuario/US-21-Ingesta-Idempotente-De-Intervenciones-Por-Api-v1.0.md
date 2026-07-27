@@ -41,4 +41,4 @@ Must: la ingesta idempotente es una capacidad Must (F-20) y la única superficie
 - [x] Depende de BT-26 y BT-28, planificadas antes
 
 ## 7. Notas y supuestos
-El dato externo entra con confianza media, por debajo de lo medido por el poller local. Los caminos de conflicto (409) e invariante roto (422) se cubren en US-22. El cliente de referencia se ilustra en el sample `ingesta-gmao/` (11-Examples).
+El dato externo entra con confianza media, por debajo de lo medido por el poller local. Los caminos de conflicto (409) e invariante roto (422) se cubren en US-22. El cliente de referencia se ilustra en el sample `ingesta-gmao/` (10-Examples).

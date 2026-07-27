@@ -2,10 +2,10 @@
 
 **Proyecto:** Sai-Service-Core
 **Documento:** Ejemplo-02-Api-Ingesta-v1.0.md
-**Versión:** 1.0
+**Versión:** 1.1
 **Estado:** Borrador
 **Fecha:** 2026-07-21
-**Autor:** Orquestador SDD (AG-11)
+**Autor:** Orquestador SDD (AG-10)
 **Nivel:** Intermedio
 **Ubicación del código:** `/samples/02-api-ingesta/`
 
@@ -133,8 +133,29 @@ Puntos clave verificables: el `201` asigna confianza `media` (menor que la del p
 | RN-07 (Todo importe con moneda y fecha) | Regla de negocio | `I-18`: `Dinero` sin moneda o fecha ⇒ `422` |
 | Escenario §20.E-8 | Fixture de datos | Fuente de las cabeceras, los cuerpos y las respuestas exactas |
 
-## 9. Control de cambios
+## 9. Contrato de verificación
+
+Arista B del sample (`Rules-Examples` §4.6). Declarado en **pasada de diseño**: el guion ejecutable vive en `/samples/02-api-ingesta/` y su evidencia se completa cuando ese código exista. El criterio asevera los cuatro códigos de respuesta del contrato (ADR-17), en el orden de la §6.
+
+```yaml
+verificacion:
+  id: VER-02
+  verifica: [CU-11, US-21, US-22]
+  comando: "cd samples/02-api-ingesta && ./ingesta-4-caminos.sh"
+  precondiciones:
+    - "Servicio corriendo con el adaptador simulado (SAI__AdaptadorConexion=Simulado)"
+    - "Catálogo base del Ejemplo 01 sembrado (referencia ups-01 y ti-inspeccion)"
+    - "Fuente de datos fd-gmao-externo registrada (sembrada al arranque)"
+  criterio_aceptacion:
+    exit_code: 0
+    stdout_contiene: ["201", "200", "409", "422"]
+  evidencia:
+    estado: "No verificado — sin código"
+```
+
+## 10. Control de cambios
 
 | Versión | Fecha | Descripción |
 |---|---|---|
 | 1.0 | 2026-07-21 | Versión inicial. Cliente HTTP de referencia de los cuatro caminos de `POST /api/v1/intervenciones`. |
+| 1.1 | 2026-07-26 | Reajuste al framework SDD v3.0: la categoría pasa de 11 a 10; se agrega el contrato de verificación `VER-02` (§9, pasada de diseño) y se reasigna el autor a AG-10. |

@@ -2,10 +2,10 @@
 
 **Proyecto:** Sai-Service-Core
 **Documento:** Ejemplo-01-Datos-Seed-v1.0.md
-**Versión:** 1.0
+**Versión:** 1.1
 **Estado:** Borrador
 **Fecha:** 2026-07-21
-**Autor:** Orquestador SDD (AG-11)
+**Autor:** Orquestador SDD (AG-10)
 **Nivel:** Básico
 **Ubicación del código:** `/samples/01-datos-seed/`
 
@@ -100,8 +100,27 @@ Ningún número está inventado: todos provienen de los escenarios `§20` del in
 | RN-01 / RN-02 (Arranque seguro en `SoloAlerta` y bloqueo por verificación) | Regla de negocio | El sistema arranca degradado y se niega a apagar mientras los supuestos no estén verificados |
 | Escenarios §20 `E-1`…`E-8` | Fixture de datos | Es la fuente de todos los valores del panel, los históricos, la prueba y el informe |
 
-## 9. Control de cambios
+## 9. Contrato de verificación
+
+Arista B del sample (`Rules-Examples` §4.6). Declarado en **pasada de diseño**: el código ejecutable vive en `/samples/01-datos-seed/` y su evidencia se completa cuando ese código exista.
+
+```yaml
+verificacion:
+  id: VER-01
+  verifica: [CU-02, CU-04]
+  comando: "devcontainer up --workspace-folder . && (cd samples/01-datos-seed && ./cargar-seed.sh)"
+  precondiciones:
+    - "Dev Container levantado con el SDK de .NET 10"
+    - "Adaptador de conexión en modo Simulado (SAI__AdaptadorConexion=Simulado)"
+  criterio_aceptacion:
+    exit_code: 0
+  evidencia:
+    estado: "No verificado — sin código"
+```
+
+## 10. Control de cambios
 
 | Versión | Fecha | Descripción |
 |---|---|---|
 | 1.0 | 2026-07-21 | Versión inicial. Sample de datos seed con adaptador simulado para onboarding sin hardware. |
+| 1.1 | 2026-07-26 | Reajuste al framework SDD v3.0: la categoría pasa de 11 a 10; se agrega el contrato de verificación `VER-01` (§9, pasada de diseño) y se reasigna el autor a AG-10. |

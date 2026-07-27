@@ -354,7 +354,7 @@ y el versionado sigue [Semantic Versioning](https://semver.org/lang/es/).
   D6 completa sin huérfanos, terminología consistente). Con esto la documentación SDD
   (Fases A-H) queda generada y auditada.
 
-- **Fase G del SDD — 11-Examples**: dos samples documentados —`Ejemplo-01-Datos-Seed`
+- **Fase G del SDD — 10-Examples**: dos samples documentados —`Ejemplo-01-Datos-Seed`
   (básico: explorar el sistema con datos precargados y el adaptador de conexión simulado,
   sin hardware) y `Ejemplo-02-Api-Ingesta` (intermedio: los cuatro caminos del contrato de
   ingesta 201/200/409/422)— más el README con la tabla maestra. Nombrados por capacidad,
@@ -401,6 +401,23 @@ y el versionado sigue [Semantic Versioning](https://semver.org/lang/es/).
   y `Bitacora-Validacion-Maqueta-v1.0.md`.
 
 ### Cambiado
+
+- **Documentación SDD — reajuste al framework SDD v3.0 (intercambio de categorías 10↔11), Parte A**: el
+  framework `IA.SDD` v3.0 intercambió las categorías documentales: la **10 pasó a ser Examples** y la **11 a
+  ser Documentacion** (cuerpo documental de entrega), e hizo **obligatorio el cuerpo mantenedor** de la 11
+  para los ocho tipos de proyecto. Esta solución se generó con el esquema anterior (10 = Developer-Guide
+  omitida, 11 = Examples). Reajuste aplicado (Parte A, estructural):
+  - `SDD/Docs/11-Examples/` renombrada a **`10-Examples/`**; actualizadas todas las referencias cruzadas de
+    ruta en `SDD/Docs/` y en este `CHANGELOG.md`.
+  - **ADR-23 superado** (registraba la omisión de la antigua categoría 10-Developer-Guide, premisa que dejó
+    de ser válida): marcado *Superado* con nota, y reflejado en `Decisiones-Arquitectura`.
+  - README maestro de `SDD/Docs/` actualizado: mapa de categorías (10 = Examples con responsable AG-10),
+    numeración conforme a v3.0, y `11-Documentacion` declarada **pendiente de generación**.
+  - Contrato de verificación **`VER-XX`** (`Rules-Examples` 2.0 §4.6) agregado a los dos ejemplos, en pasada
+    de diseño (`VER-01` en el sample de datos seed, `VER-02` en el de la API de ingesta).
+  - Notas de reajuste en las auditorías de fase (F, G, H), que se conservan como registro de su momento.
+  - **Pendiente (Parte B)**: generar la categoría **11-Documentacion** (visión general, recorrido de código,
+    guías de contribución/contenedor/despliegue, runbook, `AGENTS.md`), obligatoria para `web-monolith`.
 
 - **Documentación SDD — nomenclatura de las reglas del framework**: las citas a las reglas constructivas
   de `IA.SDD` se actualizan al nombre nuevo, que perdió el prefijo numérico de categoría

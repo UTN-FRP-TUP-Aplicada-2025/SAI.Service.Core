@@ -1,5 +1,7 @@
 # Auditoría Fase F — DevOps (09) y omisión de Developer Guide (10) — Sai-Service-Core
 
+> **Nota de reajuste (2026-07-26).** Esta auditoría verificó la omisión de la antigua «categoría 10-Developer-Guide» (esquema previo). Tras el reajuste al framework SDD v3.0, esa categoría ya no existe: la 10 es Examples y la 11 es Documentacion (obligatoria, pendiente de generación), y **ADR-23 quedó superado**. El cuerpo del audit se conserva como registro de su momento.
+
 **Fase auditada:** F (categoría 09-Devops generada + omisión registrada de 10-Developer-Guide)
 **Proyecto:** Sai-Service-Core (`web-monolith`, `redistribuible: false`, caso degenerado: solución de un solo proyecto, layout aplanado sin `Solucion/`)
 **Auditor:** Auditor independiente SDD

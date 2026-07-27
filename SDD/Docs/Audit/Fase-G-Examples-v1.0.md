@@ -1,8 +1,10 @@
-# Auditoría Fase G — 11-Examples (Sai-Service-Core)
+# Auditoría Fase G — 10-Examples (Sai-Service-Core)
+
+> **Nota de reajuste (2026-07-26).** Esta auditoría se emitió bajo el esquema de categorías anterior (10 = Developer-Guide, 11 = Examples). Tras el reajuste al framework SDD v3.0 la categoría de ejemplos es la **10** y la **11** es Documentacion (cuerpo de entrega, pendiente); ADR-23 quedó superado. El cuerpo del audit se conserva como registro de su momento; solo se actualizaron las rutas a `10-Examples/` para que los enlaces resuelvan. Donde el texto dice «categoría 11» refiriéndose a los ejemplos, léase categoría 10.
 
 **Fase auditada:** G — Categoría 11 (Examples / Samples)
 **Proyecto:** Sai-Service-Core (project_type: web-monolith, caso degenerado con layout aplanado — 11 directo bajo `SDD/Docs/`)
-**Alcance:** `SDD/Docs/11-Examples/README.md`, `Ejemplo-01-Datos-Seed-v1.0.md`, `Ejemplo-02-Api-Ingesta-v1.0.md`. Se audita la documentación de los samples; el código ejecutable en `/samples` se materializa en la fase de codificación y su ausencia NO se considera falta.
+**Alcance:** `SDD/Docs/10-Examples/README.md`, `Ejemplo-01-Datos-Seed-v1.0.md`, `Ejemplo-02-Api-Ingesta-v1.0.md`. Se audita la documentación de los samples; el código ejecutable en `/samples` se materializa en la fase de codificación y su ausencia NO se considera falta.
 **Reglas de referencia:** `IA/IA.SDD/SDD/Devs/Rules/Rules-Examples.md` (v1.2), §6 criterios de aceptación (14 ítems).
 **Upstream verificado:** `SDD/Docs/02-Especificacion-Funcional/`, `SDD/Docs/05-Arquitectura-Tecnica/`, `SDD/Intake/SOLUTION-INTAKE-Sai-Service-Core-v1.0.md` (§16.1, §18, §20).
 **Auditor:** Auditor independiente SDD (Arquitecto de Soluciones + QA Senior; no participó de la generación).
@@ -51,7 +53,7 @@ La única desviación relevante —el renombre del sample de ingesta de `ingesta
 
 | Ítem §6 / §4.3 | Resultado | Evidencia |
 |---|---|---|
-| Existe README de la carpeta | Cumple | `SDD/Docs/11-Examples/README.md` |
+| Existe README de la carpeta | Cumple | `SDD/Docs/10-Examples/README.md` |
 | Tabla maestra con columnas Sample / Nivel / Tiempo de setup / CU / Ubicación | Cumple | Tabla en líneas 9–12; columnas exactas al §4.4 y §6 |
 | Ambos samples listados con nivel, tiempo de setup, CU, ubicación | Cumple | Básico `< 5 min` CU-02/04/06/12; Intermedio `10–15 min` CU-11 |
 | Convenciones de los samples | Cumple | §"Convenciones" (autocontenidos, ≤5 pasos, nivel declarado, output exacto, trazabilidad, nomenclatura por capacidad) |
@@ -155,7 +157,7 @@ No se registran hallazgos P0 ni P1.
 
 **APROBADO — sin hallazgos bloqueantes (0 P0, 0 P1).**
 
-Los entregables de la Fase G (11-Examples) de Sai-Service-Core satisfacen los 14 criterios de aceptación del §6 de `Rules-Examples.md`: README con tabla maestra completa, los dos samples mínimos de `web-monolith`, cada uno con cabecera §4.1 y las nueve secciones §4.2, ≤5 pasos de arranque, nivel declarado, output exacto trazado a `§20`, prerequisites con versión, trazabilidad a CU/RN/ADR/F que existen y están vigentes, y nomenclatura por capacidad sin nombres de dominio. La desviación de naming intake↔regla está bien resuelta y documentada (P2). Las cinco observaciones P2/P3 son de trazabilidad-de-desviación, metadatos y estilo, atendibles en la promoción de estado y no condicionan el avance.
+Los entregables de la Fase G (10-Examples) de Sai-Service-Core satisfacen los 14 criterios de aceptación del §6 de `Rules-Examples.md`: README con tabla maestra completa, los dos samples mínimos de `web-monolith`, cada uno con cabecera §4.1 y las nueve secciones §4.2, ≤5 pasos de arranque, nivel declarado, output exacto trazado a `§20`, prerequisites con versión, trazabilidad a CU/RN/ADR/F que existen y están vigentes, y nomenclatura por capacidad sin nombres de dominio. La desviación de naming intake↔regla está bien resuelta y documentada (P2). Las cinco observaciones P2/P3 son de trazabilidad-de-desviación, metadatos y estilo, atendibles en la promoción de estado y no condicionan el avance.
 
 ---
 

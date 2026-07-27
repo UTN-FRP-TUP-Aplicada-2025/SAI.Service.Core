@@ -1,4 +1,4 @@
-# 11-Examples — Samples de Sai-Service-Core
+# 10-Examples — Samples de Sai-Service-Core
 
 Esta carpeta contiene los markdown explicativos de los samples ejecutables del proyecto **Sai-Service-Core** (`web-monolith`). Cada markdown especifica un sample cuyo código se materializa en `/samples/<carpeta>/` del repositorio durante la codificación. Los samples son la primera puerta de entrada práctica para un desarrollador que consume el producto: se clonan, se ejecutan en un entorno limpio y se modifican como punto de partida.
 
@@ -35,8 +35,8 @@ El detalle normativo está en el §6 (criterios de aceptación) de `SDD/Devs/Rul
 ## Vínculo con el resto de la documentación
 
 - **Arquitectura (05).** Los contratos que los samples respetan viven en `05-Arquitectura-Tecnica/`: `Contratos-REST-v1.0.md` (contrato de ingesta que ejercita el Ejemplo 02), `ADR-02` (adaptador de conexión simulado que hace posible el Ejemplo 01) y `ADR-17` (manejo de errores de la API).
-- **Developer guide (10) omitida.** No hay categoría 10 (developer guide dedicada): se omitió por **ADR-23**. Por eso estos samples asumen el rol de material de arranque práctico y son autoexplicativos; los conceptos que en otros proyectos se documentarían en 10 se materializan aquí, ejecutándose.
-- **README raíz del repositorio (Fase H).** La categoría 11 es el material de la fase de ejemplos del ciclo SDD; el README raíz del repositorio la enlaza como punto de entrada para consumidores externos.
+- **Documentación de entrega (11).** El framework SDD v3.0 reasignó las categorías: la 10 es **Examples** (esta carpeta) y la 11 es **Documentacion**, el cuerpo documental de entrega. La categoría 11 explica, contextualiza y enlaza estos samples **sin duplicar su código**; su generación queda pendiente (Parte B del reajuste). El onboarding que antes se remitía a una developer guide pasa a su cuerpo mantenedor.
+- **Contrato de verificación.** Cada sample declara su contrato `VER-XX` (§9 de su markdown, `Rules-Examples` §4.6): qué casos de uso verifica, con qué comando y contra qué aserción. Esos contratos son sondas de la matriz de sensado de deriva.
 
 ## Matriz tipo D8 → `/samples`
 

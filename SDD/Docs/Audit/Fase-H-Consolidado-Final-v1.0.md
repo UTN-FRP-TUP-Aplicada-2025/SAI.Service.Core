@@ -1,5 +1,7 @@
 # Auditoría Consolidada Final — Fase H
 
+> **Nota de reajuste (2026-07-26).** Emitida bajo el esquema de categorías anterior (10 = Developer-Guide omitida, 11 = Examples). Tras el reajuste al framework SDD v3.0, la 10 es Examples y la 11 es Documentacion (cuerpo de entrega, pendiente); ADR-23 quedó superado. El cuerpo se conserva como registro; donde diga «10-Developer-Guide omitida», léase «11-Documentacion pendiente».
+
 | Campo | Valor |
 | --- | --- |
 | Fase | H — Consolidación y handoff del entregable SDD completo |
@@ -68,7 +70,7 @@ Nota de caso degenerado: la ausencia de vista/pipeline de solución (`Solucion/`
 | 7 | `[07-Plan-Sprint](07-Plan-Sprint/)` | carpeta | EXISTE |
 | 8 | `[08-Calidad-Y-Pruebas](08-Calidad-Y-Pruebas/)` | carpeta | EXISTE |
 | 9 | `[09-Devops](09-Devops/)` | carpeta | EXISTE |
-| 10 | `[11-Examples](11-Examples/)` | carpeta | EXISTE |
+| 10 | `[10-Examples](10-Examples/)` | carpeta | EXISTE |
 | 11 | `[Maquetas/Sai-Service-Core](../Maquetas/Sai-Service-Core/)` | carpeta | EXISTE |
 | 12 | `[Audit](Audit/)` | carpeta | EXISTE |
 | 13 | `[00-Contexto/Roadmap-Producto-v1.0.md](...)` | archivo | EXISTE |

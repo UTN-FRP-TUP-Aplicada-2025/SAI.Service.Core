@@ -67,7 +67,7 @@ Permitir que un sistema externo de gestión de mantenimiento empuje intervencion
 | Necesidad de negocio | NB-08 (Ingesta automatizada de intervenciones) |
 | Reglas de negocio aplicables | RN-07, RN-08, RN-09, RN-12 |
 | Historias de usuario a generar | US-12 en 06 |
-| Componentes esperados | Servicio de ingesta idempotente, fuentes de datos con confianza, validación de invariantes (referencia tentativa a 05); ejemplo en 11-Examples |
+| Componentes esperados | Servicio de ingesta idempotente, fuentes de datos con confianza, validación de invariantes (referencia tentativa a 05); ejemplo en 10-Examples |
 | Tests previstos | Los cuatro caminos de respuesta de la ingesta, idempotencia por clave, degradación de confianza, dos tiempos (referencia tentativa a 08) |
 
 ## 10. Notas y supuestos

@@ -7,7 +7,7 @@
 **Fecha:** 2026-07-20
 **Autor:** Orquestador SDD (AG-00)
 **Trazabilidad upstream:** SOLUTION-INTAKE §1, §2, §3, §8, §10, §11, §12
-**Trazabilidad downstream:** 01-Necesidades-Negocio, 02-Especificacion-Funcional, 03-UX-UI-DX, 05-Arquitectura-Tecnica, 07-Plan-Sprint, 11-Examples
+**Trazabilidad downstream:** 01-Necesidades-Negocio, 02-Especificacion-Funcional, 03-UX-UI-DX, 05-Arquitectura-Tecnica, 07-Plan-Sprint, 10-Examples
 
 ## 1. Problema de negocio
 
@@ -117,4 +117,4 @@ Se reusan las cinco métricas de resultado de negocio del intake §8. Sus target
 
 Upstream: este documento deriva del SOLUTION-INTAKE §1 (idea y problema), §2 (audiencia y stakeholders), §3 (propuesta de valor y diferenciación), §8 (métricas de éxito de negocio), §10 (restricciones del cliente), §11 (riesgos) y §12 (glosario del dominio).
 
-Downstream: alimenta 01-Necesidades-Negocio (necesidades derivadas del problema y la propuesta de valor), 02-Especificacion-Funcional (casos de uso y reglas de negocio), 03-UX-UI-DX (experiencia del panel y del administrador), 05-Arquitectura-Tecnica (restricciones y riesgos que condicionan las decisiones y los ADR), 07-Plan-Sprint (objetivos y métricas que fijan prioridad) y 11-Examples (ejemplos ejecutables que ilustran la propuesta de valor). Los targets de las métricas quedan como decisión abierta P-01 y su ratificación se registra donde corresponda.
+Downstream: alimenta 01-Necesidades-Negocio (necesidades derivadas del problema y la propuesta de valor), 02-Especificacion-Funcional (casos de uso y reglas de negocio), 03-UX-UI-DX (experiencia del panel y del administrador), 05-Arquitectura-Tecnica (restricciones y riesgos que condicionan las decisiones y los ADR), 07-Plan-Sprint (objetivos y métricas que fijan prioridad) y 10-Examples (ejemplos ejecutables que ilustran la propuesta de valor). Los targets de las métricas quedan como decisión abierta P-01 y su ratificación se registra donde corresponda.
