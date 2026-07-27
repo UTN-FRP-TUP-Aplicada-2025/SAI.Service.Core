@@ -101,7 +101,7 @@ La suite de contrato (`TC-40`) verifica, para cada implementación:
 | CU cubiertos | CU-04 (leer estado, conectividad), CU-05 (apagado con retorno), CU-07/CU-10 (test de batería) |
 | RN aplicables | RN-03 (validación por efecto observado) |
 | TC asociados | TC-40 (contrato del puerto); TC-26, TC-27, TC-39 (camino de apagado contra el simulado); TC-17, TC-28 (muestra perdida, test de batería); TC-35 (sustitución reinicia verificaciones) |
-| Ejemplo de extensión | 11-Examples (escenario §20.E-07); `samples/ingesta-gmao/` ejercita la API, no el adaptador |
+| Ejemplo de extensión | 10-Examples (escenario §20.E-07); `samples/ingesta-gmao/` ejercita la API, no el adaptador |
 | Límite declarado | F-3 (ciclo físico de apagado/reencendido) no automatizable; se cubre con el simulado para la lógica y con evidencia de la ventana de mantenimiento (T-08) |
 
 ---

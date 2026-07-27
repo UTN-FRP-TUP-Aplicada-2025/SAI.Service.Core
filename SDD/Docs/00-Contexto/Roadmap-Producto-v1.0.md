@@ -7,7 +7,7 @@
 **Fecha:** 2026-07-20
 **Autor:** Orquestador SDD (AG-00)
 **Trazabilidad upstream:** SOLUTION-INTAKE §4, §6, §15
-**Trazabilidad downstream:** 06-Backlog-Tecnico, 07-Plan-Sprint, 01-Necesidades-Negocio, 02-Especificacion-Funcional, 05-Arquitectura-Tecnica, 11-Examples
+**Trazabilidad downstream:** 06-Backlog-Tecnico, 07-Plan-Sprint, 01-Necesidades-Negocio, 02-Especificacion-Funcional, 05-Arquitectura-Tecnica, 10-Examples
 
 ## 1. Propósito
 
@@ -71,4 +71,4 @@ La ventana de mantenimiento (en F4) entrega la interfaz guiada y el registro de 
 
 ## 6. Trazabilidad downstream
 
-Este roadmap alimenta directamente a 06-Backlog-Tecnico y 07-Plan-Sprint: cada fase se descompone en las épicas de la columna correspondiente, y cada épica de flujo se mapea a las capacidades y funcionalidades del intake §4 (F-01 a F-27) que la realizan. Las decisiones de F0 se cierran como ADR en 05-Arquitectura-Tecnica. Los criterios de transición son la base de la definición de listo y de terminado que 06 y 08 formalizan. La épica de ingesta de F5 se ilustra en 11-Examples con el cliente de referencia. Los flujos y su grafo de dependencias provienen del intake §6; ningún reordenamiento de fases puede violar ese grafo.
+Este roadmap alimenta directamente a 06-Backlog-Tecnico y 07-Plan-Sprint: cada fase se descompone en las épicas de la columna correspondiente, y cada épica de flujo se mapea a las capacidades y funcionalidades del intake §4 (F-01 a F-27) que la realizan. Las decisiones de F0 se cierran como ADR en 05-Arquitectura-Tecnica. Los criterios de transición son la base de la definición de listo y de terminado que 06 y 08 formalizan. La épica de ingesta de F5 se ilustra en 10-Examples con el cliente de referencia. Los flujos y su grafo de dependencias provienen del intake §6; ningún reordenamiento de fases puede violar ese grafo.

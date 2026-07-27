@@ -85,12 +85,12 @@ Cada categoría existente bajo `SDD/Docs/` con su propósito y enlace relativo. 
 | 07-Plan-Sprint | Planes de sprint y secuenciación del trabajo | AG-07 | [07-Plan-Sprint](07-Plan-Sprint/) |
 | 08-Calidad-Y-Pruebas | Estrategia de calidad, testing, cobertura y Definition of Done | AG-08 | [08-Calidad-Y-Pruebas](08-Calidad-Y-Pruebas/) |
 | 09-Devops | Versionado, ramas, pipeline CI/CD, entornos y publicación de imagen | AG-09 | [09-Devops](09-Devops/) |
-| 11-Examples | Ejemplos progresivos de uso e integración | AG-11 | [11-Examples](11-Examples/) |
+| 10-Examples | Ejemplos progresivos de uso e integración, con su contrato de verificación (`VER-XX`) | AG-10 | [10-Examples](10-Examples/) |
 
-Dos categorías del catálogo estándar se omiten en esta solución, de forma deliberada:
+Numeración conforme al framework SDD v3.0: la categoría 10 es **Examples** y la 11 es **Documentacion** (cuerpo documental de entrega). Estado de las categorías del catálogo estándar en esta solución:
 
 - 04-Prompts-AI: omitida porque el proyecto no usa LLM en su producto ni en su operación. No hay prompts de IA que documentar.
-- 10-Developer-Guide: omitida por decisión de ADR-23. El onboarding del desarrollador se consolida en la sección 6 de este README y refiere a las categorías 08 y 09.
+- 11-Documentacion: **pendiente de generación**. El framework SDD v3.0 intercambió las categorías 10 y 11 e hizo **obligatorio** el cuerpo mantenedor de la nueva categoría 11 para todos los tipos de proyecto; su generación (visión general, recorrido de código, guías de contribución/contenedor/despliegue, runbook y `AGENTS.md`) queda como paso siguiente del reajuste. Con esto queda **superado ADR-23**, que registraba la omisión de la antigua categoría 10-Developer-Guide: esa categoría ya no existe en el framework y su contenido de onboarding pasa a ser materia del cuerpo mantenedor de la 11.
 
 Artefactos complementarios, fuera del árbol numerado:
 
@@ -101,7 +101,7 @@ Artefactos complementarios, fuera del árbol numerado:
 
 ### 4.1 Cadena de trazabilidad
 
-La documentación se lee como una cadena en la que cada eslabón justifica al siguiente, sin saltos: la visión y el alcance (00) fundan las necesidades de negocio (01), que se concretan en casos de uso y reglas de negocio (02); esos requisitos y la maqueta (03) alimentan la arquitectura y sus decisiones registradas como ADRs (05); la arquitectura se descompone en backlog técnico (06) y se secuencia en planes de sprint (07); cada elemento se valida contra la estrategia de calidad y sus pruebas (08) y se despliega por el pipeline (09), con los ejemplos (11) como verificación práctica del camino feliz. Este README no repite esos contenidos: es el índice que los enlaza.
+La documentación se lee como una cadena en la que cada eslabón justifica al siguiente, sin saltos: la visión y el alcance (00) fundan las necesidades de negocio (01), que se concretan en casos de uso y reglas de negocio (02); esos requisitos y la maqueta (03) alimentan la arquitectura y sus decisiones registradas como ADRs (05); la arquitectura se descompone en backlog técnico (06) y se secuencia en planes de sprint (07); cada elemento se valida contra la estrategia de calidad y sus pruebas (08) y se despliega por el pipeline (09), con los ejemplos (10) como verificación práctica del camino feliz. Este README no repite esos contenidos: es el índice que los enlaza.
 
 ---
 
@@ -112,7 +112,7 @@ Cada audiencia tiene un punto de entrada y un recorrido propios; seguir el orden
 | Rol | Orden recomendado | Por qué |
 | --- | --- | --- |
 | Administrador / operador | 00 → 03 → maqueta → 02 | Necesita entender qué protege el servicio y cómo se opera el panel antes de la instalación; la maqueta muestra las pantallas reales y 02 detalla los flujos de alta, verificación y monitoreo. |
-| Desarrollador que retoma el proyecto | 00 → 02 → 05 → 06 → 07 → 11 | Necesita el contexto, luego la especificación funcional, después la arquitectura y sus ADRs, y por último el backlog, el plan de sprint y los ejemplos para ubicarse en el trabajo pendiente y en las convenciones. |
+| Desarrollador que retoma el proyecto | 00 → 02 → 05 → 06 → 07 → 10 | Necesita el contexto, luego la especificación funcional, después la arquitectura y sus ADRs, y por último el backlog, el plan de sprint y los ejemplos para ubicarse en el trabajo pendiente y en las convenciones. |
 | Revisor de arquitectura | 00 → 05 → 09 → 08 | Necesita la visión y el alcance, luego la arquitectura completa con sus decisiones, el pipeline y los entornos, y la estrategia de calidad para validar coherencia técnica de punta a punta. |
 | Responsable de calidad / pruebas | 02 → 08 → 05 | Necesita los requisitos y reglas de negocio, luego la estrategia de testing, cobertura y casos referenciales, y la arquitectura para ubicar los puntos de verificación. |
 
@@ -124,9 +124,9 @@ Toda la documentación SDD se genera con el orquestador SDD y sus subagentes AG-
 
 Por tratarse de un proyecto interno de un único desarrollador y sin consumidores externos, esta solución no incluye los archivos satélite `CHANGELOG.md`, `CONTRIBUTING.md` ni `LICENSE.md` en `SDD/Docs/`: el control de cambios vive en la cabecera de cada documento y en la sección 10 de este README, y el proceso de contribución es el descrito en esta sección. Tampoco hay presupuesto ni fecha objetivo impuestos; el ritmo lo marcan las etapas de validación humana, y cada etapa cierra con una verificación del administrador antes de habilitar la siguiente.
 
-### 6.1 Onboarding del desarrollador (ADR-23)
+### 6.1 Onboarding del desarrollador (provisional)
 
-Esta subsección concentra el onboarding que ADR-23 consolida en el README raíz en lugar de una categoría 10 separada. No duplica el detalle: refiere a las categorías que lo contienen.
+Con el reajuste al framework SDD v3.0, el onboarding del desarrollador pasa a ser materia del **cuerpo mantenedor de la categoría 11 Documentacion** (`Guia-Contribucion`, `Recorrido-Codigo`), hoy pendiente de generación. Hasta que esa categoría exista, esta subsección lo concentra de forma provisional. No duplica el detalle: refiere a las categorías que lo contienen.
 
 - Abrir el Dev Container: el único requisito del host es Docker; el SDK de .NET 10 vive dentro del contenedor. Se abre con «Reopen in Container» en el editor o con `devcontainer up`. La depuración va por `.vscode/launch.json` con F5, nunca por scripts sueltos. Detalle de entornos en [09-Devops](09-Devops/).
 - Ejecutar el servicio: en desarrollo, el servicio corre dentro del Dev Container; en producción, es el contenedor corriendo en el host `i7infra`, con el dispositivo USB compartido por ruta física de puerto vía regla `udev`. No hay ambiente de staging. Ver [09-Devops](09-Devops/).
@@ -152,7 +152,7 @@ La carpeta de auditoría reúne un registro por fase del proceso SDD: contexto y
 | 07-Plan-Sprint | Borrador | 1.0 |
 | 08-Calidad-Y-Pruebas | Borrador | 1.0 |
 | 09-Devops | Borrador | 1.0 |
-| 11-Examples | Borrador | 1.0 |
+| 10-Examples | Borrador | 1.0 |
 
 ---
 

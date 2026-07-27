@@ -7,7 +7,7 @@
 **Fecha:** 2026-07-20
 **Autor:** Orquestador SDD (AG-00)
 **Trazabilidad upstream:** SOLUTION-INTAKE §1, §4, §5, §6, §9, §10, §15
-**Trazabilidad downstream:** 01-Necesidades-Negocio, 02-Especificacion-Funcional, 03-UX-UI-DX, 05-Arquitectura-Tecnica, 07-Plan-Sprint, 11-Examples
+**Trazabilidad downstream:** 01-Necesidades-Negocio, 02-Especificacion-Funcional, 03-UX-UI-DX, 05-Arquitectura-Tecnica, 07-Plan-Sprint, 10-Examples
 
 ## 1. Propósito
 
@@ -109,4 +109,4 @@ Al ser un proyecto de un único responsable que concentra propietario, implement
 
 Upstream: deriva del SOLUTION-INTAKE §1 (problema), §4 (alcance funcional pretendido y su priorización), §5 (historias de usuario), §6 (flujos típicos), §9 (exclusiones declaradas), §10 (restricciones del cliente) y §15 (esquema de descomposición y delivery por etapas).
 
-Downstream: alimenta 01-Necesidades-Negocio (necesidades por capacidad incluida), 02-Especificacion-Funcional (casos de uso; las exclusiones quedan registradas para que no se generen por error), 03-UX-UI-DX (pantallas del panel por capacidad), 05-Arquitectura-Tecnica (restricciones y decisiones abiertas que se cierran como ADR), 07-Plan-Sprint (capacidades priorizadas que ordenan las etapas) y 11-Examples (ejemplo de la interfaz de integración). Las decisiones abiertas se registran como pendientes P-03 a P-06 del intake.
+Downstream: alimenta 01-Necesidades-Negocio (necesidades por capacidad incluida), 02-Especificacion-Funcional (casos de uso; las exclusiones quedan registradas para que no se generen por error), 03-UX-UI-DX (pantallas del panel por capacidad), 05-Arquitectura-Tecnica (restricciones y decisiones abiertas que se cierran como ADR), 07-Plan-Sprint (capacidades priorizadas que ordenan las etapas) y 10-Examples (ejemplo de la interfaz de integración). Las decisiones abiertas se registran como pendientes P-03 a P-06 del intake.

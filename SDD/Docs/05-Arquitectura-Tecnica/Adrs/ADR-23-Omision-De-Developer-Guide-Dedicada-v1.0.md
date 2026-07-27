@@ -2,11 +2,13 @@
 
 **Proyecto:** Sai-Service-Core
 **Documento:** ADR-23-Omision-De-Developer-Guide-Dedicada-v1.0.md
-**Versión:** 1.0
-**Estado:** Aceptado
+**Versión:** 1.1
+**Estado:** Superado (por el reajuste al framework SDD v3.0, 2026-07-26)
 **Fecha:** 2026-07-21
 **Autor:** Orquestador SDD (AG-05)
 **Categoría:** Estilo
+
+> **Nota de superación (2026-07-26).** El framework SDD v3.0 intercambió las categorías 10 y 11: la categoría 10 pasó a ser **Examples** y la 11 a ser **Documentacion**, e hizo **obligatorio el cuerpo mantenedor** de la categoría 11 para los ocho tipos de proyecto, sin excepción. En consecuencia, ya no existe una «categoría 10 Developer-Guide» que este ADR pudiera omitir, y la premisa de la decisión (categoría opcional para `web-monolith`) dejó de ser válida. El onboarding del desarrollador y el contenido que este ADR remitía al README raíz pasan a ser materia del cuerpo mantenedor de la categoría 11 (`Recorrido-Codigo`, `Guia-Contribucion`), cuya generación queda pendiente como Parte B del reajuste. Este ADR se conserva como registro de la decisión tomada bajo el esquema anterior; su cuerpo original no se reescribe.
 
 ## 1. Contexto
 
@@ -18,7 +20,7 @@ No se genera una categoría 10-Developer-Guide dedicada. El onboarding del desar
 
 ## 3. Estado
 
-Aceptado — 2026-07-21.
+Aceptado — 2026-07-21. **Superado — 2026-07-26** por el reajuste al framework SDD v3.0 (ver nota de superación en la cabecera).
 
 ## 4. Alternativas consideradas
 
@@ -60,3 +62,4 @@ La Fase H (consolidación) incluye en `SDD/Docs/README.md` una sección de onboa
 | Versión | Fecha | Descripción |
 |---|---|---|
 | 1.0 | 2026-07-21 | Registro de la omisión de la categoría 10-Developer-Guide dedicada, con consolidación del onboarding en el README raíz de la Fase H. |
+| 1.1 | 2026-07-26 | **Superado** por el reajuste al framework SDD v3.0 (intercambio de categorías 10↔11 y cuerpo mantenedor de la 11 obligatorio). Se agrega la nota de superación en cabecera y §3; el cuerpo original se conserva como registro. |

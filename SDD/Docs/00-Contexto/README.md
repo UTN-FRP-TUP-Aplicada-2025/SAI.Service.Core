@@ -33,7 +33,7 @@ Los tres roles de propietario, implementador y beneficiario recaen en una única
 ## Trazabilidad
 
 - Upstream: `SDD/Intake/SOLUTION-INTAKE-Sai-Service-Core-v1.0.md` y `SDD/Intake/SOLUTION-MANIFEST-Sai-Service-Core-v1.0.md`.
-- Downstream: 01-Necesidades-Negocio, 02-Especificacion-Funcional, 03-UX-UI-DX, 05-Arquitectura-Tecnica, 06-Backlog-Tecnico, 07-Plan-Sprint, 09-Devops y 11-Examples.
+- Downstream: 01-Necesidades-Negocio, 02-Especificacion-Funcional, 03-UX-UI-DX, 05-Arquitectura-Tecnica, 06-Backlog-Tecnico, 07-Plan-Sprint, 09-Devops y 10-Examples.
 
 ## Decisiones abiertas heredadas del intake
 

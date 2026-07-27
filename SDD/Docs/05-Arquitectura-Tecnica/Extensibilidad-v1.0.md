@@ -59,7 +59,7 @@ services.AddSingleton<IAdaptadorConexion>(sp =>
 // cuando exista un equipo que nutdrv_qx no cubra (E-07, diseñada no implementada).
 ```
 
-Un ejemplo ejecutable de extensión —el escenario que ejercita el adaptador— vive en **11-Examples** y se apoya en el escenario §20.E-07 del intake. El `samples/ingesta-gmao/` de §16.1 ejercita la otra superficie (la API), no el adaptador.
+Un ejemplo ejecutable de extensión —el escenario que ejercita el adaptador— vive en **10-Examples** y se apoya en el escenario §20.E-07 del intake. El `samples/ingesta-gmao/` de §16.1 ejercita la otra superficie (la API), no el adaptador.
 
 ## 6. Trazabilidad
 
@@ -69,7 +69,7 @@ Un ejemplo ejecutable de extensión —el escenario que ejercita el adaptador—
 | RN aplicables | RN-03 (validación por efecto observado) |
 | Capacidades | F-02 (NUT), F-24 (simulada), F-26 (add-ons diseñados), F-27 (directo) |
 | ADR que lo gobiernan | ADR-02 (tres implementaciones); ADR-22 [Propuesto] (forma del contrato); relacionados ADR-01, ADR-03, ADR-11 |
-| Ejemplo de extensión | 11-Examples (escenario §20.E-07) |
+| Ejemplo de extensión | 10-Examples (escenario §20.E-07) |
 | Tests previstos en 08 | Camino de apagado contra el adaptador simulado; conmutación de implementación por configuración; efecto observado en la operación de apagado |
 
 ## Control de cambios
