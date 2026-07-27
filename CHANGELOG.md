@@ -416,8 +416,27 @@ y el versionado sigue [Semantic Versioning](https://semver.org/lang/es/).
   - Contrato de verificación **`VER-XX`** (`Rules-Examples` 2.0 §4.6) agregado a los dos ejemplos, en pasada
     de diseño (`VER-01` en el sample de datos seed, `VER-02` en el de la API de ingesta).
   - Notas de reajuste en las auditorías de fase (F, G, H), que se conservan como registro de su momento.
-  - **Pendiente (Parte B)**: generar la categoría **11-Documentacion** (visión general, recorrido de código,
-    guías de contribución/contenedor/despliegue, runbook, `AGENTS.md`), obligatoria para `web-monolith`.
+
+- **Documentación SDD — categoría 11-Documentacion (reajuste, Parte B)**: se genera el cuerpo documental de
+  entrega para `web-monolith`, con sus cuerpos obligatorios y los artefactos de nivel solución, bajo
+  `SDD/Docs/11-Documentacion/` (caso degenerado de un proyecto). Lector primario: un agente humano o de IA en
+  primer contacto, sin el contexto de la cadena de especificación.
+  - **Nivel solución**: `README.md` (matriz de ruteo actor × intención → documento), `Vision-General-Sistema`
+    (contexto y contenedores en Mermaid, recorrido del flujo de apagado), `Guia-Inicio-Rapido`,
+    `Guia-Despliegue` (DEV/PROD sin staging, ADR-24), `Bitacora-Eventualidades` (7 entradas `EVE-XX` reales de
+    la construcción: upsmon, migraciones en contenedor, `CultureNotFound`, antiforgery, keyring, conflicto de
+    merge, jerga NUT), `Contrato-Agentes`, y **`AGENTS.md` emitido en la raíz del repositorio**.
+  - **Cuerpo mantenedor** (obligatorio): `Recorrido-Codigo` (mapa arquitectura→archivos, con la regla de que
+    toda ruta citada existe), `Guia-Contribucion`, `Guia-Extension` (`EXT-01`, el adaptador de conexión, ADR-27).
+  - **Cuerpo operador** (obligatorio): `Guia-Contenedor` (env vars con override `__`, puertos 8080/8443,
+    volúmenes del keyring y SQLite, USB por NUT, healthcheck `GET /health`) y `Runbook-Operacion` (procedimientos
+    base, logs, métricas y 4 incidentes conocidos `OPS-XX`).
+  - **Honestidad del estado**: la documentación registra que la imagen de contenedor de producción es una
+    ranura pendiente (no hay Dockerfile; ADR-20/ADR-25) y que el TLS de producción no está implementado; no se
+    inventan artefactos inexistentes.
+  - Cuerpo integrador omitido por gating (la API de ingesta ya está en `Contratos-REST` de 05). README maestro
+    actualizado: la categoría 11 pasa de *pendiente* a *vigente*. **Con esto se completa el reajuste al
+    framework SDD v3.0.**
 
 - **Documentación SDD — nomenclatura de las reglas del framework**: las citas a las reglas constructivas
   de `IA.SDD` se actualizan al nombre nuevo, que perdió el prefijo numérico de categoría
