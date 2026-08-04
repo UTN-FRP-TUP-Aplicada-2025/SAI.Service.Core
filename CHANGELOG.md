@@ -9,6 +9,29 @@ y el versionado sigue [Semantic Versioning](https://semver.org/lang/es/).
 
 ### Añadido
 
+- **Empaquetado en contenedor — `Dockerfile` multi-stage y `.dockerignore`** (ADR-18, ADR-20): el repositorio
+  pasa a ser construible como imagen Docker sin instalar el SDK de .NET en la máquina que despliega — el SDK
+  vive dentro de la etapa de build y se descarta. Habilita también el contexto de build remoto
+  (`docker build <url-del-repo>#rama`), que exige que el `Dockerfile` esté versionado en la raíz del repo.
+  - **Etapa build** (`sdk:10.0`): copia `Directory.Build.props` **antes** del restore (si falta, el `obj/`
+    queda inconsistente y el publish puede no emitir los static web assets de Blazor), luego los cinco
+    `.csproj` de las capas para cachear la capa de restore, y recién después el código. Se restaura el
+    proyecto `Web`, que arrastra las otras cuatro capas por `ProjectReference`.
+  - **Etapa runtime** (`aspnet:10.0`): usuario no-root (uid/gid 1001) y **dos** volúmenes obligatorios —
+    `/app/data` para la base SQLite append-only (migrada al arranque con `MigrateAsync`) y `/keys` para el
+    keyring de DataProtection, sin el cual cada reinicio invalida la cookie de sesión y rompe los tokens
+    antiforgery de los POST SSR.
+  - **Defaults por variable de entorno**: `ConnectionStrings__Sai`, `DataProtection__RutaLlaves`,
+    `Sai__Adaptador=Simulado` (default seguro; con SAI real se pone `Nut`) y `ASPNETCORE_ENVIRONMENT=Production`.
+    `Jwt__ClaveFirma` **no** se hornea en la imagen (ADR-20): se inyecta en el despliegue.
+  - **No se define `ASPNETCORE_URLS`** a propósito: el binding lo fija `Kestrel:Endpoints` en
+    `appsettings.json` (`http://0.0.0.0:8080`) y la variable lo pisaría entero, descartando la ranura de TLS
+    de producción (ADR-20, P-04). Tampoco se declara `HEALTHCHECK`: existe `/health`, pero la imagen `aspnet`
+    no trae `curl`/`wget` y agregarlos amplía la superficie; se declara en el orquestador.
+  - **`.dockerignore`**: recorta el contexto y evita que artefactos del host contaminen la compilación
+    (`bin/`, `obj/`, `.publish-e1`), excluye `SDD/`, `PROMPTs/` y `tests/` (los tests corren en CI), y deja
+    fuera de la imagen bases `*.db`, llaves y volcados de memoria `core.*`.
+
 - **Configuración de políticas — tiempo de retorno del SAI configurable y "En palabras" más preciso**
   (CU-03, ADR-09/ADR-27): el retardo con el que el SAI restaura la salida al host tras el retorno de la red
   (`ups.delay.start`) estaba **fijo en 180 s dentro del adaptador NUT**, quedando fuera de la política
