@@ -76,10 +76,10 @@ public sealed class AdaptadorConexionSimulado : IAdaptadorConexion, IDescubridor
             Detalle: "Adaptador simulado: conectividad fija (stub de Sprint 0)."));
 
     /// <inheritdoc />
-    public Task<ResultadoAccion> OrdenarApagadoConRetornoAsync(TimeSpan retardo, CancellationToken ct) =>
+    public Task<ResultadoAccion> OrdenarApagadoConRetornoAsync(TimeSpan retardo, TimeSpan retardoRetorno, CancellationToken ct) =>
         Task.FromResult(new ResultadoAccion(
             Aceptada: true,
-            Motivo: $"Adaptador simulado: apagado con retorno aceptado (retardo {retardo}). Sin efecto real.",
+            Motivo: $"Adaptador simulado: apagado con retorno aceptado (retardo {retardo}, retorno {retardoRetorno}). Sin efecto real.",
             MarcaTiempoUtc: Ahora));
 
     /// <inheritdoc />

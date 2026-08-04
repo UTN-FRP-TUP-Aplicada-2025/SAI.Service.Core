@@ -87,7 +87,7 @@ public class ApagadoIntegracionTests
     // que lee el apagado. El arranque siembra v1 en solo aviso; esto crea la v2 con la modalidad pedida.
     private static async Task FijarModalidad(IServiceProvider sp, Modalidad modalidad) =>
         await sp.GetRequiredService<ServicioPoliticas>()
-            .CrearVersionAsync(new PropuestaPolitica(modalidad, 300, 120), CancellationToken.None);
+            .CrearVersionAsync(new PropuestaPolitica(modalidad, 300, 120, 180), CancellationToken.None);
 
     private static async Task VerificarLosCuatro(IServiceProvider sp)
     {

@@ -56,11 +56,12 @@ public sealed class ServicioApagadoOrdenado(
         var verificaciones = await repositorioEquipos.ListarVerificacionesAsync(ct);
         var solicitada = vigente?.ModalidadSolicitada ?? opciones.ModalidadSolicitada;
         var reservado = vigente?.TiempoReservadoApagadoSeg ?? opciones.TiempoReservadoSeg;
+        var retorno = vigente?.TiempoRetornoSeg ?? opciones.TiempoRetornoSeg;
         var efectiva = EvaluadorModalidad.Efectiva(solicitada, verificaciones, ahora);
         var verificados = EvaluadorModalidad.Verificados(verificaciones, ahora);
         var codigo = $"acc-{Guid.NewGuid():N}";
 
-        var accion = await DecidirAsync(codigo, dispositivo.Codigo, solicitada, efectiva, verificados, reservado, ahora, eventoDisparoCodigo, ct);
+        var accion = await DecidirAsync(codigo, dispositivo.Codigo, solicitada, efectiva, verificados, reservado, retorno, ahora, eventoDisparoCodigo, ct);
         await repositorioMonitoreo.GuardarAccionAsync(accion, ct);
         return accion;
     }
@@ -88,7 +89,7 @@ public sealed class ServicioApagadoOrdenado(
 
     private async Task<Accion> DecidirAsync(
         string codigo, string dispositivoCodigo, Modalidad solicitada, Modalidad efectiva, int verificados,
-        int reservado, DateTimeOffset ahora, string? eventoDisparoCodigo, CancellationToken ct)
+        int reservado, int retorno, DateTimeOffset ahora, string? eventoDisparoCodigo, CancellationToken ct)
     {
         // Modalidad base segura: solo aviso, no se apaga nada (RN-01).
         if (solicitada == Modalidad.SoloAlerta)
@@ -106,7 +107,7 @@ public sealed class ServicioApagadoOrdenado(
         }
 
         // Habilitada: se ordena el apagado con retorno y se confirma por efecto observado (ADR-11).
-        var resultado = await adaptador.OrdenarApagadoConRetornoAsync(TimeSpan.FromSeconds(reservado), ct);
+        var resultado = await adaptador.OrdenarApagadoConRetornoAsync(TimeSpan.FromSeconds(reservado), TimeSpan.FromSeconds(retorno), ct);
         return resultado.Aceptada
             ? Accion.Ejecutada(codigo, dispositivoCodigo, solicitada, efectiva, reservado, ahora,
                 $"Apagado con retorno ordenado y admitido por el equipo: {resultado.Motivo}", eventoDisparoCodigo)

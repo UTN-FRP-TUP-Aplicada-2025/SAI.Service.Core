@@ -19,7 +19,7 @@
 {
     <MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Class="mb-4">
         Versión vigente: <b>v@_vigente.Numero</b> · @EtiquetaModalidad(_vigente.ModalidadSolicitada)
-        · umbral @_vigente.UmbralDisparoSegundos s · reserva @_vigente.TiempoReservadoApagadoSeg s.
+        · umbral @_vigente.UmbralDisparoSegundos s · reserva @_vigente.TiempoReservadoApagadoSeg s · retorno @_vigente.TiempoRetornoSeg s.
     </MudAlert>
 }
 
@@ -52,7 +52,11 @@
             <MudNumericField T="int" Value="_tiempoReservado" ValueChanged="CambiarTiempo" Label="@Desc("tiempoReservadoApagadoSeg").Etiqueta"
                              HelperText="@Desc("tiempoReservadoApagadoSeg").Ayuda" Adornment="Adornment.End" AdornmentText="s"
                              Min="@(Desc("tiempoReservadoApagadoSeg").Minimo ?? 0)" Max="@(Desc("tiempoReservadoApagadoSeg").Maximo ?? Domain.Acciones.Accion.TechoDuroApagadoSeg)"
-                             Variant="Variant.Outlined" Class="mb-2" />
+                             Variant="Variant.Outlined" Class="mb-3" />
+
+            <MudNumericField T="int" Value="_tiempoRetorno" ValueChanged="CambiarRetorno" Label="@Desc("tiempoRetornoSeg").Etiqueta"
+                             HelperText="@Desc("tiempoRetornoSeg").Ayuda" Adornment="Adornment.End" AdornmentText="s"
+                             Min="@(Desc("tiempoRetornoSeg").Minimo ?? 1)" Variant="Variant.Outlined" Class="mb-2" />
 
             <div class="d-flex gap-2 mt-4">
                 <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="_ocupado" OnClick="Confirmar">
@@ -70,7 +74,7 @@
             <div class="d-flex align-center gap-2 mb-2">
                 <MudText Typo="Typo.subtitle1">En palabras</MudText>
                 <MudChip T="string" Size="Size.Small" Color="Color.Secondary" Variant="Variant.Text"
-                         Icon="@Icons.Material.Filled.Science">Modo simulación</MudChip>
+                         Icon="@Icons.Material.Filled.Visibility">Previsualización</MudChip>
             </div>
             <MudText Typo="Typo.body2" Class="mb-3">@(_previa?.EnPalabras ?? "…")</MudText>
 
@@ -147,6 +151,7 @@ else
     private Modalidad _modalidad = DescriptorPoliticas.Defecto.ModalidadSolicitada;
     private int _umbral = DescriptorPoliticas.Defecto.UmbralDisparoSegundos;
     private int _tiempoReservado = DescriptorPoliticas.Defecto.TiempoReservadoApagadoSeg;
+    private int _tiempoRetorno = DescriptorPoliticas.Defecto.TiempoRetornoSeg;
 
     private bool _ocupado;
     private string? _mensaje;
@@ -177,6 +182,7 @@ else
         _modalidad = _vigente.ModalidadSolicitada;
         _umbral = _vigente.UmbralDisparoSegundos;
         _tiempoReservado = _vigente.TiempoReservadoApagadoSeg;
+        _tiempoRetorno = _vigente.TiempoRetornoSeg;
     }
 
     private static DescriptorParametro Desc(string clave) =>
@@ -184,17 +190,19 @@ else
 
     private static Modalidad ModalidadDe(string valor) => Enum.Parse<Modalidad>(valor);
 
-    private PropuestaPolitica Propuesta() => new(_modalidad, _umbral, _tiempoReservado);
+    private PropuestaPolitica Propuesta() => new(_modalidad, _umbral, _tiempoReservado, _tiempoRetorno);
 
     private async Task CambiarModalidad(Modalidad valor) { _modalidad = valor; await Previsualizar(); }
     private async Task CambiarUmbral(int valor) { _umbral = valor; await Previsualizar(); }
     private async Task CambiarTiempo(int valor) { _tiempoReservado = valor; await Previsualizar(); }
+    private async Task CambiarRetorno(int valor) { _tiempoRetorno = valor; await Previsualizar(); }
 
     private async Task AplicarPreset(Preset preset)
     {
         _modalidad = preset.Propuesta.ModalidadSolicitada;
         _umbral = preset.Propuesta.UmbralDisparoSegundos;
         _tiempoReservado = preset.Propuesta.TiempoReservadoApagadoSeg;
+        _tiempoRetorno = preset.Propuesta.TiempoRetornoSeg;
         await Previsualizar();
     }
 

@@ -43,6 +43,8 @@ public static class DescriptorPoliticas
     private const int UmbralDefault = 300;
     private const int TiempoReservadoDefault = 120;
     private const int TiempoReservadoMinimo = 12;
+    private const int TiempoRetornoDefault = Acciones.OpcionesApagado.TiempoRetornoPorDefectoSeg;
+    private const int TiempoRetornoMinimo = 1;
 
     /// <summary>Descriptores de los parámetros configurables.</summary>
     public static IReadOnlyList<DescriptorParametro> Parametros { get; } =
@@ -64,22 +66,26 @@ public static class DescriptorPoliticas
             TipoParametro.Numerico, "s", Minimo: 1),
         new DescriptorParametro(
             "tiempoReservadoApagadoSeg", "Tiempo reservado para el apagado",
-            $"Cuánto tiempo se le reserva al host para apagarse. Entre {TiempoReservadoMinimo} y {Accion.TechoDuroApagadoSeg} s (techo duro del equipo).",
+            $"Cuánto tiempo se le reserva al host para apagarse antes de que el SAI corte su salida. Entre {TiempoReservadoMinimo} y {Accion.TechoDuroApagadoSeg} s (techo duro del equipo).",
             TipoParametro.Numerico, "s", Minimo: TiempoReservadoMinimo, Maximo: Accion.TechoDuroApagadoSeg),
+        new DescriptorParametro(
+            "tiempoRetornoSeg", "Tiempo de retorno del SAI",
+            "Cuánto espera el SAI, tras volver la red, antes de restaurar la energía al host. Fuerza un ciclo limpio para que la BIOS autoencienda (requiere el autoencendido activado en la BIOS).",
+            TipoParametro.Numerico, "s", Minimo: TiempoRetornoMinimo),
     ];
 
     /// <summary>Propuesta por defecto (arranque seguro en solo aviso, RN-01).</summary>
     public static PropuestaPolitica Defecto { get; } =
-        new(Modalidad.SoloAlerta, UmbralDefault, TiempoReservadoDefault);
+        new(Modalidad.SoloAlerta, UmbralDefault, TiempoReservadoDefault, TiempoRetornoDefault);
 
     /// <summary>Los tres presets nombrados por su modalidad (wireframe §2).</summary>
     public static IReadOnlyList<Preset> Presets { get; } =
     [
         new Preset("Solo aviso", "El sistema solo avisa; no apaga el host.",
-            new PropuestaPolitica(Modalidad.SoloAlerta, UmbralDefault, TiempoReservadoDefault)),
+            new PropuestaPolitica(Modalidad.SoloAlerta, UmbralDefault, TiempoReservadoDefault, TiempoRetornoDefault)),
         new Preset("Apagado con retorno", "Apaga el host ordenadamente y lo repone al volver la energía.",
-            new PropuestaPolitica(Modalidad.ApagarHostConRetorno, UmbralDefault, TiempoReservadoDefault)),
+            new PropuestaPolitica(Modalidad.ApagarHostConRetorno, UmbralDefault, TiempoReservadoDefault, TiempoRetornoDefault)),
         new Preset("Ciclo forzado", "Apaga host y SAI; el corte no se cancela aunque vuelva la red.",
-            new PropuestaPolitica(Modalidad.CicloForzado, UmbralDefault, TiempoReservadoDefault)),
+            new PropuestaPolitica(Modalidad.CicloForzado, UmbralDefault, TiempoReservadoDefault, TiempoRetornoDefault)),
     ];
 }

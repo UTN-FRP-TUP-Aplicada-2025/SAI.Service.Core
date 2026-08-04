@@ -21,10 +21,10 @@ public class ServicioPoliticasTests
     public async Task CrearUnaSegundaVersionLaDejaVigenteYConservaLaPrimera()
     {
         var repo = new RepositorioFalso();
-        await repo.AgregarVersionAsync(VersionPolitica.Inicial(Modalidad.SoloAlerta, 300, 120, Ahora), default);
+        await repo.AgregarVersionAsync(VersionPolitica.Inicial(Modalidad.SoloAlerta, 300, 120, 180, Ahora), default);
         var servicio = new ServicioPoliticas(repo);
 
-        var resultado = await servicio.CrearVersionAsync(new PropuestaPolitica(Modalidad.ApagarHostConRetorno, 300, 240), default);
+        var resultado = await servicio.CrearVersionAsync(new PropuestaPolitica(Modalidad.ApagarHostConRetorno, 300, 240, 180), default);
 
         resultado.Codigo.Should().Be(CodigoPolitica.Creada);
         resultado.Version!.Numero.Should().Be(2);
@@ -43,7 +43,7 @@ public class ServicioPoliticasTests
     {
         var servicio = new ServicioPoliticas(new RepositorioFalso());
 
-        var resultado = await servicio.CrearVersionAsync(new PropuestaPolitica(Modalidad.SoloAlerta, 300, 120), default);
+        var resultado = await servicio.CrearVersionAsync(new PropuestaPolitica(Modalidad.SoloAlerta, 300, 120, 180), default);
 
         resultado.Codigo.Should().Be(CodigoPolitica.Creada);
         resultado.Version!.Numero.Should().Be(1);
@@ -56,7 +56,7 @@ public class ServicioPoliticasTests
         var repo = new RepositorioFalso();
         var servicio = new ServicioPoliticas(repo);
 
-        var resultado = await servicio.CrearVersionAsync(new PropuestaPolitica(Modalidad.ApagarHostConRetorno, 300, 600), default);
+        var resultado = await servicio.CrearVersionAsync(new PropuestaPolitica(Modalidad.ApagarHostConRetorno, 300, 600, 180), default);
 
         resultado.Codigo.Should().Be(CodigoPolitica.TiempoApagadoExcedeTecho);
         resultado.Version.Should().BeNull();
@@ -70,7 +70,7 @@ public class ServicioPoliticasTests
         var repo = new RepositorioFalso();
         var servicio = new ServicioPoliticas(repo);
 
-        var resultado = await servicio.CrearVersionAsync(new PropuestaPolitica(Modalidad.ApagarHostConRetorno, 0, 120), default);
+        var resultado = await servicio.CrearVersionAsync(new PropuestaPolitica(Modalidad.ApagarHostConRetorno, 0, 120, 180), default);
 
         resultado.Codigo.Should().Be(CodigoPolitica.ParametroInvalido);
         repo.Versiones.Should().BeEmpty();
@@ -81,10 +81,10 @@ public class ServicioPoliticasTests
     public async Task CambiarSoloElUmbralCreaLaVersionSiguiente()
     {
         var repo = new RepositorioFalso();
-        await repo.AgregarVersionAsync(VersionPolitica.Inicial(Modalidad.ApagarHostConRetorno, 300, 120, Ahora), default);
+        await repo.AgregarVersionAsync(VersionPolitica.Inicial(Modalidad.ApagarHostConRetorno, 300, 120, 180, Ahora), default);
         var servicio = new ServicioPoliticas(repo);
 
-        var resultado = await servicio.CrearVersionAsync(new PropuestaPolitica(Modalidad.ApagarHostConRetorno, 180, 120), default);
+        var resultado = await servicio.CrearVersionAsync(new PropuestaPolitica(Modalidad.ApagarHostConRetorno, 180, 120, 180), default);
 
         resultado.Version!.Numero.Should().Be(2);
         resultado.Version.UmbralDisparoSegundos.Should().Be(180);
@@ -98,7 +98,7 @@ public class ServicioPoliticasTests
         var repo = new RepositorioFalso { Verificaciones = SembrarLasCuatro() };
         var servicio = new ServicioPoliticas(repo);
 
-        var previa = await servicio.PrevisualizarAsync(new PropuestaPolitica(Modalidad.ApagarHostConRetorno, 300, 120), default);
+        var previa = await servicio.PrevisualizarAsync(new PropuestaPolitica(Modalidad.ApagarHostConRetorno, 300, 120, 180), default);
 
         previa.Degradada.Should().BeTrue("los cuatro supuestos no están verificados (RN-02)");
         previa.ModalidadEfectiva.Should().Be(Modalidad.SoloAlerta);
@@ -119,7 +119,7 @@ public class ServicioPoliticasTests
         var repo = new RepositorioFalso { Verificaciones = verificaciones };
         var servicio = new ServicioPoliticas(repo);
 
-        var previa = await servicio.PrevisualizarAsync(new PropuestaPolitica(Modalidad.ApagarHostConRetorno, 300, 120), default);
+        var previa = await servicio.PrevisualizarAsync(new PropuestaPolitica(Modalidad.ApagarHostConRetorno, 300, 120, 180), default);
 
         previa.Degradada.Should().BeFalse();
         previa.ModalidadEfectiva.Should().Be(Modalidad.ApagarHostConRetorno);
@@ -131,9 +131,32 @@ public class ServicioPoliticasTests
     {
         var servicio = new ServicioPoliticas(new RepositorioFalso());
 
-        var previa = await servicio.PrevisualizarAsync(new PropuestaPolitica(Modalidad.SoloAlerta, 300, 120), default);
+        var previa = await servicio.PrevisualizarAsync(new PropuestaPolitica(Modalidad.SoloAlerta, 300, 120, 180), default);
 
         previa.Degradada.Should().BeFalse();
+    }
+
+    // Un tiempo de retorno no positivo se rechaza como parámetro inválido.
+    [Fact]
+    public async Task UnTiempoDeRetornoNoPositivoSeRechaza()
+    {
+        var repo = new RepositorioFalso();
+
+        var resultado = await new ServicioPoliticas(repo).CrearVersionAsync(
+            new PropuestaPolitica(Modalidad.ApagarHostConRetorno, 300, 120, 0), default);
+
+        resultado.Codigo.Should().Be(CodigoPolitica.ParametroInvalido);
+        repo.Versiones.Should().BeEmpty();
+    }
+
+    // La explicación "en palabras" nombra el retardo de retorno y la dependencia del autoencendido de la BIOS.
+    [Fact]
+    public async Task LaPrevisualizacionExplicaElRetornoYLaBios()
+    {
+        var previa = await new ServicioPoliticas(new RepositorioFalso())
+            .PrevisualizarAsync(new PropuestaPolitica(Modalidad.ApagarHostConRetorno, 300, 120, 200), default);
+
+        previa.EnPalabras.Should().Contain("200 s").And.Contain("BIOS");
     }
 
     private static List<Verificacion> SembrarLasCuatro() =>

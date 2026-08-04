@@ -9,6 +9,50 @@ y el versionado sigue [Semantic Versioning](https://semver.org/lang/es/).
 
 ### Añadido
 
+- **Empaquetado en contenedor — `Dockerfile` multi-stage y `.dockerignore`** (ADR-18, ADR-20): el repositorio
+  pasa a ser construible como imagen Docker sin instalar el SDK de .NET en la máquina que despliega — el SDK
+  vive dentro de la etapa de build y se descarta. Habilita también el contexto de build remoto
+  (`docker build <url-del-repo>#rama`), que exige que el `Dockerfile` esté versionado en la raíz del repo.
+  - **Etapa build** (`sdk:10.0`): copia `Directory.Build.props` **antes** del restore (si falta, el `obj/`
+    queda inconsistente y el publish puede no emitir los static web assets de Blazor), luego los cinco
+    `.csproj` de las capas para cachear la capa de restore, y recién después el código. Se restaura el
+    proyecto `Web`, que arrastra las otras cuatro capas por `ProjectReference`.
+  - **Etapa runtime** (`aspnet:10.0`): usuario no-root (uid/gid 1001) y **dos** volúmenes obligatorios —
+    `/app/data` para la base SQLite append-only (migrada al arranque con `MigrateAsync`) y `/keys` para el
+    keyring de DataProtection, sin el cual cada reinicio invalida la cookie de sesión y rompe los tokens
+    antiforgery de los POST SSR.
+  - **Defaults por variable de entorno**: `ConnectionStrings__Sai`, `DataProtection__RutaLlaves`,
+    `Sai__Adaptador=Simulado` (default seguro; con SAI real se pone `Nut`) y `ASPNETCORE_ENVIRONMENT=Production`.
+    `Jwt__ClaveFirma` **no** se hornea en la imagen (ADR-20): se inyecta en el despliegue.
+  - **No se define `ASPNETCORE_URLS`** a propósito: el binding lo fija `Kestrel:Endpoints` en
+    `appsettings.json` (`http://0.0.0.0:8080`) y la variable lo pisaría entero, descartando la ranura de TLS
+    de producción (ADR-20, P-04). Tampoco se declara `HEALTHCHECK`: existe `/health`, pero la imagen `aspnet`
+    no trae `curl`/`wget` y agregarlos amplía la superficie; se declara en el orquestador.
+  - **`.dockerignore`**: recorta el contexto y evita que artefactos del host contaminen la compilación
+    (`bin/`, `obj/`, `.publish-e1`), excluye `SDD/`, `PROMPTs/` y `tests/` (los tests corren en CI), y deja
+    fuera de la imagen bases `*.db`, llaves y volcados de memoria `core.*`.
+
+- **Configuración de políticas — tiempo de retorno del SAI configurable y "En palabras" más preciso**
+  (CU-03, ADR-09/ADR-27): el retardo con el que el SAI restaura la salida al host tras el retorno de la red
+  (`ups.delay.start`) estaba **fijo en 180 s dentro del adaptador NUT**, quedando fuera de la política
+  versionada que es la fuente de verdad de la temporización. Ahora es un campo de la política:
+  - `VersionPolitica.TiempoRetornoSeg` (dominio, validado > 0) + `PropuestaPolitica` + descriptor y campo en
+    el panel. `ServicioApagadoOrdenado` lo lee de la versión vigente y lo pasa al adaptador; el contrato del
+    puerto `IAdaptadorConexion.OrdenarApagadoConRetornoAsync` suma el parámetro `retardoRetorno` (el NUT lo
+    emite como `ups.delay.start`, el simulado lo refleja). La ventana de mantenimiento usa el default
+    (`OpcionesApagado.TiempoRetornoPorDefectoSeg = 180`). Migración `PoliticaTiempoRetorno`: las políticas
+    existentes toman 180 s (comportamiento previo intacto).
+  - **Mensaje "En palabras" reescrito** para mayor precisión: nombra que el servicio ordena el apagado al
+    sistema operativo, que el tiempo reservado es la ventana del host antes de que el SAI corte su salida, y
+    —lo que antes faltaba— que tras el retorno de la red el SAI espera el tiempo de retorno antes de
+    reponer la energía, con el host reencendiendo por el **autoencendido de la BIOS** (que debe estar activado).
+  - **Chip "Modo simulación" → "Previsualización"**: el rótulo confundía (sugería que el SAI estaba
+    simulado, cuando con el adaptador NUT real no lo está); ahora indica correctamente que el panel "En
+    palabras" es una previsualización de la propuesta, no aplicada hasta confirmar.
+  - 4 pruebas nuevas/actualizadas (dominio: retorno positivo y su conservación; aplicación: rechazo por
+    retorno no positivo, mensaje que nombra el retorno y la BIOS; adaptador NUT: el retorno emitido sale del
+    argumento, ya no de un fijo).
+
 - **Etapa 5 · Ingesta automatizada de intervenciones** (CU-11, US-21, US-22, BT-28): el **único contrato
   formal hacia terceros**, `POST /api/v1/intervenciones` (autenticado por Bearer), que un GMAO externo usa
   sin intervención humana. Es idempotente por clave: un reintento de red no duplica el hecho ni corrompe el

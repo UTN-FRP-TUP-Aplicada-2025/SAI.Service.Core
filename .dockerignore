@@ -1,0 +1,41 @@
+# .dockerignore — SAI.Service.Core
+#
+# Recorta el build context que se envia al daemon. Ademas evita que artefactos
+# del host (bin/, obj/) contaminen la compilacion dentro del contenedor: si se
+# copian, MSBuild puede reutilizar un obj/ generado con otro SDK o RID.
+
+# Control de versiones y metadatos
+.git
+.gitignore
+.gitattributes
+.github
+
+# Artefactos de compilacion del host
+**/bin
+**/obj
+.publish-e1
+*.user
+*.suo
+
+# Entornos de editor / dev container (no intervienen en el build de produccion)
+.vs
+.vscode
+.devcontainer
+
+# Volcados de memoria dejados por ejecuciones locales
+core.*
+**/core.*
+
+# Documentacion y prompts: no se compilan y pesan
+SDD
+PROMPTs
+*.md
+
+# Los tests no se compilan en la imagen (corren en CI, ci.yml)
+tests
+
+# Bases de datos y llaves locales — nunca deben entrar en la imagen
+*.db
+*.db-shm
+*.db-wal
+keys

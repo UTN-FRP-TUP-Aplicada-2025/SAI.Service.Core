@@ -5,7 +5,7 @@ using SAI.Service.Core.Domain.Verificaciones;
 namespace SAI.Service.Core.Application.Politicas;
 
 /// <summary>Propuesta de configuración de política (lo que el administrador arma antes de confirmar).</summary>
-public sealed record PropuestaPolitica(Modalidad ModalidadSolicitada, int UmbralDisparoSegundos, int TiempoReservadoApagadoSeg);
+public sealed record PropuestaPolitica(Modalidad ModalidadSolicitada, int UmbralDisparoSegundos, int TiempoReservadoApagadoSeg, int TiempoRetornoSeg);
 
 /// <summary>Código de resultado de crear una versión de política.</summary>
 public enum CodigoPolitica
@@ -61,6 +61,12 @@ public sealed class ServicioPoliticas(IRepositorioPoliticas repositorio)
                 "PARAMETRO_INVALIDO: el umbral de disparo debe ser positivo.");
         }
 
+        if (propuesta.TiempoRetornoSeg <= 0)
+        {
+            return new ResultadoPolitica(CodigoPolitica.ParametroInvalido,
+                "PARAMETRO_INVALIDO: el tiempo de retorno del SAI debe ser positivo.");
+        }
+
         if (propuesta.TiempoReservadoApagadoSeg < 0 || propuesta.TiempoReservadoApagadoSeg > Accion.TechoDuroApagadoSeg)
         {
             return new ResultadoPolitica(CodigoPolitica.TiempoApagadoExcedeTecho,
@@ -70,8 +76,8 @@ public sealed class ServicioPoliticas(IRepositorioPoliticas repositorio)
         var ahora = DateTimeOffset.UtcNow;
         var vigente = await repositorio.VigenteAsync(ct);
         var nueva = vigente is null
-            ? VersionPolitica.Inicial(propuesta.ModalidadSolicitada, propuesta.UmbralDisparoSegundos, propuesta.TiempoReservadoApagadoSeg, ahora)
-            : vigente.Siguiente(propuesta.ModalidadSolicitada, propuesta.UmbralDisparoSegundos, propuesta.TiempoReservadoApagadoSeg, ahora);
+            ? VersionPolitica.Inicial(propuesta.ModalidadSolicitada, propuesta.UmbralDisparoSegundos, propuesta.TiempoReservadoApagadoSeg, propuesta.TiempoRetornoSeg, ahora)
+            : vigente.Siguiente(propuesta.ModalidadSolicitada, propuesta.UmbralDisparoSegundos, propuesta.TiempoReservadoApagadoSeg, propuesta.TiempoRetornoSeg, ahora);
 
         await repositorio.AgregarVersionAsync(nueva, ct);
         return new ResultadoPolitica(CodigoPolitica.Creada, $"Versión {nueva.Numero} creada y vigente.", nueva);

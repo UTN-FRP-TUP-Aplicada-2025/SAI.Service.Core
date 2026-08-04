@@ -69,7 +69,7 @@ public sealed class ServicioVerificacion(IRepositorioEquipos repositorio, IAdapt
         }
 
         // El retardo es el tiempo que el SAI espera antes de cortar la salida, para que el host baje limpio.
-        var accion = await adaptador.OrdenarApagadoConRetornoAsync(TimeSpan.FromSeconds(30), ct);
+        var accion = await adaptador.OrdenarApagadoConRetornoAsync(TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(Acciones.OpcionesApagado.TiempoRetornoPorDefectoSeg), ct);
         if (!accion.Aceptada)
         {
             return new ResultadoVerificacion(CodigoResultadoVerificacion.EfectoNoConfirmado, $"el apagado no se disparó: {accion.Motivo}");
@@ -114,7 +114,7 @@ public sealed class ServicioVerificacion(IRepositorioEquipos repositorio, IAdapt
     /// <summary>Paso 3: corte con retorno, ejecutando el apagado con retorno y confirmando el efecto (sin caducidad).</summary>
     public async Task<ResultadoVerificacion> VerificarCorteConRetornoAsync(CancellationToken ct)
     {
-        var accion = await adaptador.OrdenarApagadoConRetornoAsync(TimeSpan.FromSeconds(30), ct);
+        var accion = await adaptador.OrdenarApagadoConRetornoAsync(TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(Acciones.OpcionesApagado.TiempoRetornoPorDefectoSeg), ct);
         return accion.Aceptada
             ? await VerificarAsync(Supuesto.CorteConRetorno, "corte con retorno ejecutado: el SAI cortó y repuso la salida", ct)
             : new ResultadoVerificacion(CodigoResultadoVerificacion.EfectoNoConfirmado, $"el corte con retorno no se confirmó: {accion.Motivo}");

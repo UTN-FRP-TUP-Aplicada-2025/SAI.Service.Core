@@ -167,20 +167,21 @@ public sealed partial class AdaptadorConexionNut : IAdaptadorConexion, IDescubri
     private const string CmdTestBateria = "test.battery.start.quick";
 
     // Variables NUT de temporización del apagado con retorno (ADR-27 §6.2): retardo de corte y de
-    // reposición de la salida. El retorno fijo de 180 s da la transición ausencia→presencia (ADR-09).
+    // reposición de la salida. El retorno lo fija la política vigente (antes era un fijo de 180 s): da la
+    // transición ausencia→presencia que dispara el autoencendido de la BIOS (ADR-09).
     private const string VarRetardoApagado = "ups.delay.shutdown";
     private const string VarRetardoRetorno = "ups.delay.start";
-    private const int RetardoRetornoSeg = 180;
 
     /// <inheritdoc />
-    public async Task<ResultadoAccion> OrdenarApagadoConRetornoAsync(TimeSpan retardo, CancellationToken ct)
+    public async Task<ResultadoAccion> OrdenarApagadoConRetornoAsync(TimeSpan retardo, TimeSpan retardoRetorno, CancellationToken ct)
     {
         var ahora = DateTimeOffset.UtcNow;
         var retardoApagadoSeg = Math.Max(0, (int)Math.Round(retardo.TotalSeconds));
+        var retardoRetornoSeg = Math.Max(1, (int)Math.Round(retardoRetorno.TotalSeconds));
         var ajustes = new[]
         {
             (VarRetardoApagado, retardoApagadoSeg.ToString(CultureInfo.InvariantCulture)),
-            (VarRetardoRetorno, RetardoRetornoSeg.ToString(CultureInfo.InvariantCulture)),
+            (VarRetardoRetorno, retardoRetornoSeg.ToString(CultureInfo.InvariantCulture)),
         };
 
         if (!_cliente.TieneCredencialesEscritura)

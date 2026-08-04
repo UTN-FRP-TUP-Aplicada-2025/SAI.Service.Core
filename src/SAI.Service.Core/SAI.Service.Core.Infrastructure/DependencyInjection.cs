@@ -168,6 +168,7 @@ public static class DependencyInjection
         var seccion = configuration.GetSection(OpcionesApagado.Seccion);
         var defecto = new OpcionesApagado();
         var reservado = int.TryParse(seccion["TiempoReservadoSeg"], out var t) ? t : defecto.TiempoReservadoSeg;
+        var retorno = int.TryParse(seccion["TiempoRetornoSeg"], out var r) ? r : defecto.TiempoRetornoSeg;
         return new OpcionesApagado
         {
             ModalidadSolicitada = Enum.TryParse<Modalidad>(seccion["ModalidadSolicitada"], ignoreCase: true, out var m)
@@ -175,6 +176,7 @@ public static class DependencyInjection
                 : defecto.ModalidadSolicitada,
             // Se acota al techo duro de 540 s (RN-04, I-10) por si la configuración lo excede.
             TiempoReservadoSeg = Math.Clamp(reservado, 0, Domain.Acciones.Accion.TechoDuroApagadoSeg),
+            TiempoRetornoSeg = Math.Max(1, retorno),
         };
     }
 

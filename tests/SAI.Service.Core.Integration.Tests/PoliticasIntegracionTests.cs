@@ -38,7 +38,7 @@ public class PoliticasIntegracionTests
         var sp = scope.ServiceProvider;
         var servicio = sp.GetRequiredService<ServicioPoliticas>();
 
-        var resultado = await servicio.CrearVersionAsync(new PropuestaPolitica(Modalidad.CicloForzado, 200, 300), CancellationToken.None);
+        var resultado = await servicio.CrearVersionAsync(new PropuestaPolitica(Modalidad.CicloForzado, 200, 300, 180), CancellationToken.None);
 
         resultado.Codigo.Should().Be(CodigoPolitica.Creada);
         var vigente = await servicio.VigenteAsync(CancellationToken.None);
@@ -61,7 +61,7 @@ public class PoliticasIntegracionTests
         var sp = scope.ServiceProvider;
         var servicio = sp.GetRequiredService<ServicioPoliticas>();
 
-        var resultado = await servicio.CrearVersionAsync(new PropuestaPolitica(Modalidad.ApagarHostConRetorno, 300, 600), CancellationToken.None);
+        var resultado = await servicio.CrearVersionAsync(new PropuestaPolitica(Modalidad.ApagarHostConRetorno, 300, 600, 180), CancellationToken.None);
 
         resultado.Codigo.Should().Be(CodigoPolitica.TiempoApagadoExcedeTecho);
         (await sp.GetRequiredService<SaiDbContext>().Politicas.CountAsync())

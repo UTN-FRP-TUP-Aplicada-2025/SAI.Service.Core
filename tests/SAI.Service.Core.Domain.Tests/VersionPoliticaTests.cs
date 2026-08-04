@@ -19,13 +19,13 @@ public class VersionPoliticaTests
     [Fact]
     public void LaVersionEsHistoriaAppendOnly()
     {
-        VersionPolitica.Inicial(Modalidad.SoloAlerta, 300, 120, Ahora).Should().BeAssignableTo<IEntidadHistoria>();
+        VersionPolitica.Inicial(Modalidad.SoloAlerta, 300, 120, 180, Ahora).Should().BeAssignableTo<IEntidadHistoria>();
     }
 
     [Fact]
     public void LaVersionInicialArrancaEnUno()
     {
-        var version = VersionPolitica.Inicial(Modalidad.ApagarHostConRetorno, 300, 120, Ahora);
+        var version = VersionPolitica.Inicial(Modalidad.ApagarHostConRetorno, 300, 120, 180, Ahora);
 
         version.Numero.Should().Be(1);
         version.ModalidadSolicitada.Should().Be(Modalidad.ApagarHostConRetorno);
@@ -37,9 +37,9 @@ public class VersionPoliticaTests
     [Fact]
     public void SiguienteIncrementaElNumeroSinTocarLaAnterior()
     {
-        var v1 = VersionPolitica.Inicial(Modalidad.SoloAlerta, 300, 120, Ahora);
+        var v1 = VersionPolitica.Inicial(Modalidad.SoloAlerta, 300, 120, 180, Ahora);
 
-        var v2 = v1.Siguiente(Modalidad.CicloForzado, 200, 300, Ahora.AddDays(1));
+        var v2 = v1.Siguiente(Modalidad.CicloForzado, 200, 300, 240, Ahora.AddDays(1));
 
         v2.Numero.Should().Be(2);
         v2.ModalidadSolicitada.Should().Be(Modalidad.CicloForzado);
@@ -50,7 +50,7 @@ public class VersionPoliticaTests
     [Fact]
     public void ElTiempoReservadoNoPuedeSuperarElTechoDuro()
     {
-        var acto = () => VersionPolitica.Inicial(Modalidad.ApagarHostConRetorno, 300, 541, Ahora);
+        var acto = () => VersionPolitica.Inicial(Modalidad.ApagarHostConRetorno, 300, 541, 180, Ahora);
 
         acto.Should().Throw<ArgumentOutOfRangeException>("el techo duro del apagado es 540 s (RN-04, I-10)");
     }
@@ -58,7 +58,7 @@ public class VersionPoliticaTests
     [Fact]
     public void ElTiempoReservadoAceptaJustoElTechoDuro()
     {
-        var version = VersionPolitica.Inicial(Modalidad.ApagarHostConRetorno, 300, Accion.TechoDuroApagadoSeg, Ahora);
+        var version = VersionPolitica.Inicial(Modalidad.ApagarHostConRetorno, 300, Accion.TechoDuroApagadoSeg, 180, Ahora);
 
         version.TiempoReservadoApagadoSeg.Should().Be(540);
     }
@@ -66,8 +66,23 @@ public class VersionPoliticaTests
     [Fact]
     public void ElUmbralDeDisparoDebeSerPositivo()
     {
-        var acto = () => VersionPolitica.Inicial(Modalidad.ApagarHostConRetorno, 0, 120, Ahora);
+        var acto = () => VersionPolitica.Inicial(Modalidad.ApagarHostConRetorno, 0, 120, 180, Ahora);
 
         acto.Should().Throw<ArgumentOutOfRangeException>("el umbral de disparo debe ser positivo");
+    }
+
+    [Fact]
+    public void ConservaElTiempoDeRetorno()
+    {
+        VersionPolitica.Inicial(Modalidad.ApagarHostConRetorno, 300, 120, 200, Ahora)
+            .TiempoRetornoSeg.Should().Be(200);
+    }
+
+    [Fact]
+    public void ElTiempoDeRetornoDebeSerPositivo()
+    {
+        var acto = () => VersionPolitica.Inicial(Modalidad.ApagarHostConRetorno, 300, 120, 0, Ahora);
+
+        acto.Should().Throw<ArgumentOutOfRangeException>("el tiempo de retorno debe ser positivo");
     }
 }

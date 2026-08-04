@@ -109,12 +109,13 @@ public class AdaptadorConexionNutTests
         var cliente = new ClienteNutFalso { Variables = VariablesReales(), ConCredenciales = true };
         var adaptador = new AdaptadorConexionNut(cliente);
 
-        var resultado = await adaptador.OrdenarApagadoConRetornoAsync(TimeSpan.FromSeconds(30), CancellationToken.None);
+        var resultado = await adaptador.OrdenarApagadoConRetornoAsync(TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(200), CancellationToken.None);
 
         resultado.Aceptada.Should().BeTrue("el equipo admitió la orden (efecto observado, ADR-11)");
         var comando = cliente.Comandos.Should().ContainSingle().Subject;
         comando.Comando.Should().Be("shutdown.return");
-        comando.Ajustes.Should().Contain(("ups.delay.shutdown", "30")).And.Contain(("ups.delay.start", "180"));
+        // Ambos retardos salen de los argumentos (el de retorno ya no es un fijo de 180): 30 s de apagado, 200 s de retorno.
+        comando.Ajustes.Should().Contain(("ups.delay.shutdown", "30")).And.Contain(("ups.delay.start", "200"));
         cliente.Comandos.Should().NotContain(c => c.Comando.Contains("stop"), "el ciclo forzado no se cancela (ADR-09): nunca shutdown.stop");
     }
 
@@ -124,7 +125,7 @@ public class AdaptadorConexionNutTests
         var cliente = new ClienteNutFalso { Variables = VariablesReales(), ConCredenciales = false };
         var adaptador = new AdaptadorConexionNut(cliente);
 
-        var resultado = await adaptador.OrdenarApagadoConRetornoAsync(TimeSpan.FromSeconds(30), CancellationToken.None);
+        var resultado = await adaptador.OrdenarApagadoConRetornoAsync(TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(180), CancellationToken.None);
 
         resultado.Aceptada.Should().BeFalse("sin credenciales de escritura el efecto no se confirma (ADR-11)");
         cliente.Comandos.Should().BeEmpty();
@@ -136,7 +137,7 @@ public class AdaptadorConexionNutTests
         var cliente = new ClienteNutFalso { Variables = VariablesReales(), ConCredenciales = false };
         var adaptador = new AdaptadorConexionNut(cliente);
 
-        var resultado = await adaptador.OrdenarApagadoConRetornoAsync(TimeSpan.FromSeconds(30), CancellationToken.None);
+        var resultado = await adaptador.OrdenarApagadoConRetornoAsync(TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(180), CancellationToken.None);
 
         // El detalle técnico va al log; a la UI llega un mensaje en términos de permiso de operación.
         resultado.Motivo.Should()

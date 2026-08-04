@@ -27,11 +27,14 @@ public interface IAdaptadorConexion
 
     /// <summary>
     /// Ordena el apagado del host con retorno (encendido automatico al restaurarse
-    /// la energia), tras el <paramref name="retardo"/> indicado.
+    /// la energia). El SAI corta su salida tras el <paramref name="retardo"/> —la ventana que tiene el host
+    /// para bajar limpio— y la restaura tras el <paramref name="retardoRetorno"/> una vez que vuelve la red,
+    /// para forzar la transicion ausencia→presencia que necesita el autoencendido de la BIOS.
     /// </summary>
-    /// <param name="retardo">Retardo antes de ejecutar el apagado.</param>
+    /// <param name="retardo">Retardo antes de cortar la salida (ventana de apagado del host).</param>
+    /// <param name="retardoRetorno">Retardo del SAI, tras el retorno de la red, antes de restaurar la salida.</param>
     /// <param name="ct">Token de cancelacion.</param>
-    Task<ResultadoAccion> OrdenarApagadoConRetornoAsync(TimeSpan retardo, CancellationToken ct);
+    Task<ResultadoAccion> OrdenarApagadoConRetornoAsync(TimeSpan retardo, TimeSpan retardoRetorno, CancellationToken ct);
 
     /// <summary>Lanza una prueba de bateria en el equipo.</summary>
     /// <param name="ct">Token de cancelacion.</param>
